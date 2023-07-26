@@ -95,13 +95,21 @@ precedence of credentials:
 */
 func CreateClient(config *Config, diags diag.Diagnostics) (*pipes.APIClient, diag.Diagnostics) {
 	configuration := pipes.NewConfiguration()
+	var steampipeCloudHost string
 	if config.Host != "" {
-		parsedAPIURL, parseErr := url.Parse(config.Host)
+		steampipeCloudHost = config.Host
+	} else {
+		if host, ok := os.LookupEnv("STEAMPIPE_CLOUD_HOST"); ok {
+			steampipeCloudHost = host
+		}
+	}
+	if steampipeCloudHost != "" {
+		parsedAPIURL, parseErr := url.Parse(steampipeCloudHost)
 		if parseErr != nil {
 			return nil, diag.Errorf(`invalid host: %v`, parseErr)
 		}
 		if parsedAPIURL.Host == "" {
-			return nil, diag.Errorf(`missing protocol or host : %v`, config.Host)
+			return nil, diag.Errorf(`missing protocol or host : %v`, steampipeCloudHost)
 		}
 		configuration.Servers = []pipes.ServerConfiguration{
 			{
@@ -115,8 +123,6 @@ func CreateClient(config *Config, diags diag.Diagnostics) (*pipes.APIClient, dia
 		steampipeCloudToken = config.Token
 	} else {
 		if token, ok := os.LookupEnv("STEAMPIPE_CLOUD_TOKEN"); ok {
-			steampipeCloudToken = token
-		} else if token, ok := os.LookupEnv("PIPES_TOKEN"); ok {
 			steampipeCloudToken = token
 		}
 	}
