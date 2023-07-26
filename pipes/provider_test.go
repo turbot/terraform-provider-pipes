@@ -28,7 +28,11 @@ func TestProvider_impl(t *testing.T) {
 }
 
 func testAccPreCheck(t *testing.T) {
-	if token := os.Getenv("STEAMPIPE_CLOUD_TOKEN"); token == "" {
-		t.Fatal("STEAMPIPE_CLOUD_TOKEN must be set for acceptance tests")
+	token := os.Getenv("PIPES_TOKEN")
+	if token == "" {
+		token = os.Getenv("STEAMPIPE_CLOUD_TOKEN")
+	}
+	if token == "" {
+		t.Fatal("`PIPES_TOKEN` or `STEAMPIPE_CLOUD_TOKEN` must be set for acceptance tests.")
 	}
 }
