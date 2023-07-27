@@ -4,6 +4,8 @@ on:
   push:
     tags:
       - "v*"
+permissions:
+  contents: write
 jobs:
   goreleaser:
     uses: turbot/steampipe-workflows/.github/workflows/terraform-release.yml@main
