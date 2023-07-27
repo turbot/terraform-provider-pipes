@@ -20,13 +20,13 @@ func Provider() *schema.Provider {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "Sets the Turbot Pipes authentication token. This is used when connecting to Turbot Pipes workspaces. You can manage your API tokens from the Settings page for your user account in Turbot Pipes.",
-				DefaultFunc: schema.EnvDefaultFunc("PIPES_TOKEN", nil),
+				DefaultFunc: schema.EnvDefaultFunc("STEAMPIPE_CLOUD_TOKEN", nil),
 			},
 			"host": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "Sets the Turbot Pipes host. This is used when connecting to Turbot Pipes workspaces. The default is https://pipes.turbot.com, you only need to set this if you are connecting to a remote Turbot Pipes database that is NOT hosted in https://pipes.turbot.com, such as a dev/test instance.",
-				DefaultFunc: schema.EnvDefaultFunc("PIPES_HOST", nil),
+				DefaultFunc: schema.EnvDefaultFunc("STEAMPIPE_CLOUD_HOST", nil),
 			},
 		},
 
@@ -95,21 +95,21 @@ precedence of credentials:
 */
 func CreateClient(config *Config, diags diag.Diagnostics) (*pipes.APIClient, diag.Diagnostics) {
 	configuration := pipes.NewConfiguration()
-	var steampipeCloudHost string
+	var pipesHost string
 	if config.Host != "" {
-		steampipeCloudHost = config.Host
+		pipesHost = config.Host
 	} else {
-		if host, ok := os.LookupEnv("STEAMPIPE_CLOUD_HOST"); ok {
-			steampipeCloudHost = host
+		if host, ok := os.LookupEnv("PIPES_HOST"); ok {
+			pipesHost = host
 		}
 	}
-	if steampipeCloudHost != "" {
-		parsedAPIURL, parseErr := url.Parse(steampipeCloudHost)
+	if pipesHost != "" {
+		parsedAPIURL, parseErr := url.Parse(pipesHost)
 		if parseErr != nil {
 			return nil, diag.Errorf(`invalid host: %v`, parseErr)
 		}
 		if parsedAPIURL.Host == "" {
-			return nil, diag.Errorf(`missing protocol or host : %v`, steampipeCloudHost)
+			return nil, diag.Errorf(`missing protocol or host : %v`, pipesHost)
 		}
 		configuration.Servers = []pipes.ServerConfiguration{
 			{
@@ -118,16 +118,16 @@ func CreateClient(config *Config, diags diag.Diagnostics) (*pipes.APIClient, dia
 		}
 	}
 
-	var steampipeCloudToken string
+	var pipesToken string
 	if config.Token != "" {
-		steampipeCloudToken = config.Token
+		pipesToken = config.Token
 	} else {
-		if token, ok := os.LookupEnv("STEAMPIPE_CLOUD_TOKEN"); ok {
-			steampipeCloudToken = token
+		if token, ok := os.LookupEnv("PIPES_TOKEN"); ok {
+			pipesToken = token
 		}
 	}
-	if steampipeCloudToken != "" {
-		configuration.AddDefaultHeader("Authorization", fmt.Sprintf("Bearer %s", steampipeCloudToken))
+	if pipesToken != "" {
+		configuration.AddDefaultHeader("Authorization", fmt.Sprintf("Bearer %s", pipesToken))
 		return pipes.NewAPIClient(configuration), diags
 	}
 
