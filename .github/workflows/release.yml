@@ -16,4 +16,4 @@ on:
       - "v*"
 jobs:
   goreleaser:
-      uses: turbot/terraform-provider-steampipecloud/.github/workflows/release.yaml@main
+      uses: turbot/terraform-provider-steampipecloud/.github/workflows/release.yml@main
