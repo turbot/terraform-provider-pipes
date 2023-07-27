@@ -3,7 +3,7 @@
 - Terraform: https://www.terraform.io
 - Steampipe: https://steampipe.io
 - Turbot Pipes: https://pipes.turbot.com
-- Community: [Steampipe Slack](https://turbot.com/community/join)
+- Community: [Join #steampipe on Slack →](https://turbot.com/community/join)
 
 ## Requirements
 
