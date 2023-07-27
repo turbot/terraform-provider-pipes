@@ -57,3 +57,49 @@ _Note:_ Acceptance tests create real resources, and often cost money to run.
 ```sh
 $ make testacc
 ```
+
+## Migrating from legacy `steampipecloud` provider
+
+The new `pipes` provider is a drop-in replacement for the `steampipecloud` provider which has been deprecated. We have updated the name of the `resources` and `data sources` to prefix with `pipes_` instead of `steampipecloud_`.
+
+Please follow the steps below to migrate your existing Terraform configuration to use the new `pipes` provider.
+
+- Your new provider configuration should look like below.
+
+```
+terraform {
+  required_providers {
+    pipes = {
+      source = "turbot/pipes"
+    }
+  }
+}
+```
+
+- Replace the prefix for all resource name references from `steampipecloud_` to `pipes_`. An example before and after configuration is shown below.
+
+```
+resource "steampipecloud_workspace" "my_test_workspace" {
+  handle = "test"
+}
+```
+
+```
+resource "pipes_workspace" "my_test_workspace" {
+  handle = "test"
+}
+```
+
+- Use `terraform import` to import your existing resources into the new provider.
+
+```
+terraform import pipes_workspace.my_test_workspace test
+```
+
+- Use `terraform state rm` to remove your state file entries that resolved to the old provider.
+
+```
+terraform state rm steampipecloud_workspace.my_test_workspace
+```
+
+- Run `terraform plan` to ensure everything is aligned and in sync.
