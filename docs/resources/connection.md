@@ -3,7 +3,7 @@
 page_title: "pipes_connection Resource - terraform-provider-pipes"
 subcategory: ""
 description: |-
-  Provides a Steampipe Connection resource. The `Turbot Pipes Connection` represents a set of tables for a single data source. Each connection is represented as a distinct Postgres schema. In order to query data, you'll need at least one connection.
+  Provides a Pipes Connection resource. The `Turbot Pipes Connection` represents a set of tables for a single data source. Each connection is represented as a distinct Postgres schema. In order to query data, you'll need at least one connection.
 
   Connections are defined at the user account or organization level, and they can be shared by multiple workspaces within the account or organization.
 ---
@@ -67,8 +67,8 @@ provider "aws" {
 }
 
 # Create AWS IAM role
-resource "aws_iam_role" "steampipe_cloud_role" {
-  name = "steampipe_cloud"
+resource "aws_iam_role" "pipes_role" {
+  name = "pipes"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -94,8 +94,8 @@ data "aws_iam_policy" "ReadOnlyAccess" {
 }
 
 # Attach ReadOnlyAccess policy to role
-resource "aws_iam_role_policy_attachment" "steampipe_cloud_role_attach" {
-  role       = aws_iam_role.steampipe_cloud_role.name
+resource "aws_iam_role_policy_attachment" "pipes_role_attach" {
+  role       = aws_iam_role.pipes_role.name
   policy_arn = data.aws_iam_policy.ReadOnlyAccess.arn
 }
 
@@ -105,7 +105,7 @@ resource "pipes_connection" "aws_role_connection" {
   plugin      = "aws"
   config = jsonencode({
     regions     = ["us-east-1", "us-east-2"]
-    role_arn    = aws_iam_role.steampipe_cloud_role.arn
+    role_arn    = aws_iam_role.pipes_role.arn
     external_id = local.external_id
   })
 }
