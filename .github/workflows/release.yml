@@ -16,6 +16,4 @@ on:
       - "v*"
 jobs:
   goreleaser:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: turbot/terraform-provider-steampipecloud/.github/workflows/release.yaml@main
+      uses: turbot/terraform-provider-steampipecloud/.github/workflows/release.yaml@main
