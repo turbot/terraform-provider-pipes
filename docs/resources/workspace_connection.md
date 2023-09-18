@@ -93,7 +93,7 @@ In addition to all arguments above, the following attributes are exported:
 
 ### Import User Workspace Connection
 
-User workspace connections can be imported an ID made up of `workspace_handle/connection_handle`, e.g.,
+User workspace connections can be imported using an ID made up of `workspace_handle/connection_handle`, e.g.,
 
 ```sh
 terraform import pipes_workspace_connection.example myworkspace/myconn
