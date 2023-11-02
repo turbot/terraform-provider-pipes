@@ -1,6 +1,6 @@
 module github.com/turbot/terraform-provider-pipes
 
-go 1.17
+go 1.21
 
 require github.com/turbot/go-kit v0.3.0
 
