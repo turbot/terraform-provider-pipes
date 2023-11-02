@@ -40,6 +40,7 @@ func Provider() *schema.Provider {
 			"pipes_workspace_aggregator":          resourceWorkspaceAggregator(),
 			"pipes_workspace_connection":          resourceWorkspaceConnection(),
 			"pipes_workspace_datatank":            resourceWorkspaceDatatank(),
+			"pipes_workspace_datatank_table":      resourceWorkspaceDatatankTable(),
 			"pipes_workspace_mod":                 resourceWorkspaceMod(),
 			"pipes_workspace_mod_variable":        resourceWorkspaceModVariable(),
 			"pipes_workspace_pipeline":            resourceWorkspacePipeline(),
