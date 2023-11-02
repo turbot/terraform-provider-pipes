@@ -94,9 +94,9 @@ func testAccUserWorkspaceDatatankConfig(workspaceHandle, datatankHandle, descrip
 	}
 	
 	resource "pipes_workspace_datatank" "test_datatank_fast_net" {
-		workspace = pipes_workspace.test_workspace.handle
-		handle 		  = "%s"
-		description   = "%s"
+		workspace_handle = pipes_workspace.test_workspace.handle
+		handle 		     = "%s"
+		description      = "%s"
 	}`, workspaceHandle, datatankHandle, description)
 }
 
@@ -136,9 +136,9 @@ func testAccUserWorkspaceDatatankUpdateConfig(workspaceHandle, datatankHandle, d
 	}
 	
 	resource "pipes_workspace_datatank" "test_datatank_fast_net" {
-		workspace = pipes_workspace.test_workspace.handle
-		handle 		  = "%s"
-		description   = "%s"
+		workspace_handle = pipes_workspace.test_workspace.handle
+		handle 		     = "%s"
+		description      = "%s"
 	}`, workspaceHandle, datatankHandle, description)
 }
 
