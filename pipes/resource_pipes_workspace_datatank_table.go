@@ -103,16 +103,12 @@ func resourceWorkspaceDatatankTable() *schema.Resource {
 				Computed: true,
 			},
 			"freshness": {
-				Type:             schema.TypeString,
-				Computed:         true,
-				ValidateFunc:     validation.StringIsJSON,
-				DiffSuppressFunc: connectionJSONStringsEqual,
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 			"migrating_freshness": {
-				Type:             schema.TypeString,
-				Computed:         true,
-				ValidateFunc:     validation.StringIsJSON,
-				DiffSuppressFunc: connectionJSONStringsEqual,
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 			"frequency": {
 				Type:         schema.TypeString,
@@ -228,9 +224,9 @@ func resourceWorkspaceDatatankTableCreate(ctx context.Context, d *schema.Resourc
 	d.Set("state", resp.State)
 	d.Set("state_reason", resp.StateReason)
 	d.Set("desired_state", resp.DesiredState)
-	d.Set("freshness", resp.Freshness)
-	d.Set("migrating_freshness", resp.MigratingFreshness)
-	d.Set("frequency", resp.Frequency)
+	d.Set("freshness", FormatJson(resp.Freshness))
+	d.Set("migrating_freshness", FormatJson(resp.MigratingFreshness))
+	d.Set("frequency", FormatJson(resp.Frequency))
 	d.Set("created_at", resp.CreatedAt)
 	d.Set("updated_at", resp.UpdatedAt)
 	if resp.CreatedBy != nil {
@@ -325,9 +321,9 @@ func resourceWorkspaceDatatankTableRead(ctx context.Context, d *schema.ResourceD
 	d.Set("state", resp.State)
 	d.Set("state_reason", resp.StateReason)
 	d.Set("desired_state", resp.DesiredState)
-	d.Set("freshness", resp.Freshness)
-	d.Set("migrating_freshness", resp.MigratingFreshness)
-	d.Set("frequency", resp.Frequency)
+	d.Set("freshness", FormatJson(resp.Freshness))
+	d.Set("migrating_freshness", FormatJson(resp.MigratingFreshness))
+	d.Set("frequency", FormatJson(resp.Frequency))
 	d.Set("created_at", resp.CreatedAt)
 	d.Set("updated_at", resp.UpdatedAt)
 	if resp.CreatedBy != nil {
@@ -433,9 +429,9 @@ func resourceWorkspaceDatatankTableUpdate(ctx context.Context, d *schema.Resourc
 	d.Set("state", resp.State)
 	d.Set("state_reason", resp.StateReason)
 	d.Set("desired_state", resp.DesiredState)
-	d.Set("freshness", resp.Freshness)
-	d.Set("migrating_freshness", resp.MigratingFreshness)
-	d.Set("frequency", resp.Frequency)
+	d.Set("freshness", FormatJson(resp.Freshness))
+	d.Set("migrating_freshness", FormatJson(resp.MigratingFreshness))
+	d.Set("frequency", FormatJson(resp.Frequency))
 	d.Set("created_at", resp.CreatedAt)
 	d.Set("updated_at", resp.UpdatedAt)
 	if resp.CreatedBy != nil {
