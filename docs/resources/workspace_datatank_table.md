@@ -30,29 +30,29 @@ resource "pipes_connection" "test_connection_net_2" {
 }
 
 resource "pipes_workspace_connection" "test_connection_net_1_association" {
-  workspace_handle  = pipes_workspace.test_workspace.handle
+  workspace_handle  = pipes_workspace.test_user_workspace.handle
   connection_handle = pipes_connection.test_connection_net_1.handle
 }
 
 resource "pipes_workspace_connection" "test_connection_net_2_association" {
-  workspace_handle  = pipes_workspace.test_workspace.handle
+  workspace_handle  = pipes_workspace.test_user_workspace.handle
   connection_handle = pipes_connection.test_connection_net_2.handle
 }
 
 resource "pipes_workspace_aggregator" "test_aggregator_all_net" {
-  workspace          = pipes_workspace.test_workspace.handle
+  workspace          = pipes_workspace.test_user_workspace.handle
   handle             = "all_net"
   plugin             = "net"
   connections        = ["*"]
 }
 
 resource "pipes_workspace_datatank" "test_datatank_fast_net" {
-  workspace_handle   = pipes_workspace.test_workspace.handle
+  workspace_handle   = pipes_workspace.test_user_workspace.handle
   handle 		     = "fast_net"
 }
 
 resource "pipes_workspace_datatank_table" "test_datatank_table_net_certificate" {
-  workspace_handle = pipes_workspace.test_workspace.handle
+  workspace_handle = pipes_workspace.test_user_workspace.handle
   datatank_handle  = pipes_workspace_datatank.test_datatank_fast_net.handle
   name 		       = "net_certificate"
   type             = "table"
