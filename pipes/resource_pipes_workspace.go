@@ -68,6 +68,7 @@ func resourceWorkspace() *schema.Resource {
 			"instance_type": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				Computed:     true,
 				ValidateFunc: validation.StringInSlice([]string{"db1.shared", "db1.small"}, false),
 			},
 			"database_name": {
@@ -115,12 +116,13 @@ func resourceWorkspaceCreate(ctx context.Context, d *schema.ResourceData, meta i
 	if value, ok := d.GetOk("instance_type"); ok {
 		instanceType = value.(string)
 	}
+	// Default instance type to `db1.shared`
+	if instanceType == "" {
+		instanceType = "db1.shared"
+	}
 
 	// Create request
-	req := pipes.CreateWorkspaceRequest{Handle: handle}
-	if instanceType != "" {
-		req.InstanceType = types.String(instanceType)
-	}
+	req := pipes.CreateWorkspaceRequest{Handle: handle, InstanceType: &instanceType}
 
 	isUser, orgHandle := isUserConnection(d)
 	if isUser {
