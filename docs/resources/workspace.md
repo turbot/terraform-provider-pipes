@@ -31,11 +31,21 @@ resource "pipes_workspace" "test_org_workspace" {
 }
 ```
 
+**Create a user workspace with a defined instance type**
+
+```hcl
+resource "pipes_workspace" "test_user_workspace" {
+  handle        = "myworkspace"
+  instance_type = "db1.small"
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
 
 - `handle` - (Required) A friendly identifier for your workspace, and must be unique across your workspaces.
+- `instance_type` - (Optional) The instance type to use for the workspace database. Valid instance type values are `db1.shared` and `db1.small`. Defaults to `db1.shared` if nothing is passed.
 - `organization` - (Optional) An organization ID or handle to create the workspace in.
 
 ## Attributes Reference
