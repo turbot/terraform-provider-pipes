@@ -65,6 +65,12 @@ func resourceWorkspace() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"instance_type": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.StringInSlice([]string{"db1.shared", "db1.small"}, false),
+			},
 			"database_name": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -102,10 +108,21 @@ func resourceWorkspaceCreate(ctx context.Context, d *schema.ResourceData, meta i
 	var err error
 	var r *http.Response
 	var resp pipes.Workspace
-	handle := d.Get("handle")
+	var handle, instanceType string
+
+	if value, ok := d.GetOk("handle"); ok {
+		handle = value.(string)
+	}
+	if value, ok := d.GetOk("instance_type"); ok {
+		instanceType = value.(string)
+	}
+	// Default instance type to `db1.shared`
+	if instanceType == "" {
+		instanceType = "db1.shared"
+	}
 
 	// Create request
-	req := pipes.CreateWorkspaceRequest{Handle: handle.(string)}
+	req := pipes.CreateWorkspaceRequest{Handle: handle, InstanceType: &instanceType}
 
 	isUser, orgHandle := isUserConnection(d)
 	if isUser {
@@ -138,6 +155,7 @@ func resourceWorkspaceCreate(ctx context.Context, d *schema.ResourceData, meta i
 	if resp.UpdatedBy != nil {
 		d.Set("updated_by", resp.UpdatedBy.Handle)
 	}
+	d.Set("instance_type", resp.InstanceType)
 	d.Set("database_name", resp.DatabaseName)
 	d.Set("hive", resp.Hive)
 	d.Set("host", resp.Host)
@@ -221,6 +239,7 @@ func resourceWorkspaceRead(ctx context.Context, d *schema.ResourceData, meta int
 	if resp.UpdatedBy != nil {
 		d.Set("updated_by", resp.UpdatedBy.Handle)
 	}
+	d.Set("instance_type", resp.InstanceType)
 	d.Set("database_name", resp.DatabaseName)
 	d.Set("hive", resp.Hive)
 	d.Set("host", resp.Host)
@@ -283,6 +302,7 @@ func resourceWorkspaceUpdate(ctx context.Context, d *schema.ResourceData, meta i
 	if resp.UpdatedBy != nil {
 		d.Set("updated_by", resp.UpdatedBy.Handle)
 	}
+	d.Set("instance_type", resp.InstanceType)
 	d.Set("database_name", resp.DatabaseName)
 	d.Set("hive", resp.Hive)
 	d.Set("host", resp.Host)

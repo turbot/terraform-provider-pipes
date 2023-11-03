@@ -14,17 +14,18 @@ func TestAccUserWorkspace_Basic(t *testing.T) {
 	resourceName := "pipes_workspace.test"
 	workspaceHandle := "workspace" + randomString(3)
 	newWorkspaceHandle := "workspace" + randomString(4)
+	workspaceInstanceType := "db1.small"
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckUserWorkspaceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccUserWorkspaceConfig(workspaceHandle),
+				Config: testAccUserWorkspaceConfig(workspaceHandle, workspaceInstanceType),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckUserWorkspaceExists("pipes_workspace.test"),
-					resource.TestCheckResourceAttr(
-						"pipes_workspace.test", "handle", workspaceHandle),
+					resource.TestCheckResourceAttr("pipes_workspace.test", "handle", workspaceHandle),
+					resource.TestCheckResourceAttr("pipes_workspace.test", "instance_type", workspaceInstanceType),
 				),
 			},
 			{
@@ -34,27 +35,31 @@ func TestAccUserWorkspace_Basic(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"updated_at"},
 			},
 			{
-				Config: testAccUserWorkspaceUpdateHandleConfig(newWorkspaceHandle),
-				Check: resource.TestCheckResourceAttr(
-					"pipes_workspace.test", "handle", newWorkspaceHandle),
+				Config: testAccUserWorkspaceUpdateHandleConfig(newWorkspaceHandle, workspaceInstanceType),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("pipes_workspace.test", "handle", newWorkspaceHandle),
+					resource.TestCheckResourceAttr("pipes_workspace.test", "instance_type", workspaceInstanceType),
+				),
 			},
 		},
 	})
 }
 
 // configs
-func testAccUserWorkspaceConfig(workspaceHandle string) string {
+func testAccUserWorkspaceConfig(workspaceHandle, workspaceInstanceType string) string {
 	return fmt.Sprintf(`
 resource "pipes_workspace" "test" {
 	handle = "%s"
-}`, workspaceHandle)
+	instance_type = "%s"
+}`, workspaceHandle, workspaceInstanceType)
 }
 
-func testAccUserWorkspaceUpdateHandleConfig(newWorkspaceHandle string) string {
+func testAccUserWorkspaceUpdateHandleConfig(newWorkspaceHandle, workspaceInstanceType string) string {
 	return fmt.Sprintf(`
 resource "pipes_workspace" "test" {
 	handle = "%s"
-}`, newWorkspaceHandle)
+	instance_type = "%s"
+}`, newWorkspaceHandle, workspaceInstanceType)
 }
 
 // helper functions

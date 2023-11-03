@@ -1,3 +1,14 @@
+## 0.12.0 (November 3, 2023)
+
+FEATURES:
+
+* **New Resource:** `pipes_workspace_datatank`
+* **New Resource:** `pipes_workspace_datatank_table`
+
+ENHANCEMENTS:
+
+* `resources/pipes_workspace`: Add support for setting `instance_type` for a workspace.
+
 ## 0.11.0 (July 27, 2023)
 
 * The `Terraform Provider Steampipe Cloud` has been now been rebranded to use `Terraform Provider Turbot Pipes` instead:
