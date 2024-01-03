@@ -189,6 +189,11 @@ func resourceWorkspaceDatatankTableCreate(ctx context.Context, d *schema.Resourc
 		Frequency:    &frequency,
 	}
 
+	// If nothing is passed in the `part_per` field, set it to nil, so that it does not consider it as an empty string
+	if partPer == "" {
+		req.PartPer = nil
+	}
+
 	client := meta.(*PipesClient)
 	var resp pipes.DatatankTable
 	var r *http.Response
