@@ -1,3 +1,9 @@
+## 0.12.1 (January 3, 2024)
+
+BUG FIXES: 
+
+* `pipes_workspace_datatank_table`: Set `PartPer` setting for datatank table to be `nil` if nothing is passed in configuration. (#14)
+
 ## 0.12.0 (November 3, 2023)
 
 FEATURES:
