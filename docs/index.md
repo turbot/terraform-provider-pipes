@@ -46,3 +46,11 @@ resource "pipes_workspace" "my_org_workspace" {
 
 - **token** (Required) Token used to authenticate to Turbot Pipes API. You can manage your API tokens from the Settings page for your user account in Turbot Pipes. This can also be set via the `STEAMPIPE_CLOUD_TOKEN` or `PIPES_TOKEN` environment variable. Note that the value in `STEAMPIPE_CLOUD_TOKEN` will take preference if both are set.
 - **host** (Optional) The Turbot Pipes Host URL. This defaults to `https://pipes.turbot.com/`. You only need to set this if you are connecting to a remote Turbot Pipes database that is NOT hosted in `https://pipes.turbot.com/`. This can also be set via the `STEAMPIPE_CLOUD_HOST` or `PIPES_HOST` environment variable. Note that the value in `STEAMPIPE_CLOUD_HOST` will take preference if both are set.
+
+## Custom Tenant Setup
+
+After a custom tenant has been created as per [here](https://turbot.com/pipes/docs/tenants#creating-tenants), please follow the steps below to setup arguments for your provider as below:
+- Login to your custom tenant using the URL provided via [email](https://turbot.com/pipes/docs/tenants#initial-login) after tenant creation is complete.
+- Create a new API token by visiting the Settings page for your user account in Turbot Pipes.
+- Use the newly created API token as the value for the `token` argument in your provider configuration. You can also alternately, set the value for the `STEAMPIPE_CLOUD_TOKEN` or `PIPES_TOKEN` environment variable. Note that the value in `STEAMPIPE_CLOUD_TOKEN` will take preference if both are set.
+- Set Turbot Pipes Host URL as the value for the `host` argument in the provider configuration. The format for the same is `https://<tenant-handle>.pipes.turbot.com/`. For example, if your tenant handle is `mytenant`, then the Turbot Pipes Host URL will be `https://mytenant.pipes.turbot.com/`. This can also be set via the `STEAMPIPE_CLOUD_HOST` or `PIPES_HOST` environment variable. Note that the value in `STEAMPIPE_CLOUD_HOST` will take preference if both are set. 
