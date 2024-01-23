@@ -17,6 +17,7 @@ import (
 )
 
 const PipesTenantId = "t_00000000000000000000"
+const PipesTenantHandle = "turbot-pipes"
 
 // isUserConnection:: Check if the connection is scoped on an user or a specific organization
 func isUserConnection(d *schema.ResourceData) (isUser bool, orgHandle string) {
