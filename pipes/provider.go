@@ -2,8 +2,10 @@ package pipes
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
 	"log"
+	"net/http"
 	"net/url"
 	"os"
 
@@ -35,6 +37,7 @@ func Provider() *schema.Provider {
 			"pipes_organization":                  resourceOrganization(),
 			"pipes_organization_member":           resourceOrganizationMember(),
 			"pipes_organization_workspace_member": resourceOrganizationWorkspaceMember(),
+			"pipes_tenant_member":                 resourceTenantMember(),
 			"pipes_user_preferences":              resourceUserPreferences(),
 			"pipes_workspace":                     resourceWorkspace(),
 			"pipes_workspace_aggregator":          resourceWorkspaceAggregator(),
@@ -49,6 +52,7 @@ func Provider() *schema.Provider {
 		DataSourcesMap: map[string]*schema.Resource{
 			"pipes_organization": dataSourceOrganization(),
 			"pipes_process":      dataSourceProcess(),
+			"pipes_tenant":       dataSourceTenant(),
 			"pipes_user":         dataSourceUser(),
 		},
 
@@ -119,6 +123,12 @@ func CreateClient(config *Config, diags diag.Diagnostics) (*pipes.APIClient, dia
 			},
 		}
 	}
+
+	// For Local Steampipe Cloud Testing
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	configuration.HTTPClient = &http.Client{Transport: tr}
 
 	var pipesToken string
 	if config.Token != "" {
