@@ -38,10 +38,6 @@ func resourceTenantMember() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"user_handle": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
 			"email": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -102,11 +98,10 @@ func resourceTenantMemberCreate(ctx context.Context, d *schema.ResourceData, met
 	log.Printf("\n[DEBUG] Member invited: %v", tenantMember)
 
 	// Set property values
-	d.SetId(fmt.Sprintf("%s/%s", tenantHandle, tenantMember.User.Handle))
+	d.SetId(fmt.Sprintf("%s/%s", tenantHandle, tenantMember.UserId))
 	d.Set("tenant_member_id", tenantMember.Id)
 	d.Set("tenant_id", tenantMember.TenantId)
 	d.Set("user_id", tenantMember.UserId)
-	d.Set("user_handle", tenantMember.User.Handle)
 	d.Set("email", tenantMember.Email)
 	d.Set("role", tenantMember.Role)
 	d.Set("status", tenantMember.Status)
@@ -133,12 +128,12 @@ func resourceTenantMemberRead(ctx context.Context, d *schema.ResourceData, meta 
 	separator := "/"
 	idParts := strings.Split(id, separator)
 	if len(idParts) < 2 {
-		return diag.Errorf("unexpected format of ID (%q), expected <tenant_handle>/<user_handle>", id)
+		return diag.Errorf("unexpected format of ID (%q), expected <tenant_handle>/<user_id>", id)
 	}
 	tenantHandle := idParts[0]
 
 	if strings.Contains(idParts[1], "@") {
-		return diag.Errorf("invalid user_handle. Please provide valid user_handle to import")
+		return diag.Errorf("invalid user_id. Please provide valid user_id to import")
 	}
 	userHandle := idParts[1]
 
@@ -154,11 +149,10 @@ func resourceTenantMemberRead(ctx context.Context, d *schema.ResourceData, meta 
 	log.Printf("\n[DEBUG] Tenant Member received: %s", id)
 
 	// Set property values
-	d.SetId(fmt.Sprintf("%s/%s", tenantHandle, tenantMember.User.Handle))
+	d.SetId(fmt.Sprintf("%s/%s", tenantHandle, tenantMember.UserId))
 	d.Set("tenant_member_id", tenantMember.Id)
 	d.Set("tenant_id", tenantMember.TenantId)
 	d.Set("user_id", tenantMember.UserId)
-	d.Set("user_handle", tenantMember.User.Handle)
 	d.Set("email", tenantMember.Email)
 	d.Set("role", tenantMember.Role)
 	d.Set("status", tenantMember.Status)
@@ -182,7 +176,7 @@ func resourceTenantMemberUpdate(ctx context.Context, d *schema.ResourceData, met
 	var diags diag.Diagnostics
 
 	tenantHandle := d.Get("tenant_handle").(string)
-	userHandle := d.Get("user_handle").(string)
+	userId := d.Get("user_id").(string)
 	role := d.Get("role").(string)
 
 	// Create request
@@ -190,20 +184,19 @@ func resourceTenantMemberUpdate(ctx context.Context, d *schema.ResourceData, met
 		Role: &role,
 	}
 
-	log.Printf("\n[DEBUG] Updating membership: '%s/%s'", tenantHandle, userHandle)
+	log.Printf("\n[DEBUG] Updating membership: '%s/%s'", tenantHandle, userId)
 
-	tenantMember, r, err := client.APIClient.TenantMembers.Update(context.Background(), tenantHandle, userHandle).Request(req).Execute()
+	tenantMember, r, err := client.APIClient.TenantMembers.Update(context.Background(), tenantHandle, userId).Request(req).Execute()
 	if err != nil {
 		return diag.Errorf("error updating membership: %s", decodeResponse(r))
 	}
-	log.Printf("\n[DEBUG] Membership updated: %s/%s", tenantHandle, userHandle)
+	log.Printf("\n[DEBUG] Membership updated: %s/%s", tenantHandle, userId)
 
 	// Set property values
 	d.SetId(fmt.Sprintf("%s/%s", tenantHandle, tenantMember.User.Handle))
 	d.Set("tenant_member_id", tenantMember.Id)
 	d.Set("tenant_id", tenantMember.TenantId)
 	d.Set("user_id", tenantMember.UserId)
-	d.Set("user_handle", tenantMember.User.Handle)
 	d.Set("email", tenantMember.Email)
 	d.Set("role", tenantMember.Role)
 	d.Set("status", tenantMember.Status)
@@ -230,7 +223,7 @@ func resourceTenantMemberDelete(ctx context.Context, d *schema.ResourceData, met
 	separator := "/"
 	idParts := strings.Split(id, separator)
 	if len(idParts) < 2 {
-		return diag.Errorf("unexpected format of ID (%q), expected <tenant_handle>/<user_handle>", id)
+		return diag.Errorf("unexpected format of ID (%q), expected <tenant_handle>/<user_id>", id)
 	}
 	tenantHandle := idParts[0]
 	userHandle := idParts[1]
