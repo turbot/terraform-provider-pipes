@@ -12,8 +12,11 @@ import (
 )
 
 // test suites
+// To run this test :
+// 1. Enter a valid custom tenant handle which has already been created
+// 2. Enter a valid email address for a member that you are trying to invite to the tenant
 func TestAccTenantMember_Basic(t *testing.T) {
-	tenantHandle := "terraform" + randomString(3)
+	tenantHandle := "[insert_tenant_handle_here]"
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -48,9 +51,9 @@ data "pipes_tenant" "test_tenant" {
 
 # Please provide a valid email
 resource "pipes_tenant_member" "test" {
-	tenant = pipes_tenant.test_tenant.handle
-	email        = "das.siddhartha992@gmail.com" # "user@domain.com"
-	role         = "member"
+	tenant_handle = data.pipes_tenant.test_tenant.handle
+	email         = "user@domain.com"
+	role          = "member"
 }`, tenantHandle)
 }
 
@@ -64,9 +67,9 @@ data "pipes_tenant" "test_tenant" {
 
 # Please provide a valid email
 resource "pipes_tenant_member" "test" {
-	tenant = pipes_tenant.test_tenant.handle
-	email        = "das.siddhartha992@gmail.com" # "user@domain.com"
-	role         = "owner"
+	tenant_handle = data.pipes_tenant.test_tenant.handle
+	email         = "user@domain.com"
+	role          = "owner"
 }`, tenantHandle)
 }
 
@@ -113,10 +116,9 @@ func testAccCheckTenantMemberDestroy(s *terraform.State) error {
 				return fmt.Errorf("tenant member still exists")
 			}
 
-			// If a tenant is deleted, all the members will lost access to that tenant
-			// If anyone try to get that deleted resource, it will always return `403 Forbidden` error
-			if r.StatusCode != 403 {
-				return fmt.Errorf("expected 'forbidden' error, got %s", err)
+			// Verify that the error code is 404
+			if r.StatusCode != 404 {
+				return fmt.Errorf("expected 'not found' error, got %s", err)
 			}
 		}
 	}
