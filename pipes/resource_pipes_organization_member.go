@@ -101,34 +101,67 @@ func resourceOrganizationMemberCreate(ctx context.Context, d *schema.ResourceDat
 	client := meta.(*PipesClient)
 
 	// Get the organization
-	org := d.Get("organization").(string)
+	orgIdentifier := d.Get("organization").(string)
 
-	// Create request
-	req := pipes.InviteOrgUserRequest{
-		Role: d.Get("role").(string),
-	}
-
-	if value, ok := d.GetOk("user_handle"); ok {
-		req.Handle = types.String(value.(string))
-	}
-	if value, ok := d.GetOk("email"); ok {
-		req.Email = types.String(value.(string))
-	}
-
-	// Return if both handle and email are empty
-	if req.Handle == nil && req.Email == nil {
-		return diag.Errorf("either 'user_handle' or 'email' must be set in resource config")
-	}
-
-	// Invite requested member
-	orgMember, r, err := client.APIClient.OrgMembers.Invite(ctx, org).Request(req).Execute()
+	// get details of the organization
+	org, r, err := client.APIClient.Orgs.Get(context.Background(), orgIdentifier).Execute()
 	if err != nil {
-		return diag.Errorf("error inviting member: %s", decodeResponse(r))
+		return diag.Errorf("error reading organization %s: %s", orgIdentifier, decodeResponse(r))
 	}
-	log.Printf("\n[DEBUG] Member invited: %v", orgMember)
+
+	var orgMember pipes.OrgUser
+
+	// If the organization belongs to the primary tenant, we procced with logic to invite a user to the organization
+	if org.TenantId == PipesTenantId {
+		// Create request
+		req := pipes.InviteOrgUserRequest{
+			Role: d.Get("role").(string),
+		}
+
+		if value, ok := d.GetOk("user_handle"); ok {
+			req.Handle = types.String(value.(string))
+		}
+		if value, ok := d.GetOk("email"); ok {
+			req.Email = types.String(value.(string))
+		}
+
+		// Return if both handle and email are empty
+		if req.Handle == nil && req.Email == nil {
+			return diag.Errorf("either 'user_handle' or 'email' must be set in resource config")
+		}
+
+		// Invite requested member
+		orgMember, r, err = client.APIClient.OrgMembers.Invite(ctx, org.Handle).Request(req).Execute()
+		if err != nil {
+			return diag.Errorf("error inviting member: %s", decodeResponse(r))
+		}
+		log.Printf("\n[DEBUG] Member invited: %v", orgMember)
+	} else {
+		// else the organization belongs to a custom tenant and we need to invoke logic to simply add the user to the organization
+		// Create request
+		req := pipes.CreateOrgUserRequest{
+			Role: d.Get("role").(string),
+		}
+
+		if value, ok := d.GetOk("user_handle"); ok {
+			req.Handle = value.(string)
+		}
+
+		// Return if user_handle is empty
+		if req.Handle == "" {
+			return diag.Errorf("'user_handle' must be set in resource config")
+		}
+
+		// Add requested member to the organization
+		orgMember, r, err = client.APIClient.OrgMembers.Create(ctx, org.Handle).Request(req).Execute()
+		if err != nil {
+			return diag.Errorf("error inviting member: %s", decodeResponse(r))
+		}
+		log.Printf("\n[DEBUG] Member invited: %v", orgMember)
+	}
 
 	// Set property values
-	d.SetId(fmt.Sprintf("%s/%s", org, orgMember.UserHandle))
+	d.SetId(fmt.Sprintf("%s/%s", org.Handle, orgMember.UserHandle))
 	d.Set("user_handle", orgMember.UserHandle)
 	d.Set("created_at", orgMember.CreatedAt)
 	d.Set("organization_member_id", orgMember.Id)
