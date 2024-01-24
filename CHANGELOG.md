@@ -5,6 +5,10 @@ FEATURES:
 * **New Resource:** `pipes_tenant_member`
 * **New Data Source:** `pipes_tenant`
 
+ENHANCEMENTS:
+
+* `resources/pipes_organization_member`: Add support for user to be automatically added to an organization in a custom tenant skipping the invite process.
+
 ## 0.12.1 (January 3, 2024)
 
 BUG FIXES: 
