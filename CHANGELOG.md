@@ -1,3 +1,10 @@
+## 0.13.0 (January 24, 2024)
+
+FEATURES:
+
+* **New Resource:** `pipes_tenant_member`
+* **New Data Source:** `pipes_tenant`
+
 ## 0.12.1 (January 3, 2024)
 
 BUG FIXES: 
