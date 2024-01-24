@@ -38,6 +38,10 @@ func resourceTenantMember() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"user_handle": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"email": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -97,11 +101,19 @@ func resourceTenantMemberCreate(ctx context.Context, d *schema.ResourceData, met
 	}
 	log.Printf("\n[DEBUG] Member invited: %v", tenantMember)
 
+	// Get details of the invited member
+	tenantUser, r, err := client.APIClient.Identities.Get(ctx, tenantMember.UserId).Execute()
+	if err != nil {
+		return diag.Errorf("error getting invited member details: %s", decodeResponse(r))
+	}
+	log.Printf("\n[DEBUG] Member details: %v", tenantUser)
+
 	// Set property values
 	d.SetId(fmt.Sprintf("%s/%s", tenantHandle, tenantMember.UserId))
 	d.Set("tenant_member_id", tenantMember.Id)
 	d.Set("tenant_id", tenantMember.TenantId)
 	d.Set("user_id", tenantMember.UserId)
+	d.Set("user_handle", tenantUser.Handle)
 	d.Set("email", tenantMember.Email)
 	d.Set("role", tenantMember.Role)
 	d.Set("status", tenantMember.Status)
@@ -148,11 +160,19 @@ func resourceTenantMemberRead(ctx context.Context, d *schema.ResourceData, meta 
 	}
 	log.Printf("\n[DEBUG] Tenant Member received: %s", id)
 
+	// Get details of the invited member
+	tenantUser, r, err := client.APIClient.Identities.Get(ctx, tenantMember.UserId).Execute()
+	if err != nil {
+		return diag.Errorf("error getting invited member details: %s", decodeResponse(r))
+	}
+	log.Printf("\n[DEBUG] Member details: %v", tenantUser)
+
 	// Set property values
 	d.SetId(fmt.Sprintf("%s/%s", tenantHandle, tenantMember.UserId))
 	d.Set("tenant_member_id", tenantMember.Id)
 	d.Set("tenant_id", tenantMember.TenantId)
 	d.Set("user_id", tenantMember.UserId)
+	d.Set("user_handle", tenantUser.Handle)
 	d.Set("email", tenantMember.Email)
 	d.Set("role", tenantMember.Role)
 	d.Set("status", tenantMember.Status)
@@ -192,11 +212,19 @@ func resourceTenantMemberUpdate(ctx context.Context, d *schema.ResourceData, met
 	}
 	log.Printf("\n[DEBUG] Membership updated: %s/%s", tenantHandle, userId)
 
+	// Get details of the invited member
+	tenantUser, r, err := client.APIClient.Identities.Get(ctx, tenantMember.UserId).Execute()
+	if err != nil {
+		return diag.Errorf("error getting invited member details: %s", decodeResponse(r))
+	}
+	log.Printf("\n[DEBUG] Member details: %v", tenantUser)
+
 	// Set property values
 	d.SetId(fmt.Sprintf("%s/%s", tenantHandle, tenantMember.User.Handle))
 	d.Set("tenant_member_id", tenantMember.Id)
 	d.Set("tenant_id", tenantMember.TenantId)
 	d.Set("user_id", tenantMember.UserId)
+	d.Set("user_handle", tenantUser.Handle)
 	d.Set("email", tenantMember.Email)
 	d.Set("role", tenantMember.Role)
 	d.Set("status", tenantMember.Status)

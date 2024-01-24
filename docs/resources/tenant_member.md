@@ -67,6 +67,7 @@ In addition to all arguments above, the following attributes are exported:
 - `updated_at` - The time when the membership was last updated.
 - `updated_by` - The handle of the user who last updated the membership.
 - `user_id` - Unique identifier of the user that has been added to the tenant.
+- `user_handle` - The handle of the user that has been added to the tenant.
 - `version_id` - The membership version.
 
 ## Import
