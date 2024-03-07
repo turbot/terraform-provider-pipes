@@ -1,3 +1,9 @@
+## 0.13.1 (March 7, 2024)
+
+BUG FIXES: 
+
+* `pipes_workspace_pipeline`: Format and pass value for pipeline `Tags` field only if a valid config is present. (#18)
+
 ## 0.13.0 (January 24, 2024)
 
 FEATURES:
