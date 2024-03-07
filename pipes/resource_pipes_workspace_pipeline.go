@@ -114,6 +114,8 @@ func resourceWorkspacePipelineCreate(ctx context.Context, d *schema.ResourceData
 	title := d.Get("title").(string)
 	pipeline := d.Get("pipeline").(string)
 	var frequency pipes.PipelineFrequency
+	tagsStr := "{}"
+
 	err = json.Unmarshal([]byte(d.Get("frequency").(string)), &frequency)
 	if err != nil {
 		return diag.Errorf("error parsing frequency for workspace pipeline : %v", d.Get("frequency").(string))
@@ -122,10 +124,14 @@ func resourceWorkspacePipelineCreate(ctx context.Context, d *schema.ResourceData
 	if err != nil {
 		return diag.Errorf("error parsing args for workspace pipeline : %v", d.Get("args").(string))
 	}
-	tags, err := JSONStringToInterface(d.Get("tags").(string))
-	if err != nil {
-		return diag.Errorf("error parsing tags for workspace pipeline : %v", d.Get("tags").(string))
+	if d.Get("tags") != nil && d.Get("tags").(string) != "" {
+		tagsStr = d.Get("tags").(string)
 	}
+	tags, err := JSONStringToInterface(tagsStr)
+	if err != nil {
+		return diag.Errorf("error parsing tags for workspace pipeline : %v", tagsStr)
+	}
+
 	log.Printf("\n[DEBUG] Pipeline Frequency: %v", frequency)
 	log.Printf("\n[DEBUG] Pipeline Arguments: %v", args)
 	log.Printf("\n[DEBUG] Pipeline Tags: %v", tags)
@@ -158,7 +164,9 @@ func resourceWorkspacePipelineCreate(ctx context.Context, d *schema.ResourceData
 	d.Set("frequency", FormatJson(resp.Frequency))
 	d.Set("pipeline", resp.Pipeline)
 	d.Set("args", FormatJson(resp.Args))
-	d.Set("tags", FormatJson(resp.Tags))
+	if resp.Tags != nil {
+		d.Set("tags", FormatJson(resp.Tags))
+	}
 	d.Set("last_process_id", resp.LastProcessId)
 	d.Set("created_at", resp.CreatedAt)
 	d.Set("updated_at", resp.UpdatedAt)
@@ -236,7 +244,9 @@ func resourceWorkspacePipelineRead(ctx context.Context, d *schema.ResourceData, 
 	d.Set("frequency", FormatJson(resp.Frequency))
 	d.Set("pipeline", resp.Pipeline)
 	d.Set("args", FormatJson(resp.Args))
-	d.Set("tags", FormatJson(resp.Tags))
+	if resp.Tags != nil {
+		d.Set("tags", FormatJson(resp.Tags))
+	}
 	d.Set("last_process_id", resp.LastProcessId)
 	d.Set("created_at", resp.CreatedAt)
 	d.Set("updated_at", resp.UpdatedAt)
@@ -269,6 +279,7 @@ func resourceWorkspacePipelineUpdate(ctx context.Context, d *schema.ResourceData
 	var err error
 	var r *http.Response
 	var resp pipes.Pipeline
+	tagsStr := "{}"
 
 	workspaceHandle := d.Get("workspace").(string)
 	pipelineId := d.Get("workspace_pipeline_id").(string)
@@ -282,10 +293,14 @@ func resourceWorkspacePipelineUpdate(ctx context.Context, d *schema.ResourceData
 	if err != nil {
 		return diag.Errorf("error parsing args for workspace pipeline : %v", d.Get("args").(string))
 	}
-	tags, err := JSONStringToInterface(d.Get("tags").(string))
-	if err != nil {
-		return diag.Errorf("error parsing tags for workspace pipeline : %v", d.Get("tags").(string))
+	if d.Get("tags") != nil && d.Get("tags").(string) != "" {
+		tagsStr = d.Get("tags").(string)
 	}
+	tags, err := JSONStringToInterface(tagsStr)
+	if err != nil {
+		return diag.Errorf("error parsing tags for workspace pipeline : %v", tagsStr)
+	}
+
 	log.Printf("\n[DEBUG] Pipeline Frequency: %v", frequency)
 	log.Printf("\n[DEBUG] Pipeline Arguments: %v", args)
 	log.Printf("\n[DEBUG] Pipeline Tags: %v", tags)
@@ -318,7 +333,9 @@ func resourceWorkspacePipelineUpdate(ctx context.Context, d *schema.ResourceData
 	d.Set("frequency", FormatJson(resp.Frequency))
 	d.Set("pipeline", resp.Pipeline)
 	d.Set("args", FormatJson(resp.Args))
-	d.Set("tags", FormatJson(resp.Tags))
+	if resp.Tags != nil {
+		d.Set("tags", FormatJson(resp.Tags))
+	}
 	d.Set("last_process_id", resp.LastProcessId)
 	d.Set("created_at", resp.CreatedAt)
 	d.Set("updated_at", resp.UpdatedAt)
