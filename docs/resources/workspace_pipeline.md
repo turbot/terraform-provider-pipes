@@ -85,6 +85,7 @@ The following arguments are supported:
 - `pipeline` - (Required) The name of the pipeline to be executed. Can either be `pipeline.snapshot_dashboard` or `pipeline.snapshot_query`.
 - `title` - (Required) The title of the pipeline to be created.
 - `workspace` - (Required) The handle of the workspace to manage the pipeline for.
+- `desired_state` - (Optional) The desired state of the pipeline, which can be set only after it has already been created. Valid values are `enabled`, `disabled` and `paused`.
 - `organization` - (Optional) The optional handle of the organization to be used when the pipeline to be managed belongs to an organization.
 - `tags` - (Optional) The JSON-encoded string of tags for the pipeline. Use `jsonencode` on a terraform type to ensure correct escaping e.g. `jsonencode({Foo: "Bar"})`
 
@@ -99,6 +100,8 @@ In addition to all arguments above, the following attributes are exported:
 - `last_process_id` - The unique identifier of the last process that was executed for the pipeline.
 - `organization` - A human-friendly alias of the organization in which the pipeline exists.
 - `pipeline` - The name of the pipeline to be executed.
+- `state` - The current state of the pipeline.
+- `state_reason` - The reason for the current state of the pipeline.
 - `tags` - The tags for the pipeline.
 - `title` - The title of the pipeline.
 - `updated_at` - The ISO 8601 date & time the pipeline was last updated at.

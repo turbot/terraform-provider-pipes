@@ -45,6 +45,16 @@ func resourceWorkspace() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"state_reason": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"desired_state": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
 			"created_at": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -147,6 +157,8 @@ func resourceWorkspaceCreate(ctx context.Context, d *schema.ResourceData, meta i
 	d.Set("organization", orgHandle)
 	d.Set("workspace_id", resp.Id)
 	d.Set("workspace_state", resp.State)
+	d.Set("state_reason", resp.StateReason)
+	d.Set("desired_state", resp.DesiredState)
 	d.Set("created_at", resp.CreatedAt)
 	d.Set("updated_at", resp.UpdatedAt)
 	if resp.CreatedBy != nil {
@@ -231,6 +243,8 @@ func resourceWorkspaceRead(ctx context.Context, d *schema.ResourceData, meta int
 	d.Set("handle", resp.Handle)
 	d.Set("organization", orgHandle)
 	d.Set("workspace_state", resp.State)
+	d.Set("state_reason", resp.StateReason)
+	d.Set("desired_state", resp.DesiredState)
 	d.Set("created_at", resp.CreatedAt)
 	d.Set("updated_at", resp.UpdatedAt)
 	if resp.CreatedBy != nil {
@@ -255,14 +269,19 @@ func resourceWorkspaceRead(ctx context.Context, d *schema.ResourceData, meta int
 func resourceWorkspaceUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
+	var desiredState string
 
 	client := meta.(*PipesClient)
 
 	oldHandle, newHandle := d.GetChange("handle")
+	if value, ok := d.GetOk("desired_state"); ok {
+		desiredState = value.(string)
+	}
 
 	// Create request
 	req := pipes.UpdateWorkspaceRequest{
-		Handle: types.String(newHandle.(string)),
+		Handle:       types.String(newHandle.(string)),
+		DesiredState: &desiredState,
 	}
 	log.Printf("\n[DEBUG] Updating Workspace: %s", *req.Handle)
 
@@ -294,6 +313,8 @@ func resourceWorkspaceUpdate(ctx context.Context, d *schema.ResourceData, meta i
 	d.Set("organization", orgHandle)
 	d.Set("workspace_id", resp.Id)
 	d.Set("workspace_state", resp.State)
+	d.Set("state_reason", resp.StateReason)
+	d.Set("desired_state", resp.DesiredState)
 	d.Set("created_at", resp.CreatedAt)
 	d.Set("updated_at", resp.UpdatedAt)
 	if resp.CreatedBy != nil {

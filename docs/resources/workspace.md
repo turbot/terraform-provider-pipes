@@ -45,6 +45,7 @@ resource "pipes_workspace" "test_user_workspace" {
 The following arguments are supported:
 
 - `handle` - (Required) A friendly identifier for your workspace, and must be unique across your workspaces.
+- `desired_state` - (Optional) The desired state of the workspace, which can be set only after it has already been created. Valid values are `enabled`, `disabled` and `paused`.
 - `instance_type` - (Optional) The instance type to use for the workspace database. Valid instance type values are `db1.shared` and `db1.small`. Defaults to `db1.shared` if nothing is passed.
 - `organization` - (Optional) An organization ID or handle to create the workspace in.
 
@@ -57,6 +58,7 @@ In addition to all arguments above, the following attributes are exported:
 - `database_name` - The name of the Steampipe workspace database.
 - `host` - The hostname.
 - `identity_id` - An unique identifier of the entity where the workspace is created.
+- `state_reason` - The reason for the current state of the workspace.
 - `updated_at` - The time when the workspace was last updated.
 - `updated_by` - The handle of the user who last updated the workspace.
 - `version_id` - The workspace version.
