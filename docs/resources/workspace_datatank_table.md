@@ -142,6 +142,7 @@ The following arguments are supported:
 - `type` - (Required) The type of the table. Valid values are `table` and `query`.
 - `workspace_handle` - (Required) The handle of the workspace to manage the datatank for.
 - `description` - (Optional) A description for the table.
+- `desired_state` - (Optional) The desired state of the datatank table, which can be set only after it has already been created. Valid values are `enabled`, `disabled` and `paused`.
 - `organization` - (Optional) The optional handle of the organization to be used when the datatank table to be managed belongs to an organization.
 - `part_per` - (Optional) The partitioning strategy for the table i.e. creates a separate partition for each connection in `source_schema`. Only valid value is `connection`.
 - `source_query` - (Optional) The query to be used when refreshing data for the table. Required when `type = query`.
@@ -156,7 +157,6 @@ In addition to all arguments above, the following attributes are exported:
 - `created_by` - The unique identifier of the actor that created this datatank.
 - `datatank_id` - The unique identifier of the datatank.
 - `datatank_table_id` - The unique identifier of the datatank table.
-- `desired_state` - The desired state of the datatank table.
 - `freshness` - A summary of the freshness of the datatank table and its parts.
 - `migrating_freshness` - A summary of the freshness of the datatank table and its parts when the table is migrating.
 - `migrating_name` - The name of the datatank table when the table is migrating.
