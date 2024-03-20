@@ -1,3 +1,10 @@
+## 0.13.2 (March 20, 2024)
+
+ENHANCEMENTS:
+
+* `resources/pipes_workspace`: Add support for passing `desired_state` attribute to update workspace request. Add attribute `state_reason`.
+* `resources/pipes_workspace_pipeline`: Add support for passing `desired_state` attribute to update pipeline request. Add attributes `state` and `state_reason`.
+
 ## 0.13.1 (March 7, 2024)
 
 BUG FIXES: 
