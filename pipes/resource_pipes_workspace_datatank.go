@@ -103,7 +103,7 @@ func resourceWorkspaceDatatank() *schema.Resource {
 func resourceWorkspaceDatatankCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
-	var handle, description, workspaceHandle string
+	var handle, description, workspaceHandle, desiredState string
 	var err error
 
 	if value, ok := d.GetOk("handle"); ok {
@@ -115,10 +115,14 @@ func resourceWorkspaceDatatankCreate(ctx context.Context, d *schema.ResourceData
 	if value, ok := d.GetOk("workspace_handle"); ok {
 		workspaceHandle = value.(string)
 	}
+	if value, ok := d.GetOk("desired_state"); ok {
+		desiredState = value.(string)
+	}
 
 	req := pipes.CreateDatatankRequest{
-		Handle:      handle,
-		Description: &description,
+		Handle:       handle,
+		Description:  &description,
+		DesiredState: &desiredState,
 	}
 
 	client := meta.(*PipesClient)

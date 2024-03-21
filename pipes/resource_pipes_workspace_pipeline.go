@@ -129,6 +129,7 @@ func resourceWorkspacePipelineCreate(ctx context.Context, d *schema.ResourceData
 	title := d.Get("title").(string)
 	pipeline := d.Get("pipeline").(string)
 	var frequency pipes.PipelineFrequency
+	var desiredState string
 	tagsStr := "{}"
 
 	err = json.Unmarshal([]byte(d.Get("frequency").(string)), &frequency)
@@ -146,13 +147,16 @@ func resourceWorkspacePipelineCreate(ctx context.Context, d *schema.ResourceData
 	if err != nil {
 		return diag.Errorf("error parsing tags for workspace pipeline : %v", tagsStr)
 	}
+	if value, ok := d.GetOk("desired_state"); ok {
+		desiredState = value.(string)
+	}
 
 	log.Printf("\n[DEBUG] Pipeline Frequency: %v", frequency)
 	log.Printf("\n[DEBUG] Pipeline Arguments: %v", args)
 	log.Printf("\n[DEBUG] Pipeline Tags: %v", tags)
 
 	// Create request
-	req := pipes.CreatePipelineRequest{Title: title, Pipeline: pipeline, Frequency: frequency, Args: args, Tags: tags}
+	req := pipes.CreatePipelineRequest{Title: title, Pipeline: pipeline, Frequency: frequency, Args: args, Tags: tags, DesiredState: &desiredState}
 
 	userHandle := ""
 	isUser, orgHandle := isUserConnection(d)

@@ -118,7 +118,7 @@ func resourceWorkspaceCreate(ctx context.Context, d *schema.ResourceData, meta i
 	var err error
 	var r *http.Response
 	var resp pipes.Workspace
-	var handle, instanceType string
+	var handle, instanceType, desiredState string
 
 	if value, ok := d.GetOk("handle"); ok {
 		handle = value.(string)
@@ -130,9 +130,12 @@ func resourceWorkspaceCreate(ctx context.Context, d *schema.ResourceData, meta i
 	if instanceType == "" {
 		instanceType = "db1.shared"
 	}
+	if value, ok := d.GetOk("desired_state"); ok {
+		desiredState = value.(string)
+	}
 
 	// Create request
-	req := pipes.CreateWorkspaceRequest{Handle: handle, InstanceType: &instanceType}
+	req := pipes.CreateWorkspaceRequest{Handle: handle, InstanceType: &instanceType, DesiredState: &desiredState}
 
 	isUser, orgHandle := isUserConnection(d)
 	if isUser {
