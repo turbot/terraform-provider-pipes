@@ -1,9 +1,15 @@
-## 0.13.2 (March 20, 2024)
+## 0.13.2 (March 21, 2024)
+
+BUG FIXES: 
+
+* `pipes_workspace_datatank_table`: Set `PartPer` setting for datatank table to be `nil` if nothing is passed in configuration while updating a datatank table. (#23)
 
 ENHANCEMENTS:
 
-* `resources/pipes_workspace`: Add support for passing `desired_state` attribute to update workspace request. Add attribute `state_reason`.
-* `resources/pipes_workspace_pipeline`: Add support for passing `desired_state` attribute to update pipeline request. Add attributes `state` and `state_reason`.
+* `resources/pipes_workspace`: Add support for passing `desired_state`, `db_volume_size_bytes` attribute when creating or updating a workspace. Add missing attribute `state_reason`.
+* `resources/pipes_workspace_pipeline`: Add support for passing `desired_state` attribute when creating or updating a pipeline. Add attributes `state` and `state_reason`.
+* `resources/pipes_workspace_datatank`: Add support for passing `desired_state` attribute when creating a datatank.
+* `resources/pipes_workspace_datatank_table`: Add support for passing `desired_state` attribute when creating a datatank_table.
 
 ## 0.13.1 (March 7, 2024)
 
