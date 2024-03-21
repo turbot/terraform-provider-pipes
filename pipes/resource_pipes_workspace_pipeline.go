@@ -156,7 +156,10 @@ func resourceWorkspacePipelineCreate(ctx context.Context, d *schema.ResourceData
 	log.Printf("\n[DEBUG] Pipeline Tags: %v", tags)
 
 	// Create request
-	req := pipes.CreatePipelineRequest{Title: title, Pipeline: pipeline, Frequency: frequency, Args: args, Tags: tags, DesiredState: &desiredState}
+	req := pipes.CreatePipelineRequest{Title: title, Pipeline: pipeline, Frequency: frequency, Args: args, Tags: tags}
+	if desiredState != "" {
+		req.DesiredState = &desiredState
+	}
 
 	userHandle := ""
 	isUser, orgHandle := isUserConnection(d)
@@ -335,7 +338,10 @@ func resourceWorkspacePipelineUpdate(ctx context.Context, d *schema.ResourceData
 	log.Printf("\n[DEBUG] Pipeline Tags: %v", tags)
 
 	// Create request
-	req := pipes.UpdatePipelineRequest{Title: &title, Frequency: &frequency, Args: args, Tags: tags, DesiredState: &desiredState}
+	req := pipes.UpdatePipelineRequest{Title: &title, Frequency: &frequency, Args: args, Tags: tags}
+	if desiredState != "" {
+		req.DesiredState = &desiredState
+	}
 
 	userHandle := ""
 	isUser, orgHandle := isUserConnection(d)

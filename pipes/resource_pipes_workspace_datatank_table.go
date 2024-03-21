@@ -190,7 +190,9 @@ func resourceWorkspaceDatatankTableCreate(ctx context.Context, d *schema.Resourc
 		SourceTable:  &sourceTable,
 		SourceQuery:  &sourceQuery,
 		Frequency:    &frequency,
-		DesiredState: &desiredState,
+	}
+	if desiredState != "" {
+		req.DesiredState = &desiredState
 	}
 
 	// If nothing is passed in the `part_per` field, set it to nil, so that it does not consider it as an empty string
@@ -401,7 +403,9 @@ func resourceWorkspaceDatatankTableUpdate(ctx context.Context, d *schema.Resourc
 		SourceTable:  &sourceTable,
 		SourceQuery:  &sourceQuery,
 		Frequency:    &frequency,
-		DesiredState: &desiredState,
+	}
+	if desiredState != "" {
+		req.DesiredState = &desiredState
 	}
 
 	// If nothing is passed in the `part_per` field, set it to nil, so that it does not consider it as an empty string

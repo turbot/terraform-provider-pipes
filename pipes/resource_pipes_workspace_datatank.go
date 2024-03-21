@@ -120,9 +120,11 @@ func resourceWorkspaceDatatankCreate(ctx context.Context, d *schema.ResourceData
 	}
 
 	req := pipes.CreateDatatankRequest{
-		Handle:       handle,
-		Description:  &description,
-		DesiredState: &desiredState,
+		Handle:      handle,
+		Description: &description,
+	}
+	if desiredState != "" {
+		req.DesiredState = &desiredState
 	}
 
 	client := meta.(*PipesClient)
@@ -286,8 +288,10 @@ func resourceWorkspaceDatatankUpdate(ctx context.Context, d *schema.ResourceData
 	}
 
 	req := pipes.UpdateDatatankRequest{
-		Description:  &description,
-		DesiredState: &desiredState,
+		Description: &description,
+	}
+	if desiredState != "" {
+		req.DesiredState = &desiredState
 	}
 
 	isUser, orgHandle := isUserConnection(d)

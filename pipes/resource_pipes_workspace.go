@@ -81,6 +81,11 @@ func resourceWorkspace() *schema.Resource {
 				Computed:     true,
 				ValidateFunc: validation.StringInSlice([]string{"db1.shared", "db1.small"}, false),
 			},
+			"db_volume_size_bytes": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				Computed: true,
+			},
 			"database_name": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -119,12 +124,16 @@ func resourceWorkspaceCreate(ctx context.Context, d *schema.ResourceData, meta i
 	var r *http.Response
 	var resp pipes.Workspace
 	var handle, instanceType, desiredState string
+	var dbVolumeSizeBytes int64
 
 	if value, ok := d.GetOk("handle"); ok {
 		handle = value.(string)
 	}
 	if value, ok := d.GetOk("instance_type"); ok {
 		instanceType = value.(string)
+	}
+	if value, ok := d.GetOk("db_volume_size_bytes"); ok {
+		dbVolumeSizeBytes = int64(value.(int))
 	}
 	// Default instance type to `db1.shared`
 	if instanceType == "" {
@@ -135,7 +144,13 @@ func resourceWorkspaceCreate(ctx context.Context, d *schema.ResourceData, meta i
 	}
 
 	// Create request
-	req := pipes.CreateWorkspaceRequest{Handle: handle, InstanceType: &instanceType, DesiredState: &desiredState}
+	req := pipes.CreateWorkspaceRequest{Handle: handle, InstanceType: &instanceType}
+	if desiredState != "" {
+		req.DesiredState = &desiredState
+	}
+	if dbVolumeSizeBytes != 0 {
+		req.DbVolumeSizeBytes = &dbVolumeSizeBytes
+	}
 
 	isUser, orgHandle := isUserConnection(d)
 	if isUser {
@@ -171,6 +186,7 @@ func resourceWorkspaceCreate(ctx context.Context, d *schema.ResourceData, meta i
 		d.Set("updated_by", resp.UpdatedBy.Handle)
 	}
 	d.Set("instance_type", resp.InstanceType)
+	d.Set("db_volume_size_bytes", resp.DbVolumeSizeBytes)
 	d.Set("database_name", resp.DatabaseName)
 	d.Set("hive", resp.Hive)
 	d.Set("host", resp.Host)
@@ -257,6 +273,7 @@ func resourceWorkspaceRead(ctx context.Context, d *schema.ResourceData, meta int
 		d.Set("updated_by", resp.UpdatedBy.Handle)
 	}
 	d.Set("instance_type", resp.InstanceType)
+	d.Set("db_volume_size_bytes", resp.DbVolumeSizeBytes)
 	d.Set("database_name", resp.DatabaseName)
 	d.Set("hive", resp.Hive)
 	d.Set("host", resp.Host)
@@ -273,6 +290,7 @@ func resourceWorkspaceUpdate(ctx context.Context, d *schema.ResourceData, meta i
 	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
 	var desiredState string
+	var dbVolumeSizeBytes int64
 
 	client := meta.(*PipesClient)
 
@@ -280,12 +298,21 @@ func resourceWorkspaceUpdate(ctx context.Context, d *schema.ResourceData, meta i
 	if value, ok := d.GetOk("desired_state"); ok {
 		desiredState = value.(string)
 	}
+	if value, ok := d.GetOk("db_volume_size_bytes"); ok {
+		dbVolumeSizeBytes = int64(value.(int))
+	}
 
 	// Create request
 	req := pipes.UpdateWorkspaceRequest{
-		Handle:       types.String(newHandle.(string)),
-		DesiredState: &desiredState,
+		Handle: types.String(newHandle.(string)),
 	}
+	if desiredState != "" {
+		req.DesiredState = &desiredState
+	}
+	if dbVolumeSizeBytes != 0 {
+		req.DbVolumeSizeBytes = &dbVolumeSizeBytes
+	}
+
 	log.Printf("\n[DEBUG] Updating Workspace: %s", *req.Handle)
 
 	var resp pipes.Workspace
@@ -327,6 +354,7 @@ func resourceWorkspaceUpdate(ctx context.Context, d *schema.ResourceData, meta i
 		d.Set("updated_by", resp.UpdatedBy.Handle)
 	}
 	d.Set("instance_type", resp.InstanceType)
+	d.Set("db_volume_size_bytes", resp.DbVolumeSizeBytes)
 	d.Set("database_name", resp.DatabaseName)
 	d.Set("hive", resp.Hive)
 	d.Set("host", resp.Host)
