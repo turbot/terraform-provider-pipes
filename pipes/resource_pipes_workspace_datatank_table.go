@@ -400,6 +400,11 @@ func resourceWorkspaceDatatankTableUpdate(ctx context.Context, d *schema.Resourc
 		DesiredState: &desiredState,
 	}
 
+	// If nothing is passed in the `part_per` field, set it to nil, so that it does not consider it as an empty string
+	if partPer == "" {
+		req.PartPer = nil
+	}
+
 	var r *http.Response
 	var resp pipes.DatatankTable
 
