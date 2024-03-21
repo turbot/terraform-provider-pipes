@@ -142,7 +142,7 @@ func resourceWorkspaceDatatankTable() *schema.Resource {
 func resourceWorkspaceDatatankTableCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
-	var workspaceHandle, datatankHandle, name, description, tableType, partPer, sourceSchema, sourceTable, sourceQuery string
+	var workspaceHandle, datatankHandle, name, description, tableType, partPer, sourceSchema, sourceTable, sourceQuery, desiredState string
 	var frequency pipes.PipelineFrequency
 	var err error
 
@@ -173,6 +173,9 @@ func resourceWorkspaceDatatankTableCreate(ctx context.Context, d *schema.Resourc
 	if value, ok := d.GetOk("source_query"); ok {
 		sourceQuery = value.(string)
 	}
+	if value, ok := d.GetOk("desired_state"); ok {
+		desiredState = value.(string)
+	}
 	err = json.Unmarshal([]byte(d.Get("frequency").(string)), &frequency)
 	if err != nil {
 		return diag.Errorf("error parsing frequency for datatank table : %v", d.Get("frequency").(string))
@@ -187,6 +190,9 @@ func resourceWorkspaceDatatankTableCreate(ctx context.Context, d *schema.Resourc
 		SourceTable:  &sourceTable,
 		SourceQuery:  &sourceQuery,
 		Frequency:    &frequency,
+	}
+	if desiredState != "" {
+		req.DesiredState = &desiredState
 	}
 
 	// If nothing is passed in the `part_per` field, set it to nil, so that it does not consider it as an empty string
@@ -397,7 +403,14 @@ func resourceWorkspaceDatatankTableUpdate(ctx context.Context, d *schema.Resourc
 		SourceTable:  &sourceTable,
 		SourceQuery:  &sourceQuery,
 		Frequency:    &frequency,
-		DesiredState: &desiredState,
+	}
+	if desiredState != "" {
+		req.DesiredState = &desiredState
+	}
+
+	// If nothing is passed in the `part_per` field, set it to nil, so that it does not consider it as an empty string
+	if partPer == "" {
+		req.PartPer = nil
 	}
 
 	var r *http.Response

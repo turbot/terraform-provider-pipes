@@ -58,6 +58,21 @@ func resourceWorkspacePipeline() *schema.Resource {
 				Optional:     true,
 				ValidateFunc: validation.StringIsJSON,
 			},
+			"state": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"state_reason": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"desired_state": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
 			"last_process_id": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -114,6 +129,7 @@ func resourceWorkspacePipelineCreate(ctx context.Context, d *schema.ResourceData
 	title := d.Get("title").(string)
 	pipeline := d.Get("pipeline").(string)
 	var frequency pipes.PipelineFrequency
+	var desiredState string
 	tagsStr := "{}"
 
 	err = json.Unmarshal([]byte(d.Get("frequency").(string)), &frequency)
@@ -131,6 +147,9 @@ func resourceWorkspacePipelineCreate(ctx context.Context, d *schema.ResourceData
 	if err != nil {
 		return diag.Errorf("error parsing tags for workspace pipeline : %v", tagsStr)
 	}
+	if value, ok := d.GetOk("desired_state"); ok {
+		desiredState = value.(string)
+	}
 
 	log.Printf("\n[DEBUG] Pipeline Frequency: %v", frequency)
 	log.Printf("\n[DEBUG] Pipeline Arguments: %v", args)
@@ -138,6 +157,9 @@ func resourceWorkspacePipelineCreate(ctx context.Context, d *schema.ResourceData
 
 	// Create request
 	req := pipes.CreatePipelineRequest{Title: title, Pipeline: pipeline, Frequency: frequency, Args: args, Tags: tags}
+	if desiredState != "" {
+		req.DesiredState = &desiredState
+	}
 
 	userHandle := ""
 	isUser, orgHandle := isUserConnection(d)
@@ -167,6 +189,9 @@ func resourceWorkspacePipelineCreate(ctx context.Context, d *schema.ResourceData
 	if resp.Tags != nil {
 		d.Set("tags", FormatJson(resp.Tags))
 	}
+	d.Set("state", resp.State)
+	d.Set("state_reason", resp.StateReason)
+	d.Set("desired_state", resp.DesiredState)
 	d.Set("last_process_id", resp.LastProcessId)
 	d.Set("created_at", resp.CreatedAt)
 	d.Set("updated_at", resp.UpdatedAt)
@@ -247,6 +272,9 @@ func resourceWorkspacePipelineRead(ctx context.Context, d *schema.ResourceData, 
 	if resp.Tags != nil {
 		d.Set("tags", FormatJson(resp.Tags))
 	}
+	d.Set("state", resp.State)
+	d.Set("state_reason", resp.StateReason)
+	d.Set("desired_state", resp.DesiredState)
 	d.Set("last_process_id", resp.LastProcessId)
 	d.Set("created_at", resp.CreatedAt)
 	d.Set("updated_at", resp.UpdatedAt)
@@ -279,6 +307,7 @@ func resourceWorkspacePipelineUpdate(ctx context.Context, d *schema.ResourceData
 	var err error
 	var r *http.Response
 	var resp pipes.Pipeline
+	var desiredState string
 	tagsStr := "{}"
 
 	workspaceHandle := d.Get("workspace").(string)
@@ -300,6 +329,9 @@ func resourceWorkspacePipelineUpdate(ctx context.Context, d *schema.ResourceData
 	if err != nil {
 		return diag.Errorf("error parsing tags for workspace pipeline : %v", tagsStr)
 	}
+	if value, ok := d.GetOk("desired_state"); ok {
+		desiredState = value.(string)
+	}
 
 	log.Printf("\n[DEBUG] Pipeline Frequency: %v", frequency)
 	log.Printf("\n[DEBUG] Pipeline Arguments: %v", args)
@@ -307,6 +339,9 @@ func resourceWorkspacePipelineUpdate(ctx context.Context, d *schema.ResourceData
 
 	// Create request
 	req := pipes.UpdatePipelineRequest{Title: &title, Frequency: &frequency, Args: args, Tags: tags}
+	if desiredState != "" {
+		req.DesiredState = &desiredState
+	}
 
 	userHandle := ""
 	isUser, orgHandle := isUserConnection(d)
@@ -336,6 +371,9 @@ func resourceWorkspacePipelineUpdate(ctx context.Context, d *schema.ResourceData
 	if resp.Tags != nil {
 		d.Set("tags", FormatJson(resp.Tags))
 	}
+	d.Set("state", resp.State)
+	d.Set("state_reason", resp.StateReason)
+	d.Set("desired_state", resp.DesiredState)
 	d.Set("last_process_id", resp.LastProcessId)
 	d.Set("created_at", resp.CreatedAt)
 	d.Set("updated_at", resp.UpdatedAt)

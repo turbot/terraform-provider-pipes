@@ -15,17 +15,19 @@ func TestAccUserWorkspace_Basic(t *testing.T) {
 	workspaceHandle := "workspace" + randomString(3)
 	newWorkspaceHandle := "workspace" + randomString(4)
 	workspaceInstanceType := "db1.small"
+	dbVolumeBytes := 6442450944
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckUserWorkspaceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccUserWorkspaceConfig(workspaceHandle, workspaceInstanceType),
+				Config: testAccUserWorkspaceConfig(workspaceHandle, workspaceInstanceType, dbVolumeBytes),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckUserWorkspaceExists("pipes_workspace.test"),
 					resource.TestCheckResourceAttr("pipes_workspace.test", "handle", workspaceHandle),
 					resource.TestCheckResourceAttr("pipes_workspace.test", "instance_type", workspaceInstanceType),
+					resource.TestCheckResourceAttr("pipes_workspace.test", "db_volume_size_bytes", fmt.Sprint(dbVolumeBytes)),
 				),
 			},
 			{
@@ -35,10 +37,11 @@ func TestAccUserWorkspace_Basic(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"updated_at"},
 			},
 			{
-				Config: testAccUserWorkspaceUpdateHandleConfig(newWorkspaceHandle, workspaceInstanceType),
+				Config: testAccUserWorkspaceUpdateHandleConfig(newWorkspaceHandle, workspaceInstanceType, dbVolumeBytes),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("pipes_workspace.test", "handle", newWorkspaceHandle),
 					resource.TestCheckResourceAttr("pipes_workspace.test", "instance_type", workspaceInstanceType),
+					resource.TestCheckResourceAttr("pipes_workspace.test", "db_volume_size_bytes", fmt.Sprint(dbVolumeBytes)),
 				),
 			},
 		},
@@ -46,20 +49,22 @@ func TestAccUserWorkspace_Basic(t *testing.T) {
 }
 
 // configs
-func testAccUserWorkspaceConfig(workspaceHandle, workspaceInstanceType string) string {
+func testAccUserWorkspaceConfig(workspaceHandle, workspaceInstanceType string, dbVolumeBytes int) string {
 	return fmt.Sprintf(`
 resource "pipes_workspace" "test" {
 	handle = "%s"
 	instance_type = "%s"
-}`, workspaceHandle, workspaceInstanceType)
+	db_volume_size_bytes = %d
+}`, workspaceHandle, workspaceInstanceType, dbVolumeBytes)
 }
 
-func testAccUserWorkspaceUpdateHandleConfig(newWorkspaceHandle, workspaceInstanceType string) string {
+func testAccUserWorkspaceUpdateHandleConfig(newWorkspaceHandle, workspaceInstanceType string, dbVolumeBytes int) string {
 	return fmt.Sprintf(`
 resource "pipes_workspace" "test" {
 	handle = "%s"
 	instance_type = "%s"
-}`, newWorkspaceHandle, workspaceInstanceType)
+	db_volume_size_bytes = %d
+}`, newWorkspaceHandle, workspaceInstanceType, dbVolumeBytes)
 }
 
 // helper functions

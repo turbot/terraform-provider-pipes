@@ -49,6 +49,7 @@ The following arguments are supported:
 - `handle` - (Required) A friendly identifier for your datatank, which must be unique across all schemas in your workspace.
 - `workspace_handle` - (Required) The handle of the workspace to manage the datatank for.
 - `description` - (Optional) A description for the datatank.
+- `desired_state` - (Optional) The desired state of the datatank, which can be set only after it has already been created. Valid values are `enabled`, `disabled` and `paused`.
 - `organization` - (Optional) The optional handle of the organization to be used when the datatank to be managed belongs to an organization.
 
 ## Attributes Reference
@@ -58,7 +59,6 @@ In addition to all arguments above, the following attributes are exported:
 - `created_at` - The ISO 8601 date & time the datatank was created at.
 - `created_by` - The unique identifier of the actor that created this datatank.
 - `datatank_id` - The unique identifier of the datatank.
-- `desired_state` - The desired state of the datatank.
 - `identity_id` - The unique identifier of the identity to which the datatank belongs to.
 - `state` - The current state of the datatank.
 - `state_reason` - The reason for the current state of the datatank.
