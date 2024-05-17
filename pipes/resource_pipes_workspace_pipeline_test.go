@@ -257,12 +257,12 @@ func runPipeline() resource.TestCheckFunc {
 				if err != nil {
 					return fmt.Errorf("error fetching user handle. %s", err)
 				}
-				resp, _, err = client.APIClient.UserWorkspacePipelines.Command(ctx, userHandle, workspaceId, pipelineId).Request(req).Execute()
+				resp, _, err = client.APIClient.UserWorkspacePipelines.Command(ctx, userHandle, workspaceId, pipelineId).PipelineCommandRequest(req).Execute()
 				if err != nil {
 					return fmt.Errorf("error fetching pipeline %s in user workspace with handle %s. %s", pipelineId, workspaceId, err)
 				}
 			} else {
-				resp, _, err = client.APIClient.OrgWorkspacePipelines.Command(ctx, org, workspaceId, pipelineId).Request(req).Execute()
+				resp, _, err = client.APIClient.OrgWorkspacePipelines.Command(ctx, org, workspaceId, pipelineId).PipelineCommandRequest(req).Execute()
 				if err != nil {
 					return fmt.Errorf("error fetching pipeline %s in org workspace with handle %s. %s", pipelineId, workspaceId, err)
 				}

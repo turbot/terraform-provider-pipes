@@ -132,7 +132,7 @@ func resourceUserPreferencesUpdate(ctx context.Context, d *schema.ResourceData, 
 		req.CommunicationTipsAndTricks = types.String(value.(string))
 	}
 
-	resp, r, err := client.APIClient.Users.UpdatePreferences(context.Background(), userHandle).Request(req).Execute()
+	resp, r, err := client.APIClient.Users.UpdatePreferences(context.Background(), userHandle).UpdateUserPreferencesRequest(req).Execute()
 	if err != nil {
 		return diag.Errorf("error updating user preferences: %v", decodeResponse(r))
 	}
@@ -166,7 +166,7 @@ func resourceUserPreferencesDelete(ctx context.Context, d *schema.ResourceData, 
 	req.CommunicationProductUpdates = types.String("enabled")
 	req.CommunicationTipsAndTricks = types.String("enabled")
 
-	_, r, err := client.APIClient.Users.UpdatePreferences(context.Background(), userHandle).Request(req).Execute()
+	_, r, err := client.APIClient.Users.UpdatePreferences(context.Background(), userHandle).UpdateUserPreferencesRequest(req).Execute()
 	if err != nil {
 		return diag.Errorf("error resetting user preferences: %v", decodeResponse(r))
 	}

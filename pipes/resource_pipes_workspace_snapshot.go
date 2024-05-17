@@ -155,9 +155,9 @@ func resourceWorkspaceSnapshotCreate(ctx context.Context, d *schema.ResourceData
 		if err != nil {
 			return diag.Errorf("resourceWorkspaceSnapshotCreate.getUserHandler error  %v", decodeResponse(r))
 		}
-		resp, r, err = client.APIClient.UserWorkspaceSnapshots.Create(ctx, userHandle, workspaceHandle).Request(req).Execute()
+		resp, r, err = client.APIClient.UserWorkspaceSnapshots.Create(ctx, userHandle, workspaceHandle).CreateWorkspaceSnapshotRequest(req).Execute()
 	} else {
-		resp, r, err = client.APIClient.OrgWorkspaceSnapshots.Create(ctx, orgHandle, workspaceHandle).Request(req).Execute()
+		resp, r, err = client.APIClient.OrgWorkspaceSnapshots.Create(ctx, orgHandle, workspaceHandle).CreateWorkspaceSnapshotRequest(req).Execute()
 	}
 
 	// Error check
@@ -309,9 +309,9 @@ func resourceWorkspaceSnapshotUpdate(ctx context.Context, d *schema.ResourceData
 		if err != nil {
 			return diag.Errorf("resourceWorkspaceSnapshotUpdate.getUserHandler error  %v", decodeResponse(r))
 		}
-		resp, r, err = client.APIClient.UserWorkspaceSnapshots.Update(ctx, userHandle, workspaceHandle, snapshotId).Request(req).Execute()
+		resp, r, err = client.APIClient.UserWorkspaceSnapshots.Update(ctx, userHandle, workspaceHandle, snapshotId).UpdateWorkspaceSnapshotRequest(req).Execute()
 	} else {
-		resp, r, err = client.APIClient.OrgWorkspaceSnapshots.Update(ctx, orgHandle, workspaceHandle, snapshotId).Request(req).Execute()
+		resp, r, err = client.APIClient.OrgWorkspaceSnapshots.Update(ctx, orgHandle, workspaceHandle, snapshotId).UpdateWorkspaceSnapshotRequest(req).Execute()
 	}
 
 	// Error check

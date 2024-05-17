@@ -131,7 +131,7 @@ func resourceOrganizationMemberCreate(ctx context.Context, d *schema.ResourceDat
 		}
 
 		// Invite requested member
-		orgMember, r, err = client.APIClient.OrgMembers.Invite(ctx, org.Handle).Request(req).Execute()
+		orgMember, r, err = client.APIClient.OrgMembers.Invite(ctx, org.Handle).InviteOrgUserRequest(req).Execute()
 		if err != nil {
 			return diag.Errorf("error inviting member: %s", decodeResponse(r))
 		}
@@ -153,7 +153,7 @@ func resourceOrganizationMemberCreate(ctx context.Context, d *schema.ResourceDat
 		}
 
 		// Add requested member to the organization
-		orgMember, r, err = client.APIClient.OrgMembers.Create(ctx, org.Handle).Request(req).Execute()
+		orgMember, r, err = client.APIClient.OrgMembers.Create(ctx, org.Handle).CreateOrgUserRequest(req).Execute()
 		if err != nil {
 			return diag.Errorf("error inviting member: %s", decodeResponse(r))
 		}
@@ -265,7 +265,7 @@ func resourceOrganizationMemberUpdate(ctx context.Context, d *schema.ResourceDat
 
 	log.Printf("\n[DEBUG] Updating membership: '%s/%s'", org, userHandle)
 
-	resp, r, err := client.APIClient.OrgMembers.Update(context.Background(), org, userHandle).Request(req).Execute()
+	resp, r, err := client.APIClient.OrgMembers.Update(context.Background(), org, userHandle).UpdateOrgUserRequest(req).Execute()
 	if err != nil {
 		return diag.Errorf("error updating membership: %s", decodeResponse(r))
 	}

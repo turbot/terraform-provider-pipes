@@ -138,9 +138,9 @@ func resourceWorkspaceDatatankCreate(ctx context.Context, d *schema.ResourceData
 		if err != nil {
 			return diag.Errorf("resourceWorkspaceDatatankCreate. getUserHandler error  %v", decodeResponse(r))
 		}
-		resp, r, err = client.APIClient.UserWorkspaceDatatanks.Create(ctx, actorHandle, workspaceHandle).Request(req).Execute()
+		resp, r, err = client.APIClient.UserWorkspaceDatatanks.Create(ctx, actorHandle, workspaceHandle).CreateDatatankRequest(req).Execute()
 	} else {
-		resp, r, err = client.APIClient.OrgWorkspaceDatatanks.Create(ctx, orgHandle, workspaceHandle).Request(req).Execute()
+		resp, r, err = client.APIClient.OrgWorkspaceDatatanks.Create(ctx, orgHandle, workspaceHandle).CreateDatatankRequest(req).Execute()
 	}
 	if err != nil {
 		return diag.Errorf("resourceWorkspaceDatatankCreate. Create datatank api error  %v", decodeResponse(r))
@@ -301,9 +301,9 @@ func resourceWorkspaceDatatankUpdate(ctx context.Context, d *schema.ResourceData
 		if err != nil {
 			return diag.Errorf("resourceWorkspaceDatatankUpdate. getUserHandler error:	%v", decodeResponse(r))
 		}
-		resp, r, err = client.APIClient.UserWorkspaceDatatanks.Update(context.Background(), actorHandle, workspaceHandle, datatankHandle).Request(req).Execute()
+		resp, r, err = client.APIClient.UserWorkspaceDatatanks.Update(context.Background(), actorHandle, workspaceHandle, datatankHandle).UpdateDatatankRequest(req).Execute()
 	} else {
-		resp, r, err = client.APIClient.OrgWorkspaceDatatanks.Update(context.Background(), orgHandle, workspaceHandle, datatankHandle).Request(req).Execute()
+		resp, r, err = client.APIClient.OrgWorkspaceDatatanks.Update(context.Background(), orgHandle, workspaceHandle, datatankHandle).UpdateDatatankRequest(req).Execute()
 	}
 	if err != nil {
 		return diag.Errorf("resourceWorkspaceDatatankUpdate. Update datatank error: %v", decodeResponse(r))

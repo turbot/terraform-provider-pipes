@@ -91,7 +91,7 @@ func resourceOrganizationCreate(ctx context.Context, d *schema.ResourceData, met
 		req.Url = types.String(value.(string))
 	}
 
-	resp, r, err := client.APIClient.Orgs.Create(ctx).Request(req).Execute()
+	resp, r, err := client.APIClient.Orgs.Create(ctx).CreateOrgRequest(req).Execute()
 	if err != nil {
 		return diag.Errorf("error creating organization: %v", decodeResponse(r))
 	}
@@ -176,7 +176,7 @@ func resourceOrganizationUpdate(ctx context.Context, d *schema.ResourceData, met
 
 	log.Printf("\n[DEBUG] Updating Organization: %s", *req.Handle)
 
-	resp, r, err := client.APIClient.Orgs.Update(ctx, oldHandle.(string)).Request(req).Execute()
+	resp, r, err := client.APIClient.Orgs.Update(ctx, oldHandle.(string)).UpdateOrgRequest(req).Execute()
 	if err != nil {
 		return diag.Errorf("resourceOrganizationUpdate. Update organization %v", decodeResponse(r))
 	}

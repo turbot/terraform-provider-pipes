@@ -137,7 +137,7 @@ func resourceWorkspaceModVariableCreateSetting(ctx context.Context, d *schema.Re
 		// logic until the mod is installed and the variables created in the workspace
 		err = resource.RetryContext(ctx, d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
 			var err error
-			resp, r, err = client.APIClient.UserWorkspaceModVariables.CreateSetting(ctx, userHandle, workspaceHandle, modAlias).Request(req).Execute()
+			resp, r, err = client.APIClient.UserWorkspaceModVariables.CreateSetting(ctx, userHandle, workspaceHandle, modAlias).CreateWorkspaceModVariableSettingRequest(req).Execute()
 			if err != nil {
 				return resource.RetryableError(err)
 			}
@@ -145,7 +145,7 @@ func resourceWorkspaceModVariableCreateSetting(ctx context.Context, d *schema.Re
 		})
 	} else {
 		err = resource.RetryContext(ctx, d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
-			resp, r, err = client.APIClient.OrgWorkspaceModVariables.CreateSetting(ctx, orgHandle, workspaceHandle, modAlias).Request(req).Execute()
+			resp, r, err = client.APIClient.OrgWorkspaceModVariables.CreateSetting(ctx, orgHandle, workspaceHandle, modAlias).CreateWorkspaceModVariableSettingRequest(req).Execute()
 			if err != nil {
 				return resource.RetryableError(err)
 			}
@@ -300,9 +300,9 @@ func resourceWorkspaceModVariableUpdateSetting(ctx context.Context, d *schema.Re
 		if err != nil {
 			return diag.Errorf("resourceWorkspaceModVariableUpdateSetting. getUserHandler error  %v", decodeResponse(r))
 		}
-		resp, r, err = client.APIClient.UserWorkspaceModVariables.UpdateSetting(ctx, userHandle, workspaceHandle, modAlias, variableName).Request(req).Execute()
+		resp, r, err = client.APIClient.UserWorkspaceModVariables.UpdateSetting(ctx, userHandle, workspaceHandle, modAlias, variableName).UpdateWorkspaceModVariableSettingRequest(req).Execute()
 	} else {
-		resp, r, err = client.APIClient.OrgWorkspaceModVariables.UpdateSetting(ctx, orgHandle, workspaceHandle, modAlias, variableName).Request(req).Execute()
+		resp, r, err = client.APIClient.OrgWorkspaceModVariables.UpdateSetting(ctx, orgHandle, workspaceHandle, modAlias, variableName).UpdateWorkspaceModVariableSettingRequest(req).Execute()
 	}
 
 	// Error check

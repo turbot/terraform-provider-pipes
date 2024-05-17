@@ -122,9 +122,9 @@ func resourceWorkspaceAggregatorCreate(ctx context.Context, d *schema.ResourceDa
 		if err != nil {
 			return diag.Errorf("resourceWorkspaceAggregatorCreate.getUserHandler error  %v", decodeResponse(r))
 		}
-		resp, r, err = client.APIClient.UserWorkspaceAggregators.Create(ctx, userHandle, workspaceHandle).Request(req).Execute()
+		resp, r, err = client.APIClient.UserWorkspaceAggregators.Create(ctx, userHandle, workspaceHandle).CreateWorkspaceAggregatorRequest(req).Execute()
 	} else {
-		resp, r, err = client.APIClient.OrgWorkspaceAggregators.Create(ctx, orgHandle, workspaceHandle).Request(req).Execute()
+		resp, r, err = client.APIClient.OrgWorkspaceAggregators.Create(ctx, orgHandle, workspaceHandle).CreateWorkspaceAggregatorRequest(req).Execute()
 	}
 
 	// Error check
@@ -273,9 +273,9 @@ func resourceWorkspaceAggregatorUpdate(ctx context.Context, d *schema.ResourceDa
 		if err != nil {
 			return diag.Errorf("resourceWorkspaceAggregatorUpdate.getUserHandler error  %v", decodeResponse(r))
 		}
-		resp, r, err = client.APIClient.UserWorkspaceAggregators.Update(ctx, userHandle, workspaceHandle, oldAggregatorHandle.(string)).Request(req).Execute()
+		resp, r, err = client.APIClient.UserWorkspaceAggregators.Update(ctx, userHandle, workspaceHandle, oldAggregatorHandle.(string)).UpdateWorkspaceAggregatorRequest(req).Execute()
 	} else {
-		resp, r, err = client.APIClient.OrgWorkspaceAggregators.Update(ctx, orgHandle, workspaceHandle, oldAggregatorHandle.(string)).Request(req).Execute()
+		resp, r, err = client.APIClient.OrgWorkspaceAggregators.Update(ctx, orgHandle, workspaceHandle, oldAggregatorHandle.(string)).UpdateWorkspaceAggregatorRequest(req).Execute()
 	}
 
 	// Error check

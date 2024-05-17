@@ -168,9 +168,9 @@ func resourceWorkspacePipelineCreate(ctx context.Context, d *schema.ResourceData
 		if err != nil {
 			return diag.Errorf("resourceWorkspacePipelineCreate.getUserHandler error  %v", decodeResponse(r))
 		}
-		resp, r, err = client.APIClient.UserWorkspacePipelines.Create(ctx, userHandle, workspaceHandle).Request(req).Execute()
+		resp, r, err = client.APIClient.UserWorkspacePipelines.Create(ctx, userHandle, workspaceHandle).CreatePipelineRequest(req).Execute()
 	} else {
-		resp, r, err = client.APIClient.OrgWorkspacePipelines.Create(ctx, orgHandle, workspaceHandle).Request(req).Execute()
+		resp, r, err = client.APIClient.OrgWorkspacePipelines.Create(ctx, orgHandle, workspaceHandle).CreatePipelineRequest(req).Execute()
 	}
 
 	// Error check
@@ -350,9 +350,9 @@ func resourceWorkspacePipelineUpdate(ctx context.Context, d *schema.ResourceData
 		if err != nil {
 			return diag.Errorf("resourceWorkspacePipelineUpdate.getUserHandler error  %v", decodeResponse(r))
 		}
-		resp, r, err = client.APIClient.UserWorkspacePipelines.Update(ctx, userHandle, workspaceHandle, pipelineId).Request(req).Execute()
+		resp, r, err = client.APIClient.UserWorkspacePipelines.Update(ctx, userHandle, workspaceHandle, pipelineId).UpdatePipelineRequest(req).Execute()
 	} else {
-		resp, r, err = client.APIClient.OrgWorkspacePipelines.Update(ctx, orgHandle, workspaceHandle, pipelineId).Request(req).Execute()
+		resp, r, err = client.APIClient.OrgWorkspacePipelines.Update(ctx, orgHandle, workspaceHandle, pipelineId).UpdatePipelineRequest(req).Execute()
 	}
 
 	// Error check

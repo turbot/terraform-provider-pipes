@@ -133,9 +133,9 @@ func resourceConnectionCreate(ctx context.Context, d *schema.ResourceData, meta 
 		if err != nil {
 			return diag.Errorf("resourceConnectionCreate. getUserHandler error  %v", decodeResponse(r))
 		}
-		resp, r, err = client.APIClient.UserConnections.Create(ctx, actorHandle).Request(req).Execute()
+		resp, r, err = client.APIClient.UserConnections.Create(ctx, actorHandle).CreateConnectionRequest(req).Execute()
 	} else {
-		resp, r, err = client.APIClient.OrgConnections.Create(ctx, orgHandle).Request(req).Execute()
+		resp, r, err = client.APIClient.OrgConnections.Create(ctx, orgHandle).CreateConnectionRequest(req).Execute()
 	}
 	if err != nil {
 		return diag.Errorf("resourceConnectionCreate. Create connection api error  %v", decodeResponse(r))
@@ -162,7 +162,7 @@ func resourceConnectionCreate(ctx context.Context, d *schema.ResourceData, meta 
 
 	// If connection is created inside an Organization the id will be of the
 	// format "OrganizationHandle/ConnectionHandle" otherwise "ConnectionHandle"
-	if strings.HasPrefix(resp.IdentityId, "o_") {
+	if strings.HasPrefix(*resp.IdentityId, "o_") {
 		d.SetId(fmt.Sprintf("%s/%s", orgHandle, resp.Handle))
 	} else {
 		d.SetId(resp.Handle)
@@ -286,9 +286,9 @@ func resourceConnectionUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		if err != nil {
 			return diag.Errorf("resourceConnectionUpdate. getUserHandler error:	%v", decodeResponse(r))
 		}
-		resp, r, err = client.APIClient.UserConnections.Update(context.Background(), actorHandle, oldConnectionHandle.(string)).Request(req).Execute()
+		resp, r, err = client.APIClient.UserConnections.Update(context.Background(), actorHandle, oldConnectionHandle.(string)).UpdateConnectionRequest(req).Execute()
 	} else {
-		resp, r, err = client.APIClient.OrgConnections.Update(context.Background(), orgHandle, oldConnectionHandle.(string)).Request(req).Execute()
+		resp, r, err = client.APIClient.OrgConnections.Update(context.Background(), orgHandle, oldConnectionHandle.(string)).UpdateConnectionRequest(req).Execute()
 	}
 	if err != nil {
 		return diag.Errorf("resourceConnectionUpdate. Update connection error: %v", decodeResponse(r))
@@ -313,7 +313,7 @@ func resourceConnectionUpdate(ctx context.Context, d *schema.ResourceData, meta 
 
 	// If connection exists inside an Organization the id will be of the
 	// format "OrganizationHandle/ConnectionHandle" otherwise "ConnectionHandle"
-	if strings.HasPrefix(resp.IdentityId, "o_") {
+	if strings.HasPrefix(*resp.IdentityId, "o_") {
 		d.SetId(fmt.Sprintf("%s/%s", orgHandle, resp.Handle))
 	} else {
 		d.SetId(resp.Handle)

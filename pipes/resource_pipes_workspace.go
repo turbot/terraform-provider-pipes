@@ -159,9 +159,9 @@ func resourceWorkspaceCreate(ctx context.Context, d *schema.ResourceData, meta i
 		if err != nil {
 			return diag.Errorf("resourceConnectionCreate. getUserHandler error  %v", decodeResponse(r))
 		}
-		resp, r, err = client.APIClient.UserWorkspaces.Create(ctx, userHandler).Request(req).Execute()
+		resp, r, err = client.APIClient.UserWorkspaces.Create(ctx, userHandler).CreateWorkspaceRequest(req).Execute()
 	} else {
-		resp, r, err = client.APIClient.OrgWorkspaces.Create(ctx, orgHandle).Request(req).Execute()
+		resp, r, err = client.APIClient.OrgWorkspaces.Create(ctx, orgHandle).CreateWorkspaceRequest(req).Execute()
 	}
 
 	// Error check
@@ -326,9 +326,9 @@ func resourceWorkspaceUpdate(ctx context.Context, d *schema.ResourceData, meta i
 		if err != nil {
 			return diag.Errorf("resourceConnectionUpdate. getUserHandler error:	%v", decodeResponse(r))
 		}
-		resp, r, err = client.APIClient.UserWorkspaces.Update(ctx, userHandler, oldHandle.(string)).Request(req).Execute()
+		resp, r, err = client.APIClient.UserWorkspaces.Update(ctx, userHandler, oldHandle.(string)).UpdateWorkspaceRequest(req).Execute()
 	} else {
-		resp, r, err = client.APIClient.OrgWorkspaces.Update(ctx, orgHandle, oldHandle.(string)).Request(req).Execute()
+		resp, r, err = client.APIClient.OrgWorkspaces.Update(ctx, orgHandle, oldHandle.(string)).UpdateWorkspaceRequest(req).Execute()
 	}
 
 	// Error check

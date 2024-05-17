@@ -134,9 +134,9 @@ func resourceWorkspaceModInstall(ctx context.Context, d *schema.ResourceData, me
 		if err != nil {
 			return diag.Errorf("resourceConnectionCreate. getUserHandler error  %v", decodeResponse(r))
 		}
-		resp, r, err = client.APIClient.UserWorkspaceMods.Install(ctx, userHandle, workspaceHandle).Request(req).Execute()
+		resp, r, err = client.APIClient.UserWorkspaceMods.Install(ctx, userHandle, workspaceHandle).CreateWorkspaceModRequest(req).Execute()
 	} else {
-		resp, r, err = client.APIClient.OrgWorkspaceMods.Install(ctx, orgHandle, workspaceHandle).Request(req).Execute()
+		resp, r, err = client.APIClient.OrgWorkspaceMods.Install(ctx, orgHandle, workspaceHandle).CreateWorkspaceModRequest(req).Execute()
 	}
 
 	// Error check
@@ -277,7 +277,7 @@ func resourceWorkspaceModUpdate(ctx context.Context, d *schema.ResourceData, met
 	constraint := d.Get("constraint").(string)
 
 	// Create request
-	req := pipes.UpdateWorkspaceModRequest{Constraint: constraint}
+	req := pipes.UpdateWorkspaceModRequest{Constraint: &constraint}
 
 	isUser, orgHandle := isUserConnection(d)
 	if isUser {
@@ -286,9 +286,9 @@ func resourceWorkspaceModUpdate(ctx context.Context, d *schema.ResourceData, met
 		if err != nil {
 			return diag.Errorf("resourceConnectionCreate. getUserHandler error  %v", decodeResponse(r))
 		}
-		resp, r, err = client.APIClient.UserWorkspaceMods.Update(ctx, userHandle, workspaceHandle, modAlias).Request(req).Execute()
+		resp, r, err = client.APIClient.UserWorkspaceMods.Update(ctx, userHandle, workspaceHandle, modAlias).UpdateWorkspaceModRequest(req).Execute()
 	} else {
-		resp, r, err = client.APIClient.OrgWorkspaceMods.Update(ctx, orgHandle, workspaceHandle, modAlias).Request(req).Execute()
+		resp, r, err = client.APIClient.OrgWorkspaceMods.Update(ctx, orgHandle, workspaceHandle, modAlias).UpdateWorkspaceModRequest(req).Execute()
 	}
 
 	// Error check

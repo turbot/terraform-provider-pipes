@@ -211,9 +211,9 @@ func resourceWorkspaceDatatankTableCreate(ctx context.Context, d *schema.Resourc
 		if err != nil {
 			return diag.Errorf("resourceWorkspaceDatatankTableCreate. getUserHandler error  %v", decodeResponse(r))
 		}
-		resp, r, err = client.APIClient.UserWorkspaceDatatankTables.Create(ctx, actorHandle, workspaceHandle, datatankHandle).Request(req).Execute()
+		resp, r, err = client.APIClient.UserWorkspaceDatatankTables.Create(ctx, actorHandle, workspaceHandle, datatankHandle).CreateDatatankTableRequest(req).Execute()
 	} else {
-		resp, r, err = client.APIClient.OrgWorkspaceDatatankTables.Create(ctx, orgHandle, workspaceHandle, datatankHandle).Request(req).Execute()
+		resp, r, err = client.APIClient.OrgWorkspaceDatatankTables.Create(ctx, orgHandle, workspaceHandle, datatankHandle).CreateDatatankTableRequest(req).Execute()
 	}
 	if err != nil {
 		return diag.Errorf("resourceWorkspaceDatatankTableCreate. Create datatank api error  %v", decodeResponse(r))
@@ -423,9 +423,9 @@ func resourceWorkspaceDatatankTableUpdate(ctx context.Context, d *schema.Resourc
 		if err != nil {
 			return diag.Errorf("resourceWorkspaceDatatankTableUpdate. getUserHandler error:	%v", decodeResponse(r))
 		}
-		resp, r, err = client.APIClient.UserWorkspaceDatatankTables.Update(context.Background(), actorHandle, workspaceHandle, datatankHandle, name).Request(req).Execute()
+		resp, r, err = client.APIClient.UserWorkspaceDatatankTables.Update(context.Background(), actorHandle, workspaceHandle, datatankHandle, name).UpdateDatatankTableRequest(req).Execute()
 	} else {
-		resp, r, err = client.APIClient.OrgWorkspaceDatatankTables.Update(context.Background(), orgHandle, workspaceHandle, datatankHandle, name).Request(req).Execute()
+		resp, r, err = client.APIClient.OrgWorkspaceDatatankTables.Update(context.Background(), orgHandle, workspaceHandle, datatankHandle, name).UpdateDatatankTableRequest(req).Execute()
 	}
 	if err != nil {
 		return diag.Errorf("resourceWorkspaceDatatankTableUpdate. Update datatank error: %v", decodeResponse(r))

@@ -95,7 +95,7 @@ func resourceTenantMemberCreate(ctx context.Context, d *schema.ResourceData, met
 	tenantHandle := d.Get("tenant_handle").(string)
 
 	// Invite requested member
-	tenantMember, r, err := client.APIClient.TenantMembers.Invite(ctx, tenantHandle).Request(req).Execute()
+	tenantMember, r, err := client.APIClient.TenantMembers.Invite(ctx, tenantHandle).InviteTenantUserRequest(req).Execute()
 	if err != nil {
 		return diag.Errorf("error inviting member: %s", decodeResponse(r))
 	}
@@ -206,7 +206,7 @@ func resourceTenantMemberUpdate(ctx context.Context, d *schema.ResourceData, met
 
 	log.Printf("\n[DEBUG] Updating membership: '%s/%s'", tenantHandle, userId)
 
-	tenantMember, r, err := client.APIClient.TenantMembers.Update(context.Background(), tenantHandle, userId).Request(req).Execute()
+	tenantMember, r, err := client.APIClient.TenantMembers.Update(context.Background(), tenantHandle, userId).UpdateTenantUserRequest(req).Execute()
 	if err != nil {
 		return diag.Errorf("error updating membership: %s", decodeResponse(r))
 	}

@@ -123,7 +123,7 @@ func resourceOrganizationWorkspaceMemberCreate(ctx context.Context, d *schema.Re
 	}
 
 	// Invite requested member
-	_, r, err := client.APIClient.OrgWorkspaceMembers.Create(ctx, org, workspace).Request(req).Execute()
+	_, r, err := client.APIClient.OrgWorkspaceMembers.Create(ctx, org, workspace).CreateOrgWorkspaceUserRequest(req).Execute()
 	if err != nil {
 		return diag.Errorf("error inviting member: %s", decodeResponse(r))
 	}
@@ -253,7 +253,7 @@ func resourceOrganizationWorkspaceMemberUpdate(ctx context.Context, d *schema.Re
 
 	log.Printf("\n[DEBUG] Updating membership: '%s/%s/%s'", org, workspace, user)
 
-	orgWorkspaceMemberDetails, r, err := client.APIClient.OrgWorkspaceMembers.Update(context.Background(), org, workspace, user).Request(req).Execute()
+	orgWorkspaceMemberDetails, r, err := client.APIClient.OrgWorkspaceMembers.Update(context.Background(), org, workspace, user).UpdateOrgWorkspaceUserRequest(req).Execute()
 	if err != nil {
 		return diag.Errorf("error updating membership: %s", decodeResponse(r))
 	}

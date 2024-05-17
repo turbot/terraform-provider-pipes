@@ -163,9 +163,9 @@ func resourceWorkspaceConnectionCreate(ctx context.Context, d *schema.ResourceDa
 		if err != nil {
 			return diag.Errorf("resourceWorkspaceConnectionCreate. getUserHandler error %v", decodeResponse(r))
 		}
-		resp, r, err = client.APIClient.UserWorkspaceConnectionAssociations.Create(ctx, actorHandle, workspaceHandle).Request(req).Execute()
+		resp, r, err = client.APIClient.UserWorkspaceConnectionAssociations.Create(ctx, actorHandle, workspaceHandle).CreateWorkspaceConnRequest(req).Execute()
 	} else {
-		resp, r, err = client.APIClient.OrgWorkspaceConnectionAssociations.Create(ctx, orgHandle, workspaceHandle).Request(req).Execute()
+		resp, r, err = client.APIClient.OrgWorkspaceConnectionAssociations.Create(ctx, orgHandle, workspaceHandle).CreateWorkspaceConnRequest(req).Execute()
 	}
 
 	// Error check
