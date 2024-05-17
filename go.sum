@@ -318,6 +318,8 @@ github.com/turbot/pipes-sdk-go v0.9.1 h1:2yRojY2wymvJn6NQyE6A0EDFV267MNe+yDLxPVv
 github.com/turbot/pipes-sdk-go v0.9.1/go.mod h1:Mb+KhvqqEdRbz/6TSZc2QWDrMa5BN3E4Xw+gPt2TRkc=
 github.com/turbot/pipes-sdk-go v0.10.0-rc.1 h1:0ebx0Q63P/GemRose4Bn4tRKhHbB76HXa3oQ7dQyG3c=
 github.com/turbot/pipes-sdk-go v0.10.0-rc.1/go.mod h1:z/VTxsl5X1IAsnmjTf60mrBgOALzdw/vjKwgSvqpxls=
+github.com/turbot/pipes-sdk-go v0.10.0-rc.2 h1:IAsHKisdByJLnLBEHhYmjeCBUrAML2d6kTSWM/Dz+KM=
+github.com/turbot/pipes-sdk-go v0.10.0-rc.2/go.mod h1:z/VTxsl5X1IAsnmjTf60mrBgOALzdw/vjKwgSvqpxls=
 github.com/ulikunitz/xz v0.5.8 h1:ERv8V6GKqVi23rgu5cj9pVfVzJbOqAY2Ntl88O6c2nQ=
 github.com/ulikunitz/xz v0.5.8/go.mod h1:nbz6k7qbPmH4IRqmfOplQw/tblSgqTqBwxkY0oWt/14=
 github.com/vmihailenco/msgpack v3.3.3+incompatible/go.mod h1:fy3FlTQTDXWkZ7Bh6AcGMlsjHatGryHQYUTf1ShIgkk=
