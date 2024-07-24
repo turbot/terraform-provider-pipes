@@ -162,10 +162,10 @@ func resourceConnectionCreate(ctx context.Context, d *schema.ResourceData, meta 
 
 	// If connection is created inside an Organization the id will be of the
 	// format "OrganizationHandle/ConnectionHandle" otherwise "ConnectionHandle"
-	if strings.HasPrefix(resp.IdentityId, "o_") {
-		d.SetId(fmt.Sprintf("%s/%s", orgHandle, resp.Handle))
+	if strings.HasPrefix(*resp.IdentityId, "o_") {
+		d.SetId(fmt.Sprintf("%s/%s", orgHandle, *resp.Handle))
 	} else {
-		d.SetId(resp.Handle)
+		d.SetId(*resp.Handle)
 	}
 
 	return diags
@@ -313,10 +313,10 @@ func resourceConnectionUpdate(ctx context.Context, d *schema.ResourceData, meta 
 
 	// If connection exists inside an Organization the id will be of the
 	// format "OrganizationHandle/ConnectionHandle" otherwise "ConnectionHandle"
-	if strings.HasPrefix(resp.IdentityId, "o_") {
-		d.SetId(fmt.Sprintf("%s/%s", orgHandle, resp.Handle))
+	if strings.HasPrefix(*resp.IdentityId, "o_") {
+		d.SetId(fmt.Sprintf("%s/%s", orgHandle, *resp.Handle))
 	} else {
-		d.SetId(resp.Handle)
+		d.SetId(*resp.Handle)
 	}
 	if config != nil {
 		d.Set("config", configString)

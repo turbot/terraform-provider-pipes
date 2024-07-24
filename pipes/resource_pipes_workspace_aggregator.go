@@ -97,7 +97,7 @@ func resourceWorkspaceAggregatorCreate(ctx context.Context, d *schema.ResourceDa
 	var diags diag.Diagnostics
 	var err error
 	var r *http.Response
-	var resp pipes.WorkspaceAggregator
+	var resp pipes.Aggregator
 
 	workspaceHandle := d.Get("workspace").(string)
 	aggregatorHandle := d.Get("handle").(string)
@@ -113,7 +113,7 @@ func resourceWorkspaceAggregatorCreate(ctx context.Context, d *schema.ResourceDa
 	log.Printf("\n[DEBUG] Aggregator Connections: %v", connections)
 
 	// Create request
-	req := pipes.CreateWorkspaceAggregatorRequest{Handle: aggregatorHandle, Plugin: plugin, Connections: connections}
+	req := pipes.CreateAggregatorRequest{Handle: aggregatorHandle, Plugin: plugin, Connections: &connections}
 
 	userHandle := ""
 	isUser, orgHandle := isUserConnection(d)
@@ -188,7 +188,7 @@ func resourceWorkspaceAggregatorRead(ctx context.Context, d *schema.ResourceData
 		aggregatorHandle = idParts[1]
 	}
 
-	var resp pipes.WorkspaceAggregator
+	var resp pipes.Aggregator
 	var err error
 	var r *http.Response
 
@@ -246,7 +246,7 @@ func resourceWorkspaceAggregatorUpdate(ctx context.Context, d *schema.ResourceDa
 	var diags diag.Diagnostics
 	var err error
 	var r *http.Response
-	var resp pipes.WorkspaceAggregator
+	var resp pipes.Aggregator
 
 	workspaceHandle := d.Get("workspace").(string)
 	oldAggregatorHandle, newHandle := d.GetChange("handle")
@@ -264,7 +264,7 @@ func resourceWorkspaceAggregatorUpdate(ctx context.Context, d *schema.ResourceDa
 	log.Printf("\n[DEBUG] Aggregator Connections: %v", connections)
 
 	// Create request
-	req := pipes.UpdateWorkspaceAggregatorRequest{Handle: &newAggregatorHandle, Connections: &connections}
+	req := pipes.UpdateAggregatorRequest{Handle: &newAggregatorHandle, Connections: &connections}
 
 	userHandle := ""
 	isUser, orgHandle := isUserConnection(d)

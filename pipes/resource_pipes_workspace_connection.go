@@ -217,7 +217,7 @@ func resourceWorkspaceConnectionCreate(ctx context.Context, d *schema.ResourceDa
 
 	// If workspace connection association is created inside an Organization the id will be of the
 	// format "OrganizationHandle/WorkspaceHandle/ConnectionHandle" otherwise "WorkspaceHandle/ConnectionHandle"
-	id := fmt.Sprintf("%s/%s", workspaceHandle, resp.Connection.Handle)
+	id := fmt.Sprintf("%s/%s", workspaceHandle, *resp.Connection.Handle)
 	if strings.HasPrefix(resp.IdentityId, "o_") {
 		d.SetId(fmt.Sprintf("%s/%s", orgHandle, id))
 	} else {
