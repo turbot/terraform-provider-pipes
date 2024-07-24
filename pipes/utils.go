@@ -1,6 +1,7 @@
 package pipes
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -168,4 +169,37 @@ func convertToStringArray(data []interface{}) ([]string, error) {
 		}
 	}
 	return strArray, nil
+}
+
+// config is a json string
+// apply standard formatting to old and new data then compare
+func IntegrationJSONStringsEqual(k, old, new string, d *schema.ResourceData) bool {
+	if old == "" || new == "" {
+		return false
+	}
+
+	oldFormatted, _ := FormatIntegrationJSONString(old)
+	newFormatted, _ := FormatIntegrationJSONString(new)
+	return oldFormatted == newFormatted
+}
+
+// apply standard formatting to a json string by unmarshalling into a map then marshalling back to JSON
+func FormatIntegrationJSONString(body string) (string, map[string]interface{}) {
+	buffer := new(bytes.Buffer)
+	err := json.Compact(buffer, []byte(body))
+	if err != nil {
+		return body, nil
+	}
+	data := map[string]interface{}{}
+	if err := json.Unmarshal(buffer.Bytes(), &data); err != nil {
+		// ignore error and just return original body
+		return body, nil
+	}
+
+	body, err = mapToJSONString(data)
+	if err != nil {
+		// ignore error and just return original body
+		return body, data
+	}
+	return body, data
 }

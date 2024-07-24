@@ -32,6 +32,9 @@ func Provider() *schema.Provider {
 
 		ResourcesMap: map[string]*schema.Resource{
 			"pipes_connection":                    resourceConnection(),
+			"pipes_tenant_integration":            resourceTenantIntegration(),
+			"pipes_user_integration":              resourceUserIntegration(),
+			"pipes_organization_integration":      resourceOrganizationIntegration(),
 			"pipes_organization":                  resourceOrganization(),
 			"pipes_organization_member":           resourceOrganizationMember(),
 			"pipes_organization_workspace_member": resourceOrganizationWorkspaceMember(),
