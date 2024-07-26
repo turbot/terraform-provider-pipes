@@ -32,7 +32,7 @@ func resourceOrganizationIntegration() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"identity_id": {
+			"organization_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -95,8 +95,7 @@ func resourceOrganizationIntegration() *schema.Resource {
 			},
 			"organization": {
 				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Required: true,
 			},
 		},
 	}
@@ -146,7 +145,7 @@ func resourceOrganizationIntegrationCreate(ctx context.Context, d *schema.Resour
 
 	d.Set("integration_id", resp.Id)
 	d.Set("tenant_id", resp.TenantId)
-	d.Set("identity_id", resp.IdentityId)
+	d.Set("organization_id", resp.IdentityId)
 	d.Set("handle", resp.Handle)
 	d.Set("type", resp.Type)
 	d.Set("state", resp.State)
@@ -212,7 +211,7 @@ func resourceOrganizationIntegrationRead(ctx context.Context, d *schema.Resource
 
 	d.Set("integration_id", resp.Id)
 	d.Set("tenant_id", resp.TenantId)
-	d.Set("identity_id", resp.IdentityId)
+	d.Set("organization_id", resp.IdentityId)
 	d.Set("handle", resp.Handle)
 	d.Set("type", resp.Type)
 	d.Set("state", resp.State)
@@ -285,7 +284,7 @@ func resourceOrganizationIntegrationUpdate(ctx context.Context, d *schema.Resour
 
 	d.Set("integration_id", resp.Id)
 	d.Set("tenant_id", resp.TenantId)
-	d.Set("identity_id", resp.IdentityId)
+	d.Set("organization_id", resp.IdentityId)
 	d.Set("handle", resp.Handle)
 	d.Set("type", resp.Type)
 	d.Set("state", resp.State)

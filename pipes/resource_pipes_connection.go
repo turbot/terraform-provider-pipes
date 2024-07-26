@@ -110,7 +110,7 @@ func resourceConnectionCreate(ctx context.Context, d *schema.ResourceData, meta 
 
 	// save the formatted data: this is to ensure the acceptance tests behave in a consistent way regardless of the ordering of the json data
 	if value, ok := d.GetOk("config"); ok {
-		configString, config = formatConnectionJSONString(plugin, value.(string))
+		configString, config = formatConnectionJSONString(value.(string))
 	}
 
 	req := pipes.CreateConnectionRequest{
@@ -252,7 +252,7 @@ func resourceConnectionRead(ctx context.Context, d *schema.ResourceData, meta in
 func resourceConnectionUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*PipesClient)
 
-	var plugin, configString string
+	var configString string
 	var r *http.Response
 	var resp pipes.Connection
 	var err error
@@ -265,13 +265,10 @@ func resourceConnectionUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	if newConnectionHandle.(string) == "" {
 		return diag.Errorf("handle must be configured")
 	}
-	if value, ok := d.GetOk("plugin"); ok {
-		plugin = value.(string)
-	}
 
 	// save the formatted data: this is to ensure the acceptance tests behave in a consistent way regardless of the ordering of the json data
 	if value, ok := d.GetOk("config"); ok {
-		configString, config = formatConnectionJSONString(plugin, value.(string))
+		configString, config = formatConnectionJSONString(value.(string))
 	}
 
 	req := pipes.UpdateConnectionRequest{Handle: types.String(newConnectionHandle.(string))}
@@ -364,17 +361,13 @@ func connectionJSONStringsEqual(k, old, new string, d *schema.ResourceData) bool
 	if old == "" || new == "" {
 		return false
 	}
-	var plugin string
-	if value, ok := d.GetOk("plugin"); ok {
-		plugin = value.(string)
-	}
-	oldFormatted, _ := formatConnectionJSONString(plugin, old)
-	newFormatted, _ := formatConnectionJSONString(plugin, new)
+	oldFormatted, _ := formatConnectionJSONString(old)
+	newFormatted, _ := formatConnectionJSONString(new)
 	return oldFormatted == newFormatted
 }
 
 // apply standard formatting to a json string by unmarshalling into a map then marshalling back to JSON
-func formatConnectionJSONString(plugin, body string) (string, map[string]interface{}) {
+func formatConnectionJSONString(body string) (string, map[string]interface{}) {
 	buffer := new(bytes.Buffer)
 	err := json.Compact(buffer, []byte(body))
 	if err != nil {
