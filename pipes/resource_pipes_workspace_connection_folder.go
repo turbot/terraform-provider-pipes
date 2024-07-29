@@ -23,7 +23,6 @@ func resourceWorkspaceConnectionFolder() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"connection_folder_id": {
 				Type:     schema.TypeString,
-				Optional: true,
 				ForceNew: true,
 				Computed: true,
 			},
@@ -102,13 +101,14 @@ func resourceWorkspaceConnectionFolder() *schema.Resource {
 			"organization": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Computed: false,
+				Computed: true,
 			},
 			"workspace": {
 				Type:     schema.TypeString,
 				Required: true,
 				Computed: false,
 			},
+			""
 		},
 	}
 }
