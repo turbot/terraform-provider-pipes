@@ -147,7 +147,7 @@ func resourceOrganizationConnectionCreate(ctx context.Context, d *schema.Resourc
 	var config map[string]interface{}
 	var err error
 
-	// Get details about the organization where the integration would be created
+	// Get details about the organization where the connection would be created
 	if val, ok := d.GetOk("organization"); ok {
 		orgHandle = val.(string)
 	}
@@ -160,7 +160,7 @@ func resourceOrganizationConnectionCreate(ctx context.Context, d *schema.Resourc
 		plugin = value.(string)
 	}
 	if value, ok := d.GetOk("parent_id"); ok {
-		plugin = value.(string)
+		parentId = value.(string)
 	}
 
 	// save the formatted data: this is to ensure the acceptance tests behave in a consistent way regardless of the ordering of the json data

@@ -147,7 +147,7 @@ func resourceTenantConnectionCreate(ctx context.Context, d *schema.ResourceData,
 		plugin = value.(string)
 	}
 	if value, ok := d.GetOk("parent_id"); ok {
-		plugin = value.(string)
+		parentId = value.(string)
 	}
 
 	// save the formatted data: this is to ensure the acceptance tests behave in a consistent way regardless of the ordering of the json data
