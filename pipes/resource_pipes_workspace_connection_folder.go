@@ -154,9 +154,9 @@ func resourceWorkspaceConnectionFolderCreate(ctx context.Context, d *schema.Reso
 		resp, r, err = client.APIClient.UserWorkspaceConnectionFolders.Create(ctx, actorHandle, workspaceHandle).Request(req).Execute()
 	} else {
 		resp, r, err = client.APIClient.OrgWorkspaceConnectionFolders.Create(ctx, orgHandle, workspaceHandle).Request(req).Execute()
-		if err != nil {
-			return diag.Errorf("resourceWorkspaceConnectionFolderCreate. Create connection api error  %v", decodeResponse(r))
-		}
+	}
+	if err != nil {
+		return diag.Errorf("resourceWorkspaceConnectionFolderCreate. Create connection folder api error  %v", decodeResponse(r))
 	}
 
 	d.Set("connection_folder_id", resp.Id)
