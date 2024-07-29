@@ -283,8 +283,8 @@ func testCheckJSONString(name, key, value string) resource.TestCheckFunc {
 		}
 
 		if v, ok := rs.Primary.Attributes[key]; !ok {
-			configString, _ := formatConnectionJSONString("aws", v)
-			compareValue, _ := formatConnectionJSONString("aws", value)
+			configString, _ := formatConnectionJSONString(v)
+			compareValue, _ := formatConnectionJSONString(value)
 			if configString != compareValue {
 				if emptyCheck && !ok {
 					return nil
