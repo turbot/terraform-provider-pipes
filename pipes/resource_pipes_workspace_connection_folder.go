@@ -108,7 +108,6 @@ func resourceWorkspaceConnectionFolder() *schema.Resource {
 				Required: true,
 				Computed: false,
 			},
-			""
 		},
 	}
 }
