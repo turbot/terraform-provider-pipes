@@ -72,6 +72,7 @@ func resourceOrganizationConnectionFolder() *schema.Resource {
 			"trunk": {
 				Type:     schema.TypeList,
 				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeMap},
 			},
 			"created_at": {
 				Type:     schema.TypeString,
