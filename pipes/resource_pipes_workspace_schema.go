@@ -16,6 +16,7 @@ func resourceWorkspaceSchema() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceWorkspaceSchemaCreate,
 		ReadContext:   resourceWorkspaceSchemaRead,
+		UpdateContext: resourceWorkspaceSchemaRead,
 		DeleteContext: resourceWorkspaceSchemaDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
@@ -76,7 +77,7 @@ func resourceWorkspaceSchema() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
-			"workspace": {
+			"workspace_handle": {
 				Type:     schema.TypeString,
 				Required: true,
 				Computed: false,
@@ -110,7 +111,7 @@ func resourceWorkspaceSchemaCreate(ctx context.Context, d *schema.ResourceData, 
 	var err error
 
 	// Get details about the workspace where the connection folder would be created
-	if val, ok := d.GetOk("workspace"); ok {
+	if val, ok := d.GetOk("workspace_handle"); ok {
 		workspaceHandle = val.(string)
 	}
 	// When attaching a workspace schema, we can pass in a connection folder id, connection handle or aggregator handle
@@ -173,20 +174,20 @@ func resourceWorkspaceSchemaCreate(ctx context.Context, d *schema.ResourceData, 
 	}
 	d.Set("version_id", resp.VersionId)
 	d.Set("organization", orgHandle)
-	d.Set("workspace", workspaceHandle)
+	d.Set("workspace_handle", workspaceHandle)
 	// ID formats
-	// User workspace schema - "WorkspaceHandle/{schema_type}/SchemaHandle"
-	// Org workspace schema - "OrganizationHandle/WorkspaceHandle/{schema_type}/SchemaHandle"
+	// User workspace schema - "WorkspaceHandle/SchemaHandle"
+	// Org workspace schema - "OrganizationHandle/WorkspaceHandle/SchemaHandle"
 	var id string
 	if connectionFolderId != "" {
 		d.Set("connection_folder_id", connectionFolderId)
-		id = fmt.Sprintf("%s/connection-folder/%s", workspaceHandle, connectionFolderId)
+		id = fmt.Sprintf("%s/%s", workspaceHandle, connectionFolderId)
 	} else if connectionHandle != "" {
 		d.Set("connection_handle", connectionHandle)
-		id = fmt.Sprintf("%s/connection/%s", workspaceHandle, connectionHandle)
+		id = fmt.Sprintf("%s/%s", workspaceHandle, connectionHandle)
 	} else if aggregatorHandle != "" {
 		d.Set("aggregator_handle", aggregatorHandle)
-		id = fmt.Sprintf("%s/aggregator/%s", workspaceHandle, aggregatorHandle)
+		id = fmt.Sprintf("%s/%s", workspaceHandle, aggregatorHandle)
 	}
 	if !isUser {
 		d.SetId(fmt.Sprintf("%s/%s", orgHandle, id))
@@ -206,23 +207,21 @@ func resourceWorkspaceSchemaRead(ctx context.Context, d *schema.ResourceData, me
 	var isUser = false
 
 	// ID formats
-	// User workspace schema - "WorkspaceHandle/{schema_type}/SchemaHandle"
-	// Org workspace schema - "OrganizationHandle/WorkspaceHandle/{schema_type}/SchemaHandle"
+	// User workspace schema - "WorkspaceHandle/SchemaHandle"
+	// Org workspace schema - "OrganizationHandle/WorkspaceHandle/SchemaHandle"
 	idParts := strings.Split(d.Id(), "/")
-	if len(idParts) < 3 && len(idParts) > 4 {
-		return diag.Errorf("unexpected format of ID (%q), expected <org-handle>/<workspace-handle>/<schema-type>/<schema-handle>", d.Id())
+	if len(idParts) < 2 && len(idParts) > 3 {
+		return diag.Errorf("unexpected format of ID (%q), expected <org-handle>/<workspace-handle>/<schema-handle>", d.Id())
 	}
 
-	if len(idParts) == 4 {
+	if len(idParts) == 3 {
 		orgHandle = idParts[0]
 		workspaceHandle = idParts[1]
-		schemaType = idParts[2]
 		schemaHandle = idParts[2]
-	} else if len(idParts) == 3 {
+	} else if len(idParts) == 2 {
 		isUser = true
 		workspaceHandle = idParts[0]
-		schemaType = idParts[1]
-		schemaHandle = idParts[2]
+		schemaHandle = idParts[1]
 	}
 
 	var respSchema pipes.WorkspaceSchema
@@ -236,21 +235,12 @@ func resourceWorkspaceSchemaRead(ctx context.Context, d *schema.ResourceData, me
 		if err != nil {
 			return diag.Errorf("resourceConnectionRead. getUserHandler error  %v", decodeResponse(r))
 		}
-		if schemaType == "connection-folder" {
-			respAssociation, r, err = client.APIClient.UserWorkspaceConnectionAssociations.Get(ctx, actorHandle, workspaceHandle, schemaHandle).Execute()
-		} else {
-			respSchema, r, err = client.APIClient.UserWorkspaceSchemas.Get(ctx, actorHandle, workspaceHandle, schemaHandle).Execute()
-		}
-	} else {
-		if schemaType == "connection-folder" {
-			respAssociation, r, err = client.APIClient.OrgWorkspaceConnectionAssociations.Get(ctx, orgHandle, workspaceHandle, schemaHandle).Execute()
-		} else {
-			respSchema, r, err = client.APIClient.OrgWorkspaceSchemas.Get(ctx, orgHandle, workspaceHandle, schemaHandle).Execute()
-		}
-	}
 
-	if err != nil {
-		if r.StatusCode == 404 {
+		// Determine the type of schema for which details need to be get
+		// Check of the schema handle is a connection folder
+		connectionFolder, r, err := client.APIClient.UserWorkspaceConnectionFolders.Get(ctx, actorHandle, workspaceHandle, schemaHandle).Execute()
+		// If there's an error and the status code is not not found, return the error
+		if err != nil && r.StatusCode != 404 {
 			diags = append(diags, diag.Diagnostic{
 				Severity: diag.Warning,
 				Summary:  fmt.Sprintf("Schema (%s) not found", schemaHandle),
@@ -258,7 +248,59 @@ func resourceWorkspaceSchemaRead(ctx context.Context, d *schema.ResourceData, me
 			d.SetId("")
 			return diags
 		}
-		return diag.Errorf("resourceWorkspaceSchemaRead. Get workspace connection association error: %v", decodeResponse(r))
+		if connectionFolder.Id != "" {
+			schemaType = "connection-folder"
+		}
+
+		if schemaType == "connection-folder" {
+			respAssociation, r, err = client.APIClient.UserWorkspaceConnectionAssociations.Get(ctx, actorHandle, workspaceHandle, schemaHandle).Execute()
+		} else {
+			respSchema, r, err = client.APIClient.UserWorkspaceSchemas.Get(ctx, actorHandle, workspaceHandle, schemaHandle).Execute()
+		}
+		if err != nil {
+			if r.StatusCode == 404 {
+				diags = append(diags, diag.Diagnostic{
+					Severity: diag.Warning,
+					Summary:  fmt.Sprintf("Schema (%s) not found", schemaHandle),
+				})
+				d.SetId("")
+				return diags
+			}
+			return diag.Errorf("resourceWorkspaceSchemaRead. Get workspace connection association error: %v", decodeResponse(r))
+		}
+	} else {
+		// Determine the type of schema for which details need to be get
+		// Check of the schema handle is a connection folder
+		connectionFolder, r, err := client.APIClient.OrgWorkspaceConnectionFolders.Get(ctx, orgHandle, workspaceHandle, schemaHandle).Execute()
+		// If there's an error and the status code is not not found, return the error
+		if err != nil && r.StatusCode != 404 {
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Warning,
+				Summary:  fmt.Sprintf("Schema (%s) not found", schemaHandle),
+			})
+			d.SetId("")
+			return diags
+		}
+		if connectionFolder.Id != "" {
+			schemaType = "connection-folder"
+		}
+
+		if schemaType == "connection-folder" {
+			respAssociation, r, err = client.APIClient.OrgWorkspaceConnectionAssociations.Get(ctx, orgHandle, workspaceHandle, schemaHandle).Execute()
+		} else {
+			respSchema, r, err = client.APIClient.OrgWorkspaceSchemas.Get(ctx, orgHandle, workspaceHandle, schemaHandle).Execute()
+		}
+		if err != nil {
+			if r.StatusCode == 404 {
+				diags = append(diags, diag.Diagnostic{
+					Severity: diag.Warning,
+					Summary:  fmt.Sprintf("Schema (%s) not found", schemaHandle),
+				})
+				d.SetId("")
+				return diags
+			}
+			return diag.Errorf("resourceWorkspaceSchemaRead. Get workspace connection association error: %v", decodeResponse(r))
+		}
 	}
 
 	if schemaType == "connection-folder" {
@@ -276,9 +318,9 @@ func resourceWorkspaceSchemaRead(ctx context.Context, d *schema.ResourceData, me
 		}
 		d.Set("version_id", respAssociation.VersionId)
 		d.Set("organization", orgHandle)
-		d.Set("workspace", workspaceHandle)
+		d.Set("workspace_handle", workspaceHandle)
 		d.Set("connection_folder_id", schemaHandle)
-		id := fmt.Sprintf("%s/connection-folder/%s", workspaceHandle, schemaHandle)
+		id := fmt.Sprintf("%s/%s", workspaceHandle, schemaHandle)
 		if !isUser {
 			d.SetId(fmt.Sprintf("%s/%s", orgHandle, id))
 		} else {
@@ -302,14 +344,14 @@ func resourceWorkspaceSchemaRead(ctx context.Context, d *schema.ResourceData, me
 		}
 		d.Set("version_id", respSchema.VersionId)
 		d.Set("organization", orgHandle)
-		d.Set("workspace", workspaceHandle)
+		d.Set("workspace_handle", workspaceHandle)
 		var id string
-		if schemaType == "connection" {
+		if strings.HasPrefix(*respSchema.Type, "connection") {
 			d.Set("connection_handle", schemaHandle)
-			id = fmt.Sprintf("%s/connection/%s", workspaceHandle, schemaHandle)
-		} else if schemaType == "aggregator" {
+			id = fmt.Sprintf("%s/%s", workspaceHandle, schemaHandle)
+		} else {
 			d.Set("aggregator_handle", schemaHandle)
-			id = fmt.Sprintf("%s/aggregator/%s", workspaceHandle, schemaHandle)
+			id = fmt.Sprintf("%s/%s", workspaceHandle, schemaHandle)
 		}
 		if !isUser {
 			d.SetId(fmt.Sprintf("%s/%s", orgHandle, id))
@@ -330,21 +372,21 @@ func resourceWorkspaceSchemaDelete(ctx context.Context, d *schema.ResourceData, 
 	var isUser = false
 
 	// ID formats
-	// User workspace schema - "WorkspaceHandle/{schema_type}/SchemaHandle"
-	// Org workspace schema - "OrganizationHandle/WorkspaceHandle/{schema_type}/SchemaHandle"
+	// User workspace schema - "WorkspaceHandle/SchemaHandle"
+	// Org workspace schema - "OrganizationHandle/WorkspaceHandle/SchemaHandle"
 	idParts := strings.Split(d.Id(), "/")
-	if len(idParts) < 3 && len(idParts) > 4 {
-		return diag.Errorf("unexpected format of ID (%q), expected <org-handle>/<workspace-handle>/<schema-type>/<schema-handle>", d.Id())
+	if len(idParts) < 2 && len(idParts) > 3 {
+		return diag.Errorf("unexpected format of ID (%q), expected <org-handle>/<workspace-handle>/<schema-handle>", d.Id())
 	}
 
-	if len(idParts) == 4 {
+	if len(idParts) == 3 {
 		orgHandle = idParts[0]
 		workspaceHandle = idParts[1]
 		schemaHandle = idParts[2]
-	} else if len(idParts) == 3 {
+	} else if len(idParts) == 2 {
 		isUser = true
 		workspaceHandle = idParts[0]
-		schemaHandle = idParts[2]
+		schemaHandle = idParts[1]
 	}
 
 	log.Printf("\n[DEBUG] Detaching Workspace schema: %s", fmt.Sprintf("%s/%s", workspaceHandle, schemaHandle))
@@ -360,7 +402,7 @@ func resourceWorkspaceSchemaDelete(ctx context.Context, d *schema.ResourceData, 
 		}
 		_, r, err = client.APIClient.UserWorkspaceSchemas.Detach(ctx, actorHandle, workspaceHandle, schemaHandle).Execute()
 	} else {
-		_, r, err = client.APIClient.OrgWorkspaceConnectionAssociations.Delete(ctx, orgHandle, workspaceHandle, schemaHandle).Execute()
+		_, r, err = client.APIClient.OrgWorkspaceSchemas.Detach(ctx, orgHandle, workspaceHandle, schemaHandle).Execute()
 	}
 
 	if err != nil {
