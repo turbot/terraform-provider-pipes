@@ -40,6 +40,14 @@ func getUserHandler(ctx context.Context, client *PipesClient) (string, *http.Res
 	return resp.Handle, r, nil
 }
 
+func getActorDetails(ctx context.Context, client *PipesClient) (*pipes.User, *http.Response, error) {
+	resp, r, err := client.APIClient.Actors.Get(ctx).Execute()
+	if err != nil {
+		return nil, r, err
+	}
+	return &resp, r, nil
+}
+
 func getWorkspaceDetails(ctx context.Context, client *PipesClient, d *schema.ResourceData) (*pipes.Workspace, *http.Response, error) {
 	var resp pipes.Workspace
 	var r *http.Response
