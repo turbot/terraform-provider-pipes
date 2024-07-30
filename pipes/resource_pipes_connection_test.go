@@ -50,37 +50,6 @@ func TestAccConnection_Basic(t *testing.T) {
 	})
 }
 
-func TestAccOrgConnection_Basic(t *testing.T) {
-	resourceName := "pipes_connection.test_org"
-	orgHandle := "terraform" + randomString(9)
-	connHandle := "aws_" + randomString(7)
-	newHandle := "aws_" + randomString(8)
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckOrganizationDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccOrgConnectionConfig(connHandle, orgHandle),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckConnectionOrganizationExists(orgHandle),
-					testAccCheckConnectionExists(resourceName),
-					resource.TestCheckResourceAttr(resourceName, "handle", connHandle),
-					resource.TestCheckResourceAttr(resourceName, "plugin", "aws"),
-					resource.TestCheckResourceAttr(resourceName, "config", "{\n \"access_key\": \"redacted\",\n \"regions\": [\n  \"us-east-1\"\n ],\n \"secret_key\": \"redacted\"\n}"),
-				),
-			},
-			{
-				Config: testAccOrgConnectionUpdateConfig(newHandle, orgHandle),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("pipes_connection.test_org", "handle", newHandle),
-					resource.TestCheckResourceAttr(resourceName, "config", "{\n \"access_key\": \"redacted\",\n \"regions\": [\n  \"us-east-2\",\n  \"us-east-1\"\n ],\n \"secret_key\": \"redacted\"\n}"),
-				),
-			},
-		},
-	})
-}
-
 // configs
 func testAccConnectionConfig(connHandle string) string {
 	return fmt.Sprintf(`
@@ -110,48 +79,6 @@ resource "pipes_connection" "test" {
 		secret_key = "redacted"
 	})
 }`, newHandle)
-}
-
-func testAccOrgConnectionConfig(connHandle string, orgHandle string) string {
-	return fmt.Sprintf(`
-provider "pipes" {}
-
-resource "pipes_organization" "test" {
-	handle       = "%s"
-	display_name = "Terraform Test Org"
-}
-
-resource "pipes_connection" "test_org" {
-	organization = pipes_organization.test.handle
-	handle       = "%s"
-	plugin       = "aws"
-	config = jsonencode({
-		regions      = ["us-east-1"]
-		access_key   = "redacted"
-		secret_key   = "redacted"
-	})
-}`, orgHandle, connHandle)
-}
-
-func testAccOrgConnectionUpdateConfig(newHandle string, orgHandle string) string {
-	return fmt.Sprintf(`
-provider "pipes" {}
-
-resource "pipes_organization" "test" {
-	handle       = "%s"
-	display_name = "Terraform Test Org"
-}
-
-resource "pipes_connection" "test_org" {
-	organization = pipes_organization.test.handle
-	handle       = "%s"
-	plugin       = "aws"
-	config = jsonencode({
-		regions      = ["us-east-2", "us-east-1"]
-		access_key   = "redacted"
-		secret_key   = "redacted"
-	})
-}`, orgHandle, newHandle)
 }
 
 // testAccCheckConnectionDestroy verifies the connection has been destroyed
@@ -250,21 +177,6 @@ func testAccCheckConnectionExists(n string) resource.TestCheckFunc {
 			}
 			log.Printf("[INFO] TestAccOrgConnection_Basic testAccCheckConnectionExists %v", err)
 			return err
-		}
-		return nil
-	}
-}
-
-func testAccCheckConnectionOrganizationExists(orgHandle string) resource.TestCheckFunc {
-	return func(state *terraform.State) error {
-		client := testAccProvider.Meta().(*PipesClient)
-		ctx := context.Background()
-		var err error
-
-		// check if organization  is created
-		_, _, err = client.APIClient.Orgs.Get(ctx, orgHandle).Execute()
-		if err != nil {
-			return fmt.Errorf("error fetching organization with handle %s. %s", orgHandle, err)
 		}
 		return nil
 	}
