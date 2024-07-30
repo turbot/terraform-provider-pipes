@@ -151,13 +151,13 @@ func resourceOrganizationConnectionPermissionCreate(ctx context.Context, d *sche
 	}
 	d.Set("version_id", resp.VersionId)
 	if resp.Tenant != nil {
-		d.Set("tenant_handle", resp.Tenant.TenantHandle)
+		d.Set("tenant_handle", resp.Tenant.Handle)
 	}
 	if resp.Identity != nil {
-		d.Set("identity_handle", resp.Identity.IdentityHandle)
+		d.Set("identity_handle", resp.Identity.Handle)
 	}
 	if resp.Workspace != nil {
-		d.Set("workspace_handle", resp.Workspace.WorkspaceHandle)
+		d.Set("workspace_handle", resp.Workspace.Handle)
 	}
 	// ID formats
 	// Tenant Connection - "OrganizationHandle/ConnectionHandle/PermissionId"
@@ -212,13 +212,13 @@ func resourceOrganizationConnectionPermissionRead(ctx context.Context, d *schema
 	}
 	d.Set("version_id", resp.VersionId)
 	if resp.Tenant != nil {
-		d.Set("tenant_handle", resp.Tenant.TenantHandle)
+		d.Set("tenant_handle", resp.Tenant.Handle)
 	}
 	if resp.Identity != nil {
-		d.Set("identity_handle", resp.Identity.IdentityHandle)
+		d.Set("identity_handle", resp.Identity.Handle)
 	}
 	if resp.Workspace != nil {
-		d.Set("workspace_handle", resp.Workspace.WorkspaceHandle)
+		d.Set("workspace_handle", resp.Workspace.Handle)
 	}
 	// ID formats
 	// Tenant Connection - "OrganizationHandle/ConnectionHandle/PermissionId"
@@ -294,13 +294,13 @@ func resourceOrganizationConnectionPermissionUpdate(ctx context.Context, d *sche
 	}
 	d.Set("version_id", resp.VersionId)
 	if resp.Tenant != nil {
-		d.Set("tenant_handle", resp.Tenant.TenantHandle)
+		d.Set("tenant_handle", resp.Tenant.Handle)
 	}
 	if resp.Identity != nil {
-		d.Set("identity_handle", resp.Identity.IdentityHandle)
+		d.Set("identity_handle", resp.Identity.Handle)
 	}
 	if resp.Workspace != nil {
-		d.Set("workspace_handle", resp.Workspace.WorkspaceHandle)
+		d.Set("workspace_handle", resp.Workspace.Handle)
 	}
 	// ID formats
 	// Tenant Connection - "OrganizationHandle/ConnectionHandle/PermissionId"
