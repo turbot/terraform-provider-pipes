@@ -77,7 +77,7 @@ func resourceWorkspaceSchema() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
-			"workspace_handle": {
+			"workspace": {
 				Type:     schema.TypeString,
 				Required: true,
 				Computed: false,
@@ -111,7 +111,7 @@ func resourceWorkspaceSchemaCreate(ctx context.Context, d *schema.ResourceData, 
 	var err error
 
 	// Get details about the workspace where the connection folder would be created
-	if val, ok := d.GetOk("workspace_handle"); ok {
+	if val, ok := d.GetOk("workspace"); ok {
 		workspaceHandle = val.(string)
 	}
 	// When attaching a workspace schema, we can pass in a connection folder id, connection handle or aggregator handle
@@ -174,7 +174,7 @@ func resourceWorkspaceSchemaCreate(ctx context.Context, d *schema.ResourceData, 
 	}
 	d.Set("version_id", resp.VersionId)
 	d.Set("organization", orgHandle)
-	d.Set("workspace_handle", workspaceHandle)
+	d.Set("workspace", workspaceHandle)
 	// ID formats
 	// User workspace schema - "WorkspaceHandle/SchemaHandle"
 	// Org workspace schema - "OrganizationHandle/WorkspaceHandle/SchemaHandle"
@@ -318,7 +318,7 @@ func resourceWorkspaceSchemaRead(ctx context.Context, d *schema.ResourceData, me
 		}
 		d.Set("version_id", respAssociation.VersionId)
 		d.Set("organization", orgHandle)
-		d.Set("workspace_handle", workspaceHandle)
+		d.Set("workspace", workspaceHandle)
 		d.Set("connection_folder_id", schemaHandle)
 		id := fmt.Sprintf("%s/%s", workspaceHandle, schemaHandle)
 		if !isUser {
@@ -344,7 +344,7 @@ func resourceWorkspaceSchemaRead(ctx context.Context, d *schema.ResourceData, me
 		}
 		d.Set("version_id", respSchema.VersionId)
 		d.Set("organization", orgHandle)
-		d.Set("workspace_handle", workspaceHandle)
+		d.Set("workspace", workspaceHandle)
 		var id string
 		if strings.HasPrefix(*respSchema.Type, "connection") {
 			d.Set("connection_handle", schemaHandle)
