@@ -24,7 +24,7 @@ func TestAccOrgConnection_Basic(t *testing.T) {
 			{
 				Config: testAccOrgConnectionConfig(connHandle, orgHandle),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckConnectionOrganizationExists(orgHandle),
+					testAccCheckOrganizationExists(orgHandle),
 					testAccCheckOrgConnectionExists(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "handle", connHandle),
 					resource.TestCheckResourceAttr(resourceName, "plugin", "aws"),
@@ -78,21 +78,6 @@ resource "pipes_organization_connection" "test_org" {
 		secret_key   = "redacted"
 	})
 }`, orgHandle, newHandle)
-}
-
-func testAccCheckConnectionOrganizationExists(orgHandle string) resource.TestCheckFunc {
-	return func(state *terraform.State) error {
-		client := testAccProvider.Meta().(*PipesClient)
-		ctx := context.Background()
-		var err error
-
-		// check if organization  is created
-		_, _, err = client.APIClient.Orgs.Get(ctx, orgHandle).Execute()
-		if err != nil {
-			return fmt.Errorf("error fetching organization with handle %s. %s", orgHandle, err)
-		}
-		return nil
-	}
 }
 
 func testAccCheckOrgConnectionExists(n string) resource.TestCheckFunc {

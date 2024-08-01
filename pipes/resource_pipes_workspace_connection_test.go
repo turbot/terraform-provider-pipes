@@ -50,7 +50,7 @@ func TestAccOrgWorkspaceConnection_Basic(t *testing.T) {
 			{
 				Config: testAccOrgWorkspaceConnectionConfig(orgName, workspaceHandle, connHandle),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckConnectionOrganizationExists(orgName),
+					testAccCheckOrganizationExists(orgName),
 					testAccCheckTestWorkspaceExists(workspaceHandle),
 					testAccCheckWorkspaceConnectionExists(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "workspace", workspaceHandle),
