@@ -55,6 +55,7 @@ func resourceTenantIntegration() *schema.Resource {
 			"config": {
 				Type:             schema.TypeString,
 				Optional:         true,
+				Sensitive:        true,
 				ValidateFunc:     validation.StringIsJSON,
 				DiffSuppressFunc: IntegrationJSONStringsEqual,
 			},
@@ -163,7 +164,8 @@ func resourceTenantIntegrationRead(ctx context.Context, d *schema.ResourceData, 
 	client := meta.(*PipesClient)
 
 	// Warning or errors can be collected in a slice type
-	var integrationId, tenantId string
+	var integrationId, tenantId, configString string
+	var config map[string]interface{}
 	var diags diag.Diagnostics
 	var err error
 	var r *http.Response
@@ -190,6 +192,11 @@ func resourceTenantIntegrationRead(ctx context.Context, d *schema.ResourceData, 
 		return diag.Errorf("resourceTenantIntegrationRead. Integration information not present.")
 	}
 
+	// save the formatted data: this is to ensure the acceptance tests behave in a consistent way regardless of the ordering of the json data
+	if value, ok := d.GetOk("config"); ok {
+		configString, config = formatConnectionJSONString(value.(string))
+	}
+
 	resp, r, err = client.APIClient.TenantIntegrations.Get(ctx, integrationId).Execute()
 	if err != nil {
 		if r.StatusCode == 404 {
@@ -204,10 +211,11 @@ func resourceTenantIntegrationRead(ctx context.Context, d *schema.ResourceData, 
 	}
 
 	// Convert config to string
-	var configString string
-	configString, err = mapToJSONString(resp.GetConfig())
-	if err != nil {
-		return diag.Errorf("resourceTenantIntegrationRead. Error converting config to string: %v", err)
+	if config == nil {
+		configString, err = mapToJSONString(resp.GetConfig())
+		if err != nil {
+			return diag.Errorf("resourceTenantIntegrationRead. Error converting config to string: %v", err)
+		}
 	}
 
 	d.Set("integration_id", resp.Id)
