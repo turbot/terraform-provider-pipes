@@ -53,8 +53,6 @@ func TestAccConnection_Basic(t *testing.T) {
 // configs
 func testAccConnectionConfig(connHandle string) string {
 	return fmt.Sprintf(`
-provider "pipes" {}
-
 resource "pipes_connection" "test" {
 	handle     = "%s"
 	plugin     = "aws"
@@ -68,8 +66,6 @@ resource "pipes_connection" "test" {
 
 func testAccConnectionHandleUpdateConfig(newHandle string) string {
 	return fmt.Sprintf(`
-provider "pipes" {}
-
 resource "pipes_connection" "test" {
 	handle     = "%s"
 	plugin     = "aws"

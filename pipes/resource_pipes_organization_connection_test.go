@@ -12,7 +12,7 @@ import (
 )
 
 func TestAccOrgConnection_Basic(t *testing.T) {
-	resourceName := "pipes_connection.test_org"
+	resourceName := "pipes_organization_connection.test_org"
 	orgHandle := "terraform" + randomString(9)
 	connHandle := "aws_" + randomString(7)
 	newHandle := "aws_" + randomString(8)
@@ -34,7 +34,7 @@ func TestAccOrgConnection_Basic(t *testing.T) {
 			{
 				Config: testAccOrgConnectionUpdateConfig(newHandle, orgHandle),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("pipes_connection.test_org", "handle", newHandle),
+					resource.TestCheckResourceAttr("pipes_organization_connection.test_org", "handle", newHandle),
 					resource.TestCheckResourceAttr(resourceName, "config", "{\n \"access_key\": \"redacted\",\n \"regions\": [\n  \"us-east-2\",\n  \"us-east-1\"\n ],\n \"secret_key\": \"redacted\"\n}"),
 				),
 			},
@@ -44,14 +44,12 @@ func TestAccOrgConnection_Basic(t *testing.T) {
 
 func testAccOrgConnectionConfig(connHandle string, orgHandle string) string {
 	return fmt.Sprintf(`
-provider "pipes" {}
-
 resource "pipes_organization" "test" {
 	handle       = "%s"
 	display_name = "Terraform Test Org"
 }
 
-resource "pipes_connection" "test_org" {
+resource "pipes_organization_connection" "test_org" {
 	organization = pipes_organization.test.handle
 	handle       = "%s"
 	plugin       = "aws"
@@ -65,8 +63,6 @@ resource "pipes_connection" "test_org" {
 
 func testAccOrgConnectionUpdateConfig(newHandle string, orgHandle string) string {
 	return fmt.Sprintf(`
-provider "pipes" {}
-
 resource "pipes_organization" "test" {
 	handle       = "%s"
 	display_name = "Terraform Test Org"

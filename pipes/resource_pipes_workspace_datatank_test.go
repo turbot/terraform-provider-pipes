@@ -60,8 +60,6 @@ func TestAccUserWorkspaceDatatank_Basic(t *testing.T) {
 
 func testAccUserWorkspaceDatatankConfig(workspaceHandle, datatankHandle, description string) string {
 	return fmt.Sprintf(`
-	provider "pipes" {}
-
 	resource "pipes_workspace" "test_workspace" {
 		handle = "%s"
 	}
@@ -102,8 +100,6 @@ func testAccUserWorkspaceDatatankConfig(workspaceHandle, datatankHandle, descrip
 
 func testAccUserWorkspaceDatatankUpdateConfig(workspaceHandle, datatankHandle, description string) string {
 	return fmt.Sprintf(`
-	provider "pipes" {}
-
 	resource "pipes_workspace" "test_workspace" {
 		handle = "%s"
 	}

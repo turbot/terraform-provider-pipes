@@ -25,8 +25,8 @@ func TestAccWorkspaceConnection_Basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckTestWorkspaceExists(workspaceHandle),
 					testAccCheckWorkspaceConnectionExists(resourceName),
-					resource.TestCheckResourceAttr(resourceName, "workspace_handle", workspaceHandle),
-					resource.TestCheckResourceAttr(resourceName, "connection_handle", connHandle),
+					resource.TestCheckResourceAttr(resourceName, "workspace", workspaceHandle),
+					resource.TestCheckResourceAttr(resourceName, "handle", connHandle),
 				),
 			},
 			{
@@ -53,8 +53,8 @@ func TestAccOrgWorkspaceConnection_Basic(t *testing.T) {
 					testAccCheckConnectionOrganizationExists(orgName),
 					testAccCheckTestWorkspaceExists(workspaceHandle),
 					testAccCheckWorkspaceConnectionExists(resourceName),
-					resource.TestCheckResourceAttr(resourceName, "workspace_handle", workspaceHandle),
-					resource.TestCheckResourceAttr(resourceName, "connection_handle", connHandle),
+					resource.TestCheckResourceAttr(resourceName, "workspace", workspaceHandle),
+					resource.TestCheckResourceAttr(resourceName, "handle", connHandle),
 				),
 			},
 		},
@@ -64,8 +64,6 @@ func TestAccOrgWorkspaceConnection_Basic(t *testing.T) {
 // User Workspace Connection association config
 func testAccWorkspaceConnectionConfig(workspace string, conn string) string {
 	return fmt.Sprintf(`
-provider "pipes" {}
-
 resource "pipes_workspace" "test_conn" {
   handle = "%s"
 }
@@ -86,8 +84,6 @@ resource "pipes_workspace_connection" "test_conn" {
 // Organization Workspace Connection association config
 func testAccOrgWorkspaceConnectionConfig(org string, workspace string, conn string) string {
 	return fmt.Sprintf(`
-provider "pipes" {}
-
 resource "pipes_organization" "test_org" {
 	handle       = "%s"
 	display_name = "Terraform Test Org"

@@ -102,10 +102,10 @@ func testAccCheckOrganizationDestroy(s *terraform.State) error {
 				return fmt.Errorf("organization still exists")
 			}
 
-			// If a organization is deleted, all the members will lost access to that organization
-			// If anyone try to get that deleted resource, it will always return `403 Forbidden` error
-			if r.StatusCode != 403 {
-				return fmt.Errorf("expected 'forbidden' error, got %s", err)
+			// If an organization is deleted, it will return a not found error for subsequent requests
+			// for it. If the error is not a 404, then it is unexpected.
+			if r.StatusCode != 404 {
+				return fmt.Errorf("expected 'not found' error, got %s", err)
 			}
 		}
 	}

@@ -85,8 +85,6 @@ func TestAccUserWorkspaceDatatankTable_Basic(t *testing.T) {
 
 func testAccUserWorkspaceDatatankTableConfig(workspaceHandle, datatankHandle, name, tableType, partPer, sourceSchema, sourceTable, frequency string) string {
 	return fmt.Sprintf(`
-	provider "pipes" {}
-
 	resource "pipes_workspace" "test_workspace" {
 		handle = "%s"
 	}
@@ -139,8 +137,6 @@ func testAccUserWorkspaceDatatankTableConfig(workspaceHandle, datatankHandle, na
 
 func testAccUserWorkspaceDatatankTableUpdateConfig(workspaceHandle, datatankHandle, name, tableType, partPer, sourceSchema, sourceTable, frequency string) string {
 	return fmt.Sprintf(`
-	provider "pipes" {}
-
 	resource "pipes_workspace" "test_workspace" {
 		handle = "%s"
 	}

@@ -114,7 +114,7 @@ func TestAccUserWorkspacePipeline_Basic(t *testing.T) {
 
 func testAccUserWorkspacePipelineConfig(workspaceHandle, title, pipeline, frequency, args, tags, mod string) string {
 	return fmt.Sprintf(`
-	provider "pipes" {}
+	
 
 	resource "pipes_workspace" "test_workspace" {
 		handle = "%s"
@@ -139,8 +139,6 @@ func testAccUserWorkspacePipelineConfig(workspaceHandle, title, pipeline, freque
 
 func testAccUserWorkspacePipelineUpdateConfig(workspaceHandle, title, pipeline, frequency, args, tags, mod string) string {
 	return fmt.Sprintf(`
-	provider "pipes" {}
-
 	resource "pipes_workspace" "test_workspace" {
 		handle = "%s"
 	}
@@ -164,8 +162,6 @@ func testAccUserWorkspacePipelineUpdateConfig(workspaceHandle, title, pipeline, 
 
 func testAccUserWorkspacePipelineProcessConfig(workspaceHandle, title, pipeline, frequency, args, tags, mod string) string {
 	return fmt.Sprintf(`
-	provider "pipes" {}
-
 	resource "pipes_workspace" "test_workspace" {
 		handle = "%s"
 	}

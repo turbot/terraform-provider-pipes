@@ -55,8 +55,6 @@ func TestAccUserWorkspaceAggregator_Basic(t *testing.T) {
 
 func testAccUserWorkspaceAggregatorConfig(workspaceHandle, aggregatorHandle, plugin, connections string) string {
 	return fmt.Sprintf(`
-	provider "pipes" {}
-
 	resource "pipes_workspace" "test_workspace" {
 		handle = "%s"
 	}
@@ -71,8 +69,6 @@ func testAccUserWorkspaceAggregatorConfig(workspaceHandle, aggregatorHandle, plu
 
 func testAccUserWorkspaceAggregatorUpdateConfig(workspaceHandle, aggregatorHandle, plugin, connections string) string {
 	return fmt.Sprintf(`
-	provider "pipes" {}
-
 	resource "pipes_workspace" "test_workspace" {
 		handle = "%s"
 	}

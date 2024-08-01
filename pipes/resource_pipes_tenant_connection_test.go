@@ -40,7 +40,7 @@ func TestAccTenantConnection_Basic(t *testing.T) {
 			{
 				Config: testAccTenantConnectionHandleUpdateConfig(newHandle),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("pipes_connection.test", "handle", newHandle),
+					resource.TestCheckResourceAttr("pipes_tenant_connection.test", "handle", newHandle),
 					resource.TestCheckResourceAttr(resourceName, "config", "{\n \"access_key\": \"redacted\",\n \"regions\": [\n  \"us-east-2\",\n  \"us-east-1\"\n ],\n \"secret_key\": \"redacted\"\n}"),
 					testCheckJSONString(resourceName, "config", `{"access_key":"redacted","regions":[""us-east-2","us-east-1"],"secret_key":"redacted"}`),
 				),
@@ -52,8 +52,6 @@ func TestAccTenantConnection_Basic(t *testing.T) {
 // configs
 func testAccTenantConnectionConfig(connHandle string) string {
 	return fmt.Sprintf(`
-provider "pipes" {}
-
 resource "pipes_tenant_connection" "test" {
 	handle     = "%s"
 	plugin     = "aws"
@@ -67,8 +65,6 @@ resource "pipes_tenant_connection" "test" {
 
 func testAccTenantConnectionHandleUpdateConfig(newHandle string) string {
 	return fmt.Sprintf(`
-provider "pipes" {}
-
 resource "pipes_tenant_connection" "test" {
 	handle     = "%s"
 	plugin     = "aws"
@@ -133,10 +129,6 @@ func testAccCheckTenantConnectionExists(n string) resource.TestCheckFunc {
 		var err error
 
 		_, r, err = client.APIClient.TenantConnections.Get(context.Background(), connectionHandle).Execute()
-		if err != nil {
-			return fmt.Errorf("testAccCheckTenantConnectionExists.\n Get tenant connection error: %v", decodeResponse(r))
-		}
-
 		// If the error is equivalent to 404 not found, the connection is destroyed.
 		// Otherwise return the error
 		if err != nil {

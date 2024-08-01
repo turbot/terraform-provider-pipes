@@ -44,8 +44,6 @@ func TestAccOrganizationWorkspaceMember_Basic(t *testing.T) {
 // configs
 func testAccOrganizationWorkspaceMemberConfig(orgHandle, workspaceHandle string) string {
 	return fmt.Sprintf(`
-provider "pipes" {}
-
 resource "pipes_organization" "test" {
 	handle = "%s"
 }
@@ -73,8 +71,6 @@ resource "pipes_organization_workspace_member" "test" {
 
 func testAccOrganizationWorkspaceMemberUpdateConfig(orgHandle, workspaceHandle string) string {
 	return fmt.Sprintf(`
-provider "pipes" {}
-
 resource "pipes_organization" "test" {
 	handle = "%s"
 }
