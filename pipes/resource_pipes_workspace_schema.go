@@ -80,24 +80,28 @@ func resourceWorkspaceSchema() *schema.Resource {
 			"workspace": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 				Computed: false,
 			},
 			"connection_folder_id": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Computed:     false,
+				ForceNew:     true,
 				ExactlyOneOf: []string{"connection_folder_id", "connection_handle", "aggregator_handle"},
 			},
 			"connection_handle": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Computed:     false,
+				ForceNew:     true,
 				ExactlyOneOf: []string{"connection_folder_id", "connection_handle", "aggregator_handle"},
 			},
 			"aggregator_handle": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Computed:     false,
+				ForceNew:     true,
 				ExactlyOneOf: []string{"connection_folder_id", "connection_handle", "aggregator_handle"},
 			},
 		},
@@ -153,7 +157,7 @@ func resourceWorkspaceSchemaCreate(ctx context.Context, d *schema.ResourceData, 
 	}
 	// Error check
 	if err != nil {
-		return diag.Errorf("error creating workspace connection association: %v", decodeResponse(r))
+		return diag.Errorf("error attaching schema to workspace: %v", decodeResponse(r))
 	}
 
 	// Set property values
@@ -266,7 +270,7 @@ func resourceWorkspaceSchemaRead(ctx context.Context, d *schema.ResourceData, me
 				d.SetId("")
 				return diags
 			}
-			return diag.Errorf("resourceWorkspaceSchemaRead. Get workspace connection association error: %v", decodeResponse(r))
+			return diag.Errorf("resourceWorkspaceSchemaRead. Get workspace schema error: %v", decodeResponse(r))
 		}
 	} else {
 		// Determine the type of schema for which details need to be get
@@ -299,7 +303,7 @@ func resourceWorkspaceSchemaRead(ctx context.Context, d *schema.ResourceData, me
 				d.SetId("")
 				return diags
 			}
-			return diag.Errorf("resourceWorkspaceSchemaRead. Get workspace connection association error: %v", decodeResponse(r))
+			return diag.Errorf("resourceWorkspaceSchemaRead. Get workspace schema error: %v", decodeResponse(r))
 		}
 	}
 
