@@ -94,6 +94,30 @@ func testAccCheckUserWorkspaceExists(resource string) resource.TestCheckFunc {
 	}
 }
 
+func testAccCheckOrgWorkspaceExists(resource string) resource.TestCheckFunc {
+	ctx := context.Background()
+	return func(state *terraform.State) error {
+		rs, ok := state.RootModule().Resources[resource]
+		if !ok {
+			return fmt.Errorf("not found: %s", resource)
+		}
+		if rs.Primary.ID == "" {
+			return fmt.Errorf("no Record ID is set")
+		}
+		client := testAccProvider.Meta().(*PipesClient)
+
+		// Get org handle
+		orgHandle := rs.Primary.Attributes["organization"]
+		workspaceHandle := rs.Primary.Attributes["handle"]
+
+		_, _, err := client.APIClient.OrgWorkspaces.Get(ctx, orgHandle, workspaceHandle).Execute()
+		if err != nil {
+			return fmt.Errorf("error fetching item with resource %s. %s", resource, err)
+		}
+		return nil
+	}
+}
+
 func testAccCheckUserWorkspaceDestroy(s *terraform.State) error {
 	ctx := context.Background()
 	client := testAccProvider.Meta().(*PipesClient)
