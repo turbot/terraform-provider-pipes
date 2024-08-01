@@ -235,7 +235,8 @@ func resourceOrganizationConnectionRead(ctx context.Context, d *schema.ResourceD
 	client := meta.(*PipesClient)
 
 	// Warning or errors can be collected in a slice type
-	var connectionHandle, orgId string
+	var connectionHandle, orgId, configString string
+	var config map[string]interface{}
 	var diags diag.Diagnostics
 
 	// Its an org level connection so the id would be of format "OrganizationHandle/ConnectionHandle"
@@ -252,6 +253,11 @@ func resourceOrganizationConnectionRead(ctx context.Context, d *schema.ResourceD
 		return diag.Errorf("resourceOrganizationConnectionRead. Connection handle not present.")
 	}
 
+	// save the formatted data: this is to ensure the acceptance tests behave in a consistent way regardless of the ordering of the json data
+	if value, ok := d.GetOk("config"); ok {
+		configString, config = formatConnectionJSONString(value.(string))
+	}
+
 	resp, r, err := client.APIClient.OrgConnections.Get(context.Background(), orgId, connectionHandle).Execute()
 	if err != nil {
 		if r.StatusCode == 404 {
@@ -266,10 +272,11 @@ func resourceOrganizationConnectionRead(ctx context.Context, d *schema.ResourceD
 	}
 
 	// Convert config to string
-	var configString string
-	configString, err = mapToJSONString(resp.GetConfig())
-	if err != nil {
-		return diag.Errorf("resourceOrganizationConnectionRead. Error converting config to string: %v", err)
+	if config == nil {
+		configString, err = mapToJSONString(resp.GetConfig())
+		if err != nil {
+			return diag.Errorf("resourceOrganizationConnectionRead. Error converting config to string: %v", err)
+		}
 	}
 
 	d.Set("connection_id", resp.Id)

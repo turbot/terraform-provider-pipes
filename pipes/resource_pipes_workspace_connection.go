@@ -257,7 +257,12 @@ func resourceWorkspaceConnectionCreate(ctx context.Context, d *schema.ResourceDa
 	// ID Format
 	// User workspace connection - WorkspaceHandle/ConnectionHandle
 	// Org workspace connection - OrgHandle/WorkspaceHandle/ConnectionHandle
-	d.SetId(fmt.Sprintf("%s/%s", orgHandle, *resp.Handle))
+	if isUser {
+		d.SetId(fmt.Sprintf("%s/%s", workspaceHandle, *resp.Handle))
+	} else {
+		d.SetId(fmt.Sprintf("%s/%s/%s", orgHandle, workspaceHandle, *resp.Handle))
+
+	}
 
 	return diags
 }
@@ -266,7 +271,8 @@ func resourceWorkspaceConnectionRead(ctx context.Context, d *schema.ResourceData
 	client := meta.(*PipesClient)
 
 	// Warning or errors can be collected in a slice type
-	var connectionHandle, orgHandle, workspaceHandle string
+	var connectionHandle, orgHandle, workspaceHandle, configString string
+	var config map[string]interface{}
 	var diags diag.Diagnostics
 	var isUser = false
 
@@ -276,6 +282,11 @@ func resourceWorkspaceConnectionRead(ctx context.Context, d *schema.ResourceData
 	idParts := strings.Split(d.Id(), "/")
 	if len(idParts) < 2 && len(idParts) > 3 {
 		return diag.Errorf("unexpected format of ID (%q), expected <org-handle>/<workspace-handle>/<connection-handle>", d.Id())
+	}
+
+	// save the formatted data: this is to ensure the acceptance tests behave in a consistent way regardless of the ordering of the json data
+	if value, ok := d.GetOk("config"); ok {
+		configString, config = formatConnectionJSONString(value.(string))
 	}
 
 	if len(idParts) == 3 {
@@ -313,10 +324,11 @@ func resourceWorkspaceConnectionRead(ctx context.Context, d *schema.ResourceData
 	}
 
 	// Convert config to string
-	var configString string
-	configString, err = mapToJSONString(resp.GetConfig())
-	if err != nil {
-		return diag.Errorf("resourceOrganizationConnectionRead. Error converting config to string: %v", err)
+	if config == nil {
+		configString, err = mapToJSONString(resp.GetConfig())
+		if err != nil {
+			return diag.Errorf("resourceOrganizationConnectionRead. Error converting config to string: %v", err)
+		}
 	}
 
 	d.Set("connection_id", resp.Id)
@@ -353,7 +365,12 @@ func resourceWorkspaceConnectionRead(ctx context.Context, d *schema.ResourceData
 	// ID Format
 	// User workspace connection - WorkspaceHandle/ConnectionHandle
 	// Org workspace connection - OrgHandle/WorkspaceHandle/ConnectionHandle
-	d.SetId(fmt.Sprintf("%s/%s", orgHandle, *resp.Handle))
+	if isUser {
+		d.SetId(fmt.Sprintf("%s/%s", workspaceHandle, *resp.Handle))
+	} else {
+		d.SetId(fmt.Sprintf("%s/%s/%s", orgHandle, workspaceHandle, *resp.Handle))
+
+	}
 
 	return diags
 }
@@ -456,7 +473,12 @@ func resourceWorkspaceConnectionUpdate(ctx context.Context, d *schema.ResourceDa
 	// ID Format
 	// User workspace connection - WorkspaceHandle/ConnectionHandle
 	// Org workspace connection - OrgHandle/WorkspaceHandle/ConnectionHandle
-	d.SetId(fmt.Sprintf("%s/%s", orgHandle, *resp.Handle))
+	if isUser {
+		d.SetId(fmt.Sprintf("%s/%s", workspaceHandle, *resp.Handle))
+	} else {
+		d.SetId(fmt.Sprintf("%s/%s/%s", orgHandle, workspaceHandle, *resp.Handle))
+
+	}
 
 	return diags
 }
