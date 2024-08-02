@@ -339,7 +339,9 @@ func resourceWorkspaceConnectionRead(ctx context.Context, d *schema.ResourceData
 	d.Set("plugin", resp.Plugin)
 	d.Set("plugin_version", resp.PluginVersion)
 	d.Set("type", resp.Type)
-	d.Set("config", configString)
+	if configString != "" && configString != "null" {
+		d.Set("config", configString)
+	}
 	d.Set("config_source", resp.ConfigSource)
 	d.Set("credential_source", resp.CredentialSource)
 	d.Set("handle_mode", resp.HandleMode)
