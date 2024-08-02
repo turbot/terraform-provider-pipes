@@ -50,8 +50,6 @@ func TestAccUserWorkspaceSnapshot_Basic(t *testing.T) {
 
 func testAccUserWorkspaceSnapshotConfig(workspaceHandle, visibility string) string {
 	return fmt.Sprintf(`
-	provider "pipes" {}
-
 	resource "pipes_workspace" "test_workspace" {
 		handle = "%s"
 	}
@@ -198,8 +196,6 @@ func testAccUserWorkspaceSnapshotConfig(workspaceHandle, visibility string) stri
 
 func testAccUserWorkspaceSnapshotUpdateConfig(workspaceHandle, visibility string) string {
 	return fmt.Sprintf(`
-	provider "pipes" {}
-
 	resource "pipes_workspace" "test_workspace" {
 		handle = "%s"
 	}

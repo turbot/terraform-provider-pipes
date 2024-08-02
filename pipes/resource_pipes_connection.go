@@ -34,8 +34,7 @@ func resourceConnection() *schema.Resource {
 			},
 			"organization": {
 				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Required: true,
 			},
 			"handle": {
 				Type:         schema.TypeString,
@@ -97,9 +96,14 @@ func resourceConnection() *schema.Resource {
 func resourceConnectionCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
-	var plugin, connHandle, configString string
+	var plugin, connHandle, configString, orgHandle string
 	var config map[string]interface{}
 	var err error
+
+	// Organization is manadatory now since we no longer have user level connections
+	if val, ok := d.GetOk("organization"); ok {
+		orgHandle = val.(string)
+	}
 
 	if value, ok := d.GetOk("handle"); ok {
 		connHandle = value.(string)
@@ -110,7 +114,7 @@ func resourceConnectionCreate(ctx context.Context, d *schema.ResourceData, meta 
 
 	// save the formatted data: this is to ensure the acceptance tests behave in a consistent way regardless of the ordering of the json data
 	if value, ok := d.GetOk("config"); ok {
-		configString, config = formatConnectionJSONString(plugin, value.(string))
+		configString, config = formatConnectionJSONString(value.(string))
 	}
 
 	req := pipes.CreateConnectionRequest{
@@ -126,17 +130,7 @@ func resourceConnectionCreate(ctx context.Context, d *schema.ResourceData, meta 
 	var resp pipes.Connection
 	var r *http.Response
 
-	isUser, orgHandle := isUserConnection(d)
-	if isUser {
-		var actorHandle string
-		actorHandle, r, err = getUserHandler(ctx, client)
-		if err != nil {
-			return diag.Errorf("resourceConnectionCreate. getUserHandler error  %v", decodeResponse(r))
-		}
-		resp, r, err = client.APIClient.UserConnections.Create(ctx, actorHandle).Request(req).Execute()
-	} else {
-		resp, r, err = client.APIClient.OrgConnections.Create(ctx, orgHandle).Request(req).Execute()
-	}
+	resp, r, err = client.APIClient.OrgConnections.Create(ctx, orgHandle).Request(req).Execute()
 	if err != nil {
 		return diag.Errorf("resourceConnectionCreate. Create connection api error  %v", decodeResponse(r))
 	}
@@ -159,14 +153,8 @@ func resourceConnectionCreate(ctx context.Context, d *schema.ResourceData, meta 
 	if config != nil {
 		d.Set("config", configString)
 	}
-
-	// If connection is created inside an Organization the id will be of the
-	// format "OrganizationHandle/ConnectionHandle" otherwise "ConnectionHandle"
-	if strings.HasPrefix(resp.IdentityId, "o_") {
-		d.SetId(fmt.Sprintf("%s/%s", orgHandle, resp.Handle))
-	} else {
-		d.SetId(resp.Handle)
-	}
+	// format "OrganizationHandle/ConnectionHandle"
+	d.SetId(fmt.Sprintf("%s/%s", orgHandle, *resp.Handle))
 
 	return diags
 }
@@ -180,39 +168,21 @@ func resourceConnectionRead(ctx context.Context, d *schema.ResourceData, meta in
 	var err error
 	var r *http.Response
 	var resp pipes.Connection
-	var isUser = false
 	id := d.Id()
 
-	// For backward-compatibility, we see whether the id contains : or /
-	separator := "/"
-	if strings.Contains(id, ":") {
-		separator = ":"
-	}
-	// If connection exists inside an Organization the id will be of the
-	// format "OrganizationHandle/ConnectionHandle" otherwise "ConnectionHandle"
-	ids := strings.Split(id, separator)
-	if len(ids) == 2 {
-		orgHandle = ids[0]
-		connectionHandle = ids[1]
-	} else if len(ids) == 1 {
-		isUser = true
-		connectionHandle = ids[0]
-	}
+	// format "OrganizationHandle/ConnectionHandle"
+	ids := strings.Split(id, "/")
+	orgHandle = ids[0]
+	connectionHandle = ids[1]
 
+	if orgHandle == "" {
+		return diag.Errorf("resourceConnectionRead. Organization handle not present.")
+	}
 	if connectionHandle == "" {
 		return diag.Errorf("resourceConnectionRead. Connection handle not present.")
 	}
 
-	if isUser {
-		var actorHandle string
-		actorHandle, r, err = getUserHandler(ctx, client)
-		if err != nil {
-			return diag.Errorf("resourceConnectionRead. getUserHandler error  %v", decodeResponse(r))
-		}
-		resp, r, err = client.APIClient.UserConnections.Get(context.Background(), actorHandle, connectionHandle).Execute()
-	} else {
-		resp, r, err = client.APIClient.OrgConnections.Get(context.Background(), orgHandle, connectionHandle).Execute()
-	}
+	resp, r, err = client.APIClient.OrgConnections.Get(context.Background(), orgHandle, connectionHandle).Execute()
 	if err != nil {
 		if r.StatusCode == 404 {
 			diags = append(diags, diag.Diagnostic{
@@ -225,11 +195,19 @@ func resourceConnectionRead(ctx context.Context, d *schema.ResourceData, meta in
 		return diag.Errorf("resourceConnectionRead. Get connection error: %v", decodeResponse(r))
 	}
 
+	// Convert config to string
+	var configString string
+	configString, err = mapToJSONString(resp.GetConfig())
+	if err != nil {
+		return diag.Errorf("resourceOrganizationConnectionRead. Error converting config to string: %v", err)
+	}
+
 	// assign results back into ResourceData
 	d.Set("connection_id", resp.Id)
 	d.Set("identity_id", resp.IdentityId)
 	d.Set("organization", orgHandle)
 	d.Set("type", resp.Type)
+	d.Set("config", configString)
 	d.Set("plugin", resp.Plugin)
 	d.Set("plugin_version", resp.PluginVersion)
 	d.Set("handle", resp.Handle)
@@ -242,9 +220,8 @@ func resourceConnectionRead(ctx context.Context, d *schema.ResourceData, meta in
 		d.Set("updated_by", resp.UpdatedBy.Handle)
 	}
 	d.Set("version_id", resp.VersionId)
-	if separator == ":" {
-		d.SetId(strings.ReplaceAll(id, ":", "/"))
-	}
+	// format "OrganizationHandle/ConnectionHandle"
+	d.SetId(fmt.Sprintf("%s/%s", orgHandle, *resp.Handle))
 
 	return diags
 }
@@ -252,7 +229,7 @@ func resourceConnectionRead(ctx context.Context, d *schema.ResourceData, meta in
 func resourceConnectionUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*PipesClient)
 
-	var plugin, configString string
+	var orgHandle, configString string
 	var r *http.Response
 	var resp pipes.Connection
 	var err error
@@ -261,17 +238,19 @@ func resourceConnectionUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
 
+	// Organization is manadatory now since we no longer have user level connections
+	if val, ok := d.GetOk("organization"); ok {
+		orgHandle = val.(string)
+	}
+
 	oldConnectionHandle, newConnectionHandle := d.GetChange("handle")
 	if newConnectionHandle.(string) == "" {
 		return diag.Errorf("handle must be configured")
 	}
-	if value, ok := d.GetOk("plugin"); ok {
-		plugin = value.(string)
-	}
 
 	// save the formatted data: this is to ensure the acceptance tests behave in a consistent way regardless of the ordering of the json data
 	if value, ok := d.GetOk("config"); ok {
-		configString, config = formatConnectionJSONString(plugin, value.(string))
+		configString, config = formatConnectionJSONString(value.(string))
 	}
 
 	req := pipes.UpdateConnectionRequest{Handle: types.String(newConnectionHandle.(string))}
@@ -279,17 +258,7 @@ func resourceConnectionUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		req.SetConfig(config)
 	}
 
-	isUser, orgHandle := isUserConnection(d)
-	if isUser {
-		var actorHandle string
-		actorHandle, r, err = getUserHandler(ctx, client)
-		if err != nil {
-			return diag.Errorf("resourceConnectionUpdate. getUserHandler error:	%v", decodeResponse(r))
-		}
-		resp, r, err = client.APIClient.UserConnections.Update(context.Background(), actorHandle, oldConnectionHandle.(string)).Request(req).Execute()
-	} else {
-		resp, r, err = client.APIClient.OrgConnections.Update(context.Background(), orgHandle, oldConnectionHandle.(string)).Request(req).Execute()
-	}
+	resp, r, err = client.APIClient.OrgConnections.Update(context.Background(), orgHandle, oldConnectionHandle.(string)).Request(req).Execute()
 	if err != nil {
 		return diag.Errorf("resourceConnectionUpdate. Update connection error: %v", decodeResponse(r))
 	}
@@ -303,6 +272,9 @@ func resourceConnectionUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	d.Set("updated_at", resp.UpdatedAt)
 	d.Set("plugin", *resp.Plugin)
 	d.Set("plugin_version", resp.PluginVersion)
+	if config != nil {
+		d.Set("config", configString)
+	}
 	if resp.CreatedBy != nil {
 		d.Set("created_by", resp.CreatedBy.Handle)
 	}
@@ -310,17 +282,9 @@ func resourceConnectionUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		d.Set("updated_by", resp.UpdatedBy.Handle)
 	}
 	d.Set("version_id", resp.VersionId)
+	// format "OrganizationHandle/ConnectionHandle"
+	d.SetId(fmt.Sprintf("%s/%s", orgHandle, *resp.Handle))
 
-	// If connection exists inside an Organization the id will be of the
-	// format "OrganizationHandle/ConnectionHandle" otherwise "ConnectionHandle"
-	if strings.HasPrefix(resp.IdentityId, "o_") {
-		d.SetId(fmt.Sprintf("%s/%s", orgHandle, resp.Handle))
-	} else {
-		d.SetId(resp.Handle)
-	}
-	if config != nil {
-		d.Set("config", configString)
-	}
 	return diags
 }
 
@@ -329,25 +293,20 @@ func resourceConnectionDelete(ctx context.Context, d *schema.ResourceData, meta 
 
 	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
-	var connectionHandle string
+	var connectionHandle, orgHandle string
+
+	// Organization is manadatory now since we no longer have user level connections
+	if val, ok := d.GetOk("organization"); ok {
+		orgHandle = val.(string)
+	}
 	if value, ok := d.GetOk("handle"); ok {
 		connectionHandle = value.(string)
 	}
 
 	var err error
 	var r *http.Response
-	isUser, orgHandle := isUserConnection(d)
-	if isUser {
-		var actorHandle string
-		actorHandle, r, err = getUserHandler(ctx, client)
-		if err != nil {
-			return diag.Errorf("resourceConnectionDelete. getUserHandler error: %v", decodeResponse(r))
-		}
-		_, r, err = client.APIClient.UserConnections.Delete(ctx, actorHandle, connectionHandle).Execute()
-	} else {
-		_, r, err = client.APIClient.OrgConnections.Delete(ctx, orgHandle, connectionHandle).Execute()
-	}
 
+	_, r, err = client.APIClient.OrgConnections.Delete(ctx, orgHandle, connectionHandle).Execute()
 	if err != nil {
 		return diag.Errorf("resourceConnectionDelete. Delete connection error:	%v", decodeResponse(r))
 	}
@@ -364,17 +323,13 @@ func connectionJSONStringsEqual(k, old, new string, d *schema.ResourceData) bool
 	if old == "" || new == "" {
 		return false
 	}
-	var plugin string
-	if value, ok := d.GetOk("plugin"); ok {
-		plugin = value.(string)
-	}
-	oldFormatted, _ := formatConnectionJSONString(plugin, old)
-	newFormatted, _ := formatConnectionJSONString(plugin, new)
+	oldFormatted, _ := formatConnectionJSONString(old)
+	newFormatted, _ := formatConnectionJSONString(new)
 	return oldFormatted == newFormatted
 }
 
 // apply standard formatting to a json string by unmarshalling into a map then marshalling back to JSON
-func formatConnectionJSONString(plugin, body string) (string, map[string]interface{}) {
+func formatConnectionJSONString(body string) (string, map[string]interface{}) {
 	buffer := new(bytes.Buffer)
 	err := json.Compact(buffer, []byte(body))
 	if err != nil {

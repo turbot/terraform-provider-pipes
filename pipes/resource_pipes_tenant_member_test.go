@@ -43,8 +43,6 @@ func TestAccTenantMember_Basic(t *testing.T) {
 // configs
 func testAccTenantMemberConfig(tenantHandle string) string {
 	return fmt.Sprintf(`
-provider "pipes" {}
-
 data "pipes_tenant" "test_tenant" {
 	handle = "%s"
 }
@@ -59,8 +57,6 @@ resource "pipes_tenant_member" "test" {
 
 func testAccTenantMemberUpdateConfig(tenantHandle string) string {
 	return fmt.Sprintf(`
-provider "pipes" {}
-
 data "pipes_tenant" "test_tenant" {
 	handle = "%s"
 }

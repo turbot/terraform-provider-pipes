@@ -61,6 +61,7 @@ In addition to all arguments above, the following attributes are exported:
 - `installed_version` - The installed version of the the mod.
 - `path` - The path of the public git repo containing the mod.
 - `state` - The state of the mod installation.
+- `state_reason` - The reason for the state of the mod installation.
 - `updated_at` - The ISO 8601 date & time the mod entity was last updated at.
 - `updated_by` - The handle of the user who last updated the mod.
 - `version_id` - The mod version.

@@ -1,3 +1,30 @@
+## 0.14.0 (August 2, 2024)
+
+BREAKING CHANGES:
+
+* `resources/pipes_workspace_connection`: Resource functionality moved to manage connections at the workspace level. Previously, the resource used to manage `attachment` of connections to the workspace defined at the respective identity level. Please follow the [migration guide](https://github.com/turbot/terraform-provider-pipes/workspace_connection/docs/migrating.md) for migrating your existing configuration into the new model.
+* `resources/pipes_connection`: Removed functionality to manage user level connections in line with changes in Pipes.
+
+FEATURES:
+
+* **New Resource:** `pipes_organization_connection`
+* **New Resource:** `pipes_organization_connection_folder`
+* **New Resource:** `pipes_organization_connection_folder_permission`
+* **New Resource:** `pipes_organization_connection_permission`
+* **New Resource:** `pipes_organization_integration`
+* **New Resource:** `pipes_tenant_connection`
+* **New Resource:** `pipes_tenant_connection_folder`
+* **New Resource:** `pipes_tenant_connection_folder_permission`
+* **New Resource:** `pipes_tenant_connection_permission`
+* **New Resource:** `pipes_tenant_integration`
+* **New Resource:** `pipes_user_integration`
+* **New Resource:** `pipes_workspace_connection_folder`
+* **New Resource:** `pipes_workspace_schema`
+
+ENHANCEMENTS:
+
+* `resources/pipes_workspace_mod`: Add attribute `state_reason`.
+
 ## 0.13.2 (March 21, 2024)
 
 BUG FIXES: 

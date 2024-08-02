@@ -93,6 +93,11 @@ func resourceWorkspaceMod() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"state_reason": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
 			"organization": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -163,8 +168,8 @@ func resourceWorkspaceModInstall(ctx context.Context, d *schema.ResourceData, me
 	d.Set("alias", resp.Alias)
 	d.Set("installed_version", resp.InstalledVersion)
 	d.Set("state", resp.State)
+	d.Set("state_reason", resp.StateReason)
 	d.Set("path", resp.Path)
-	d.Set("details", resp.Details)
 	d.Set("organization", orgHandle)
 	d.Set("workspace_handle", workspaceHandle)
 
@@ -247,8 +252,8 @@ func resourceWorkspaceModRead(ctx context.Context, d *schema.ResourceData, meta 
 	d.Set("alias", resp.Alias)
 	d.Set("installed_version", resp.InstalledVersion)
 	d.Set("state", resp.State)
+	d.Set("state_reason", resp.StateReason)
 	d.Set("path", resp.Path)
-	d.Set("details", resp.Details)
 	d.Set("organization", orgHandle)
 	d.Set("workspace_handle", workspaceHandle)
 
@@ -277,7 +282,7 @@ func resourceWorkspaceModUpdate(ctx context.Context, d *schema.ResourceData, met
 	constraint := d.Get("constraint").(string)
 
 	// Create request
-	req := pipes.UpdateWorkspaceModRequest{Constraint: constraint}
+	req := pipes.UpdateWorkspaceModRequest{Constraint: &constraint}
 
 	isUser, orgHandle := isUserConnection(d)
 	if isUser {
@@ -314,8 +319,8 @@ func resourceWorkspaceModUpdate(ctx context.Context, d *schema.ResourceData, met
 	d.Set("alias", resp.Alias)
 	d.Set("installed_version", resp.InstalledVersion)
 	d.Set("state", resp.State)
+	d.Set("state_reason", resp.StateReason)
 	d.Set("path", resp.Path)
-	d.Set("details", resp.Details)
 	d.Set("organization", orgHandle)
 	d.Set("workspace_handle", workspaceHandle)
 

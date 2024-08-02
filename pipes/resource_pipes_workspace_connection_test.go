@@ -24,10 +24,9 @@ func TestAccWorkspaceConnection_Basic(t *testing.T) {
 				Config: testAccWorkspaceConnectionConfig(workspaceHandle, connHandle),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckTestWorkspaceExists(workspaceHandle),
-					testAccCheckTestConnectionExists(connHandle),
 					testAccCheckWorkspaceConnectionExists(resourceName),
-					resource.TestCheckResourceAttr(resourceName, "workspace_handle", workspaceHandle),
-					resource.TestCheckResourceAttr(resourceName, "connection_handle", connHandle),
+					resource.TestCheckResourceAttr(resourceName, "workspace", workspaceHandle),
+					resource.TestCheckResourceAttr(resourceName, "handle", connHandle),
 				),
 			},
 			{
@@ -51,12 +50,11 @@ func TestAccOrgWorkspaceConnection_Basic(t *testing.T) {
 			{
 				Config: testAccOrgWorkspaceConnectionConfig(orgName, workspaceHandle, connHandle),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckConnectionOrganizationExists(orgName),
+					testAccCheckOrganizationExists(orgName),
 					testAccCheckTestWorkspaceExists(workspaceHandle),
-					testAccCheckTestConnectionExists(connHandle),
 					testAccCheckWorkspaceConnectionExists(resourceName),
-					resource.TestCheckResourceAttr(resourceName, "workspace_handle", workspaceHandle),
-					resource.TestCheckResourceAttr(resourceName, "connection_handle", connHandle),
+					resource.TestCheckResourceAttr(resourceName, "workspace", workspaceHandle),
+					resource.TestCheckResourceAttr(resourceName, "handle", connHandle),
 				),
 			},
 		},
@@ -66,13 +64,12 @@ func TestAccOrgWorkspaceConnection_Basic(t *testing.T) {
 // User Workspace Connection association config
 func testAccWorkspaceConnectionConfig(workspace string, conn string) string {
 	return fmt.Sprintf(`
-provider "pipes" {}
-
 resource "pipes_workspace" "test_conn" {
   handle = "%s"
 }
 
-resource "pipes_connection" "test_conn" {
+resource "pipes_workspace_connection" "test_conn" {
+	workspace  = pipes_workspace.test_conn.handle
 	handle     = "%s"
 	plugin     = "aws"
 	config = jsonencode({
@@ -81,30 +78,25 @@ resource "pipes_connection" "test_conn" {
 		secret_key = "redacted"
 	})
 }
-
-resource "pipes_workspace_connection" "test_conn" {
-  workspace_handle  = pipes_workspace.test_conn.handle
-  connection_handle = pipes_connection.test_conn.handle
-}`, workspace, conn)
+`, workspace, conn)
 }
 
 // Organization Workspace Connection association config
 func testAccOrgWorkspaceConnectionConfig(org string, workspace string, conn string) string {
 	return fmt.Sprintf(`
-provider "pipes" {}
-
 resource "pipes_organization" "test_org" {
 	handle       = "%s"
 	display_name = "Terraform Test Org"
 }
 
-resource "pipes_workspace" "test_org" {
+resource "pipes_workspace" "test_workspace" {
 	organization = pipes_organization.test_org.handle
 	handle       = "%s"
 }
 
-resource "pipes_connection" "test_org" {
+resource "pipes_workspace_connection" "test_workspace_connection" {
 	organization = pipes_organization.test_org.handle
+	workspace    = pipes_workspace.test_workspace.handle
 	handle       = "%s"
 	plugin       = "aws"
 	config = jsonencode({
@@ -113,12 +105,7 @@ resource "pipes_connection" "test_org" {
 		secret_key = "redacted"
 	})
 }
-
-resource "pipes_workspace_connection" "test_org" {
-	organization 	    = pipes_organization.test_org.handle
-	workspace_handle  = pipes_workspace.test_org.handle
-	connection_handle = pipes_connection.test_org.handle
-}`, org, workspace, conn)
+`, org, workspace, conn)
 }
 
 // testAccCheckWorkspaceConnectionDestroy verifies the workspace connection association has been destroyed
@@ -132,13 +119,13 @@ func testAccCheckWorkspaceConnectionDestroy(s *terraform.State) error {
 
 	// loop through the resources in state, verifying each managed resource is destroyed
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "pipes_workspace" && rs.Type != "pipes_connection" && rs.Type != "pipes_workspace_connection" {
+		if rs.Type != "pipes_workspace_connection" {
 			continue
 		}
 
 		// Retrieve workspace and connection handle by referencing it's state handle for API lookup
-		connectionHandle := rs.Primary.Attributes["connection_handle"]
-		workspaceHandle := rs.Primary.Attributes["workspace_handle"]
+		connectionHandle := rs.Primary.Attributes["handle"]
+		workspaceHandle := rs.Primary.Attributes["workspace"]
 
 		// Retrieve organization
 		org := rs.Primary.Attributes["organization"]
@@ -150,9 +137,9 @@ func testAccCheckWorkspaceConnectionDestroy(s *terraform.State) error {
 			if err != nil {
 				return fmt.Errorf("error fetching user handle. %s", err)
 			}
-			_, r, err = client.APIClient.UserWorkspaceConnectionAssociations.Get(ctx, actorHandle, workspaceHandle, connectionHandle).Execute()
+			_, r, err = client.APIClient.UserWorkspaceConnections.Get(ctx, actorHandle, workspaceHandle, connectionHandle).Execute()
 		} else {
-			_, r, err = client.APIClient.OrgWorkspaceConnectionAssociations.Get(ctx, org, workspaceHandle, connectionHandle).Execute()
+			_, r, err = client.APIClient.OrgWorkspaceConnections.Get(ctx, org, workspaceHandle, connectionHandle).Execute()
 		}
 		if err == nil {
 			return fmt.Errorf("Workspace Connection association %s:%s still exists", workspaceHandle, connectionHandle)
@@ -183,8 +170,8 @@ func testAccCheckWorkspaceConnectionExists(n string) resource.TestCheckFunc {
 		if rs.Primary.ID == "" {
 			return fmt.Errorf("No ID is set")
 		}
-		connectionHandle := rs.Primary.Attributes["connection_handle"]
-		workspaceHandle := rs.Primary.Attributes["workspace_handle"]
+		connectionHandle := rs.Primary.Attributes["handle"]
+		workspaceHandle := rs.Primary.Attributes["workspace"]
 
 		client := testAccProvider.Meta().(*PipesClient)
 
@@ -198,12 +185,12 @@ func testAccCheckWorkspaceConnectionExists(n string) resource.TestCheckFunc {
 			if err != nil {
 				return fmt.Errorf("error fetching user handle. %s", err)
 			}
-			_, _, err = client.APIClient.UserWorkspaceConnectionAssociations.Get(ctx, actorHandle, workspaceHandle, connectionHandle).Execute()
+			_, _, err = client.APIClient.UserWorkspaceConnections.Get(ctx, actorHandle, workspaceHandle, connectionHandle).Execute()
 			if err != nil {
 				return fmt.Errorf("error reading user workspace connection: %s:%s.\nerr: %s", workspaceHandle, connectionHandle, err)
 			}
 		} else {
-			_, _, err = client.APIClient.OrgWorkspaceConnectionAssociations.Get(ctx, org, workspaceHandle, connectionHandle).Execute()
+			_, _, err = client.APIClient.OrgWorkspaceConnections.Get(ctx, org, workspaceHandle, connectionHandle).Execute()
 			if err != nil {
 				return fmt.Errorf("error reading organization workspace connection: %s:%s.\nerr: %s", workspaceHandle, connectionHandle, err)
 			}
@@ -245,43 +232,6 @@ func testAccCheckTestWorkspaceExists(workspaceHandle string) resource.TestCheckF
 				}
 			}
 		}
-		return nil
-	}
-}
-
-func testAccCheckTestConnectionExists(connHandle string) resource.TestCheckFunc {
-	ctx := context.Background()
-	return func(state *terraform.State) error {
-		client := testAccProvider.Meta().(*PipesClient)
-
-		for _, rs := range state.RootModule().Resources {
-			if rs.Type != "pipes_connection" {
-				continue
-			}
-
-			// Retrieve organization
-			org := rs.Primary.Attributes["organization"]
-			isUser := org == ""
-
-			var err error
-			if isUser {
-				var actorHandle string
-				actorHandle, _, err = getUserHandler(ctx, client)
-				if err != nil {
-					return fmt.Errorf("error fetching user handle. %s", err)
-				}
-				_, _, err = client.APIClient.UserConnections.Get(ctx, actorHandle, connHandle).Execute()
-				if err != nil {
-					return fmt.Errorf("error fetching user connection with handle %s. %s", connHandle, err)
-				}
-			} else {
-				_, _, err = client.APIClient.OrgConnections.Get(ctx, org, connHandle).Execute()
-				if err != nil {
-					return fmt.Errorf("error fetching org connection with handle %s. %s", connHandle, err)
-				}
-			}
-		}
-
 		return nil
 	}
 }

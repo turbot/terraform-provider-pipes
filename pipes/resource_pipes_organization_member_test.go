@@ -42,8 +42,6 @@ func TestAccOrganizationMember_Basic(t *testing.T) {
 // configs
 func testAccOrganizationMemberConfig(orgHandle string) string {
 	return fmt.Sprintf(`
-provider "pipes" {}
-
 resource "pipes_organization" "test" {
 	handle = "%s"
 }
@@ -58,8 +56,6 @@ resource "pipes_organization_member" "test" {
 
 func testAccOrganizationMemberUpdateConfig(orgHandle string) string {
 	return fmt.Sprintf(`
-provider "pipes" {}
-
 resource "pipes_organization" "test" {
 	handle = "%s"
 }
