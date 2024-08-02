@@ -93,6 +93,11 @@ func resourceWorkspaceMod() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"state_reason": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
 			"organization": {
 				Type:     schema.TypeString,
 				Optional: true,

@@ -21,6 +21,10 @@ FEATURES:
 * **New Resource:** `pipes_workspace_connection_folder`
 * **New Resource:** `pipes_workspace_schema`
 
+ENHANCEMENTS:
+
+* `resources/pipes_workspace_mod`: Add attribute `state_reason`.
+
 ## 0.13.2 (March 21, 2024)
 
 BUG FIXES: 
