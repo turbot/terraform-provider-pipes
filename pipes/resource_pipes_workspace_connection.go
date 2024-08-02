@@ -35,7 +35,7 @@ func resourceWorkspaceConnection() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"organization_id": {
+			"identity_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -223,7 +223,7 @@ func resourceWorkspaceConnectionCreate(ctx context.Context, d *schema.ResourceDa
 
 	d.Set("connection_id", resp.Id)
 	d.Set("tenant_id", resp.TenantId)
-	d.Set("organization_id", resp.IdentityId)
+	d.Set("identity_id", resp.IdentityId)
 	d.Set("workspace_id", resp.WorkspaceId)
 	d.Set("handle", resp.Handle)
 	d.Set("plugin", resp.Plugin)
@@ -333,7 +333,7 @@ func resourceWorkspaceConnectionRead(ctx context.Context, d *schema.ResourceData
 
 	d.Set("connection_id", resp.Id)
 	d.Set("tenant_id", resp.TenantId)
-	d.Set("organization_id", resp.IdentityId)
+	d.Set("identity_id", resp.IdentityId)
 	d.Set("workspace_id", resp.WorkspaceId)
 	d.Set("handle", resp.Handle)
 	d.Set("plugin", resp.Plugin)
@@ -439,7 +439,7 @@ func resourceWorkspaceConnectionUpdate(ctx context.Context, d *schema.ResourceDa
 
 	d.Set("connection_id", resp.Id)
 	d.Set("tenant_id", resp.TenantId)
-	d.Set("organization_id", resp.IdentityId)
+	d.Set("identity_id", resp.IdentityId)
 	d.Set("workspace_id", resp.WorkspaceId)
 	d.Set("handle", resp.Handle)
 	d.Set("plugin", resp.Plugin)
