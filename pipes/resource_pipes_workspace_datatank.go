@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	pipes "github.com/turbot/pipes-sdk-go"
+	"github.com/turbot/pipes-sdk-go"
 )
 
 func resourceWorkspaceDatatank() *schema.Resource {
@@ -124,7 +124,7 @@ func resourceWorkspaceDatatankCreate(ctx context.Context, d *schema.ResourceData
 		Description: &description,
 	}
 	if desiredState != "" {
-		req.DesiredState = &desiredState
+		req.DesiredState = (*pipes.DesiredState)(&desiredState)
 	}
 
 	client := meta.(*PipesClient)
@@ -291,7 +291,7 @@ func resourceWorkspaceDatatankUpdate(ctx context.Context, d *schema.ResourceData
 		Description: &description,
 	}
 	if desiredState != "" {
-		req.DesiredState = &desiredState
+		req.DesiredState = (*pipes.DesiredState)(&desiredState)
 	}
 
 	isUser, orgHandle := isUserConnection(d)

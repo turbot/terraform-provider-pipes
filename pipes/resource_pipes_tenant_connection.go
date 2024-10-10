@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/turbot/go-kit/types"
-	pipes "github.com/turbot/pipes-sdk-go"
+	"github.com/turbot/pipes-sdk-go"
 )
 
 func resourceTenantConnection() *schema.Resource {
@@ -331,12 +331,12 @@ func resourceTenantConnectionUpdate(ctx context.Context, d *schema.ResourceData,
 	}
 	if ok := d.HasChange("config_source"); ok {
 		if value, ok := d.GetOk("config_source"); ok {
-			req.SetConfigSource(value.(string))
+			req.SetConfigSource(pipes.ConnectionConfigSource(value.(string)))
 		}
 	}
 	if ok := d.HasChange("credential_source"); ok {
 		if value, ok := d.GetOk("credential_source"); ok {
-			req.SetCredentialSource(value.(string))
+			req.SetCredentialSource(pipes.ConnectionCredentialSource(value.(string)))
 		}
 	}
 
