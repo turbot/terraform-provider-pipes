@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	pipes "github.com/turbot/pipes-sdk-go"
+	"github.com/turbot/pipes-sdk-go"
 )
 
 func resourceOrganizationIntegration() *schema.Resource {
@@ -129,7 +129,7 @@ func resourceOrganizationIntegrationCreate(ctx context.Context, d *schema.Resour
 
 	req := pipes.CreateIntegrationRequest{
 		Handle: integrationHandle,
-		Type:   integrationType,
+		Type:   pipes.IntegrationType(integrationType),
 	}
 
 	if config != nil {
@@ -279,7 +279,7 @@ func resourceOrganizationIntegrationUpdate(ctx context.Context, d *schema.Resour
 
 	req := pipes.UpdateIntegrationRequest{
 		Handle: &newHandle,
-		State:  &state,
+		State:  (*pipes.IntegrationState)(&state),
 	}
 
 	if config != nil {
