@@ -47,11 +47,11 @@ func resourceWorkspaceFlowpipeTrigger() *schema.Resource {
 			},
 			"title": {
 				Type:     schema.TypeString,
-				Required: false,
+				Optional: true,
 			},
 			"description": {
 				Type:     schema.TypeString,
-				Required: false,
+				Optional: true,
 			},
 			"name": {
 				Type:     schema.TypeString,
