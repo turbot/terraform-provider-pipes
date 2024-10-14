@@ -9,7 +9,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	pipes "github.com/turbot/pipes-sdk-go"
+
+	"github.com/turbot/pipes-sdk-go"
 )
 
 // Provider
@@ -54,6 +55,9 @@ func Provider() *schema.Provider {
 			"pipes_workspace_connection_folder":               resourceWorkspaceConnectionFolder(),
 			"pipes_workspace_datatank":                        resourceWorkspaceDatatank(),
 			"pipes_workspace_datatank_table":                  resourceWorkspaceDatatankTable(),
+			"pipes_workspace_flowpipe_mod":                    resourceWorkspaceFlowpipeMod(),
+			"pipes_workspace_flowpipe_mod_variable":           resourceWorkspaceFlowpipeModVariable(),
+			"pipes_workspace_flowpipe_trigger":                resourceWorkspaceFlowpipeTrigger(),
 			"pipes_workspace_mod":                             resourceWorkspaceMod(),
 			"pipes_workspace_mod_variable":                    resourceWorkspaceModVariable(),
 			"pipes_workspace_pipeline":                        resourceWorkspacePipeline(),
@@ -61,10 +65,11 @@ func Provider() *schema.Provider {
 			"pipes_workspace_snapshot":                        resourceWorkspaceSnapshot(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
-			"pipes_organization": dataSourceOrganization(),
-			"pipes_process":      dataSourceProcess(),
-			"pipes_tenant":       dataSourceTenant(),
-			"pipes_user":         dataSourceUser(),
+			"pipes_organization":                dataSourceOrganization(),
+			"pipes_process":                     dataSourceProcess(),
+			"pipes_tenant":                      dataSourceTenant(),
+			"pipes_user":                        dataSourceUser(),
+			"pipes_workspace_flowpipe_pipeline": dataSourceWorkspaceFlowpipePipeline(),
 		},
 
 		ConfigureContextFunc: providerConfigure,
