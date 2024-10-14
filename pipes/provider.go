@@ -2,8 +2,10 @@ package pipes
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
 	"log"
+	"net/http"
 	"net/url"
 	"os"
 
@@ -65,6 +67,7 @@ func Provider() *schema.Provider {
 			"pipes_workspace_snapshot":                        resourceWorkspaceSnapshot(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
+			"pipes_integration":                 dataSourceIntegration(),
 			"pipes_organization":                dataSourceOrganization(),
 			"pipes_process":                     dataSourceProcess(),
 			"pipes_tenant":                      dataSourceTenant(),
@@ -140,6 +143,13 @@ func CreateClient(config *Config, diags diag.Diagnostics) (*pipes.APIClient, dia
 		}
 	}
 
+	// For local testing only - DO NOT COMMIT!!
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	configuration.HTTPClient = &http.Client{Transport: tr}
+	// For local testing only - DO NOT COMMIT!!
+
 	var pipesToken string
 	if config.Token != "" {
 		pipesToken = config.Token
@@ -158,5 +168,6 @@ func CreateClient(config *Config, diags diag.Diagnostics) (*pipes.APIClient, dia
 		Summary:  "Unable to create Turbot Pipes client",
 		Detail:   "Failed to get token to authenticate Turbot Pipes client. Please set 'token' in provider config",
 	})
+
 	return nil, diags
 }
