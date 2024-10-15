@@ -64,6 +64,7 @@ func Provider() *schema.Provider {
 			"pipes_workspace_flowpipe_trigger":                resourceWorkspaceFlowpipeTrigger(),
 			"pipes_workspace_mod":                             resourceWorkspaceMod(),
 			"pipes_workspace_mod_variable":                    resourceWorkspaceModVariable(),
+			"pipes_workspace_notifier":                        resourceWorkspaceNotifier(),
 			"pipes_workspace_pipeline":                        resourceWorkspacePipeline(),
 			"pipes_workspace_schema":                          resourceWorkspaceSchema(),
 			"pipes_workspace_snapshot":                        resourceWorkspaceSnapshot(),
