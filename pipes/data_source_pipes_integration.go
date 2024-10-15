@@ -3,11 +3,13 @@ package pipes
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/turbot/pipes-sdk-go"
 	"log"
 	"net/http"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	"github.com/turbot/pipes-sdk-go"
 )
 
 func dataSourceIntegration() *schema.Resource {
@@ -57,7 +59,7 @@ func dataSourceIntegration() *schema.Resource {
 				Computed: true,
 			},
 			"github_installation_id": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeInt,
 				Computed: true,
 			},
 			"pipeline_id": {

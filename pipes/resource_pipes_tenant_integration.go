@@ -60,7 +60,7 @@ func resourceTenantIntegration() *schema.Resource {
 				DiffSuppressFunc: IntegrationJSONStringsEqual,
 			},
 			"github_installation_id": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeInt,
 				Optional: true,
 				Computed: true,
 			},
