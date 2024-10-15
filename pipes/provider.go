@@ -72,6 +72,7 @@ func Provider() *schema.Provider {
 			"pipes_process":                     dataSourceProcess(),
 			"pipes_tenant":                      dataSourceTenant(),
 			"pipes_user":                        dataSourceUser(),
+			"pipes_workspace":                   dataSourceWorkspace(),
 			"pipes_workspace_flowpipe_pipeline": dataSourceWorkspaceFlowpipePipeline(),
 		},
 
