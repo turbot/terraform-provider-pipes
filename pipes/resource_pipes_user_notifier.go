@@ -104,7 +104,7 @@ func resourceUserNotifierCreate(ctx context.Context, d *schema.ResourceData, met
 		return diag.Errorf("error parsing state for notifier: %v", err)
 	}
 
-	var notifies map[string]interface{}
+	var notifies []map[string]interface{}
 	if v, ok := d.GetOk("notifies"); ok {
 		notifiesString := v.(string)
 		err = json.Unmarshal([]byte(notifiesString), &notifies)
@@ -228,7 +228,7 @@ func resourceUserNotifierUpdate(ctx context.Context, d *schema.ResourceData, met
 		return diag.Errorf("error parsing state for notifier: %v", err)
 	}
 
-	var notifies map[string]interface{}
+	var notifies []map[string]interface{}
 	if v, ok := d.GetOk("notifies"); ok {
 		notifiesString := v.(string)
 		err = json.Unmarshal([]byte(notifiesString), &notifies)

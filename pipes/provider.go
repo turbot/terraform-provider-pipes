@@ -2,10 +2,8 @@ package pipes
 
 import (
 	"context"
-	"crypto/tls"
 	"fmt"
 	"log"
-	"net/http"
 	"net/url"
 	"os"
 
@@ -146,13 +144,6 @@ func CreateClient(config *Config, diags diag.Diagnostics) (*pipes.APIClient, dia
 			},
 		}
 	}
-
-	// For local testing only - DO NOT COMMIT!!
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-	configuration.HTTPClient = &http.Client{Transport: tr}
-	// For local testing only - DO NOT COMMIT!!
 
 	var pipesToken string
 	if config.Token != "" {
