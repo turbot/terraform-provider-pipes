@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	pipes "github.com/turbot/pipes-sdk-go"
+	"github.com/turbot/pipes-sdk-go"
 )
 
 func resourceTenantIntegration() *schema.Resource {
@@ -60,7 +60,7 @@ func resourceTenantIntegration() *schema.Resource {
 				DiffSuppressFunc: IntegrationJSONStringsEqual,
 			},
 			"github_installation_id": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeInt,
 				Optional: true,
 				Computed: true,
 			},
@@ -117,7 +117,7 @@ func resourceTenantIntegrationCreate(ctx context.Context, d *schema.ResourceData
 
 	req := pipes.CreateIntegrationRequest{
 		Handle: integrationHandle,
-		Type:   integrationType,
+		Type:   pipes.IntegrationType(integrationType),
 	}
 
 	if config != nil {
@@ -274,7 +274,7 @@ func resourceTenantIntegrationUpdate(ctx context.Context, d *schema.ResourceData
 
 	req := pipes.UpdateIntegrationRequest{
 		Handle: &newHandle,
-		State:  &state,
+		State:  (*pipes.IntegrationState)(&state),
 		Config: &config,
 	}
 

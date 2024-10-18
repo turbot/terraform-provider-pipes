@@ -12,7 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/turbot/go-kit/types"
-	pipes "github.com/turbot/pipes-sdk-go"
+	"github.com/turbot/pipes-sdk-go"
 )
 
 func resourceWorkspace() *schema.Resource {
@@ -144,9 +144,9 @@ func resourceWorkspaceCreate(ctx context.Context, d *schema.ResourceData, meta i
 	}
 
 	// Create request
-	req := pipes.CreateWorkspaceRequest{Handle: handle, InstanceType: &instanceType}
+	req := pipes.CreateWorkspaceRequest{Handle: handle, InstanceType: (*pipes.WorkspaceInstanceType)(&instanceType)}
 	if desiredState != "" {
-		req.DesiredState = &desiredState
+		req.DesiredState = (*pipes.DesiredState)(&desiredState)
 	}
 	if dbVolumeSizeBytes != 0 {
 		req.DbVolumeSizeBytes = &dbVolumeSizeBytes
@@ -307,7 +307,7 @@ func resourceWorkspaceUpdate(ctx context.Context, d *schema.ResourceData, meta i
 		Handle: types.String(newHandle.(string)),
 	}
 	if desiredState != "" {
-		req.DesiredState = &desiredState
+		req.DesiredState = (*pipes.DesiredState)(&desiredState)
 	}
 	if dbVolumeSizeBytes != 0 {
 		req.DbVolumeSizeBytes = &dbVolumeSizeBytes

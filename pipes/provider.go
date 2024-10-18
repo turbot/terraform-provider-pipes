@@ -9,7 +9,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	pipes "github.com/turbot/pipes-sdk-go"
+
+	"github.com/turbot/pipes-sdk-go"
 )
 
 // Provider
@@ -39,6 +40,7 @@ func Provider() *schema.Provider {
 			"pipes_organization_integration":                  resourceOrganizationIntegration(),
 			"pipes_organization":                              resourceOrganization(),
 			"pipes_organization_member":                       resourceOrganizationMember(),
+			"pipes_organization_notifier":                     resourceOrganizationNotifier(),
 			"pipes_organization_workspace_member":             resourceOrganizationWorkspaceMember(),
 			"pipes_tenant_connection":                         resourceTenantConnection(),
 			"pipes_tenant_connection_permission":              resourceTenantConnectionPermission(),
@@ -47,6 +49,7 @@ func Provider() *schema.Provider {
 			"pipes_tenant_integration":                        resourceTenantIntegration(),
 			"pipes_tenant_member":                             resourceTenantMember(),
 			"pipes_user_integration":                          resourceUserIntegration(),
+			"pipes_user_notifier":                             resourceUserNotifier(),
 			"pipes_user_preferences":                          resourceUserPreferences(),
 			"pipes_workspace":                                 resourceWorkspace(),
 			"pipes_workspace_aggregator":                      resourceWorkspaceAggregator(),
@@ -54,17 +57,24 @@ func Provider() *schema.Provider {
 			"pipes_workspace_connection_folder":               resourceWorkspaceConnectionFolder(),
 			"pipes_workspace_datatank":                        resourceWorkspaceDatatank(),
 			"pipes_workspace_datatank_table":                  resourceWorkspaceDatatankTable(),
+			"pipes_workspace_flowpipe_mod":                    resourceWorkspaceFlowpipeMod(),
+			"pipes_workspace_flowpipe_mod_variable":           resourceWorkspaceFlowpipeModVariable(),
+			"pipes_workspace_flowpipe_trigger":                resourceWorkspaceFlowpipeTrigger(),
 			"pipes_workspace_mod":                             resourceWorkspaceMod(),
 			"pipes_workspace_mod_variable":                    resourceWorkspaceModVariable(),
+			"pipes_workspace_notifier":                        resourceWorkspaceNotifier(),
 			"pipes_workspace_pipeline":                        resourceWorkspacePipeline(),
 			"pipes_workspace_schema":                          resourceWorkspaceSchema(),
 			"pipes_workspace_snapshot":                        resourceWorkspaceSnapshot(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
-			"pipes_organization": dataSourceOrganization(),
-			"pipes_process":      dataSourceProcess(),
-			"pipes_tenant":       dataSourceTenant(),
-			"pipes_user":         dataSourceUser(),
+			"pipes_integration":                 dataSourceIntegration(),
+			"pipes_organization":                dataSourceOrganization(),
+			"pipes_process":                     dataSourceProcess(),
+			"pipes_tenant":                      dataSourceTenant(),
+			"pipes_user":                        dataSourceUser(),
+			"pipes_workspace":                   dataSourceWorkspace(),
+			"pipes_workspace_flowpipe_pipeline": dataSourceWorkspaceFlowpipePipeline(),
 		},
 
 		ConfigureContextFunc: providerConfigure,
@@ -153,5 +163,6 @@ func CreateClient(config *Config, diags diag.Diagnostics) (*pipes.APIClient, dia
 		Summary:  "Unable to create Turbot Pipes client",
 		Detail:   "Failed to get token to authenticate Turbot Pipes client. Please set 'token' in provider config",
 	})
+
 	return nil, diags
 }
