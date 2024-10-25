@@ -8,7 +8,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	pipes "github.com/turbot/pipes-sdk-go"
+	"github.com/turbot/pipes-sdk-go"
 )
 
 func resourceWorkspaceConnectionFolder() *schema.Resource {
@@ -308,12 +308,11 @@ func resourceWorkspaceConnectionFolderUpdate(ctx context.Context, d *schema.Reso
 	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
 
-	_, new := d.GetChange("title")
-	if new.(string) == "" {
+	_, n := d.GetChange("title")
+	newTitle := n.(string)
+	if newTitle == "" {
 		return diag.Errorf("title must be configured for a connection folder")
 	}
-
-	newTitle := new.(string)
 
 	req := pipes.UpdateConnectionFolderRequest{
 		Title: &newTitle,
