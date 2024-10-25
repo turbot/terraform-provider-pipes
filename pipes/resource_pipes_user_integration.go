@@ -244,8 +244,10 @@ func resourceUserIntegrationUpdate(ctx context.Context, d *schema.ResourceData, 
 	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
 
-	old, new := d.GetChange("handle")
-	if new.(string) == "" {
+	o, n := d.GetChange("handle")
+	oldHandle := o.(string)
+	newHandle := n.(string)
+	if newHandle == "" {
 		return diag.Errorf("handle must be configured")
 	}
 	if value, ok := d.GetOk("state"); ok {
@@ -256,9 +258,6 @@ func resourceUserIntegrationUpdate(ctx context.Context, d *schema.ResourceData, 
 	if value, ok := d.GetOk("config"); ok {
 		configString, config = FormatIntegrationJSONString(value.(string))
 	}
-
-	oldHandle := old.(string)
-	newHandle := new.(string)
 
 	req := pipes.UpdateIntegrationRequest{
 		Handle: &newHandle,

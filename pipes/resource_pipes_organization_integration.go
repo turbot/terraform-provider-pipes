@@ -261,8 +261,10 @@ func resourceOrganizationIntegrationUpdate(ctx context.Context, d *schema.Resour
 		orgHandle = val.(string)
 	}
 
-	old, new := d.GetChange("handle")
-	if new.(string) == "" {
+	o, n := d.GetChange("handle")
+	oldHandle := o.(string)
+	newHandle := n.(string)
+	if newHandle == "" {
 		return diag.Errorf("handle must be configured")
 	}
 	if value, ok := d.GetOk("state"); ok {
@@ -273,9 +275,6 @@ func resourceOrganizationIntegrationUpdate(ctx context.Context, d *schema.Resour
 	if value, ok := d.GetOk("config"); ok {
 		configString, config = FormatIntegrationJSONString(value.(string))
 	}
-
-	oldHandle := old.(string)
-	newHandle := new.(string)
 
 	req := pipes.UpdateIntegrationRequest{
 		Handle: &newHandle,
