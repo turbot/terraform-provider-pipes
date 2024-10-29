@@ -2,16 +2,12 @@ module github.com/turbot/terraform-provider-pipes
 
 go 1.21
 
-replace (
-	github.com/turbot/pipes-sdk-go v0.10.0 => ../pipes-sdk-go
-)
-
 require github.com/turbot/go-kit v0.3.0
 
 require (
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.34.0
 	github.com/stretchr/testify v1.7.2
-	github.com/turbot/pipes-sdk-go v0.10.0
+	github.com/turbot/pipes-sdk-go v0.11.0
 )
 
 require (
