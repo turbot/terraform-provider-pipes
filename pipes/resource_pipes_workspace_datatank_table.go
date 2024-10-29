@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	pipes "github.com/turbot/pipes-sdk-go"
+	"github.com/turbot/pipes-sdk-go"
 )
 
 func resourceWorkspaceDatatankTable() *schema.Resource {
@@ -192,7 +192,7 @@ func resourceWorkspaceDatatankTableCreate(ctx context.Context, d *schema.Resourc
 		Frequency:    &frequency,
 	}
 	if desiredState != "" {
-		req.DesiredState = &desiredState
+		req.DesiredState = (*pipes.DesiredState)(&desiredState)
 	}
 
 	// If nothing is passed in the `part_per` field, set it to nil, so that it does not consider it as an empty string
@@ -405,7 +405,7 @@ func resourceWorkspaceDatatankTableUpdate(ctx context.Context, d *schema.Resourc
 		Frequency:    &frequency,
 	}
 	if desiredState != "" {
-		req.DesiredState = &desiredState
+		req.DesiredState = (*pipes.DesiredState)(&desiredState)
 	}
 
 	// If nothing is passed in the `part_per` field, set it to nil, so that it does not consider it as an empty string
