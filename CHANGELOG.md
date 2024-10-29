@@ -1,3 +1,27 @@
+## 0.15.0 (October 29, 2024)
+
+BREAKING CHANGES:
+
+* Resource `pipes_organzation_integration`: Attribute `github_installation_id` is now expected type `int` instead of `string`.
+* Resource `pipes_tenant_integration`: Attribute `github_installation_id` is now expected type `int` instead of `string`.
+* Resource `pipes_user_integration`: Attribute `github_installation_id` is now expected type `int` instead of `string`.
+
+FEATURES:
+
+* **New Resource:** `pipes_organization_notifier`
+* **New Resource:** `pipes_user_notifier`
+* **New Resource:** `pipes_workspace_notifier`
+* **New Resource:** `pipes_workspace_flowpipe_mod`
+* **New Resource:** `pipes_workspace_flowpipe_mod_variable`
+* **New Resource:** `pipes_workspace_flowpipe_trigger`
+* **New Data Source:** `pipes_integration`
+* **New Data Source:** `pipes_workspace`
+* **New Data Source:** `pipes_workspace_flowpipe_pipeline`
+
+ENHANCEMENTS:
+
+* Updated some `string` based fields to be typed enums for better validation.
+
 ## 0.14.0 (August 2, 2024)
 
 BREAKING CHANGES:
