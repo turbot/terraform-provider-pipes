@@ -61,7 +61,7 @@ resource "pipes_organization_integration" "azure" {
   type = "azure"
   config = jsonencode(
     {
-      environment = "public"
+      environment = "AZUREPUBLICCLOUD"
       tenant_id = "redacted"
       client_id = "redacted"
       client_secret = "redacted"
