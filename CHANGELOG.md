@@ -8,6 +8,7 @@ BREAKING CHANGES:
 
 FEATURES:
 
+* **New Resource:** `pipes_tenant_notifier`
 * **New Resource:** `pipes_organization_notifier`
 * **New Resource:** `pipes_user_notifier`
 * **New Resource:** `pipes_workspace_notifier`

@@ -68,6 +68,7 @@ In addition to all arguments above, the following attributes are exported:
 - `created_at` - The time when the invitation has been sent.
 - `created_by` - The handle of the user who sent the invitation.
 - `display_name` - The display name of the user to add to the organization.
+- `last_activity_at` - The time when activity was last performed by the user in the organization.
 - `organization_id` - An unique identifier of the organization.
 - `organization_member_id` - An unique identifier of the organization membership.
 - `status` - The current membership status. Can be either `invited`, or `accepted`.

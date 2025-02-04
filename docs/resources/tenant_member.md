@@ -61,6 +61,7 @@ In addition to all arguments above, the following attributes are exported:
 
 - `created_at` - The time when the invitation has been sent.
 - `created_by` - The handle of the user who sent the invitation.
+- `last_activity_at` - The time when activity was last performed by the user in the tenant.
 - `status` - The current membership status. Can be either `invited`, or `accepted`.
 - `tenant_id` - Unique identifier of the tenant to which the user is to be added.
 - `tenant_member_id` - Unique identifier of the tenant membership.
