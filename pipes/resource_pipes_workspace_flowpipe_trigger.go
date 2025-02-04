@@ -62,7 +62,7 @@ func resourceWorkspaceFlowpipeTrigger() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"frequency": {
+			"schedule": {
 				Type:         schema.TypeString,
 				Required:     true,
 				ValidateFunc: validation.StringIsJSON,
@@ -117,9 +117,9 @@ func resourceWorkspaceFlowpipeTriggerCreate(ctx context.Context, d *schema.Resou
 	var err error
 
 	// parse frequency & args - return if error
-	var frequency pipes.PipelineFrequency
+	var schedule pipes.PipelineFrequency
 	var args map[string]interface{}
-	err = json.Unmarshal([]byte(d.Get("frequency").(string)), &frequency)
+	err = json.Unmarshal([]byte(d.Get("schedule").(string)), &schedule)
 	if err != nil {
 		diags = append(diags, diag.Errorf("error parsing frequency for workspace Flowpipe trigger: %v", d.Get("frequency").(string))...)
 	}
@@ -158,7 +158,7 @@ func resourceWorkspaceFlowpipeTriggerCreate(ctx context.Context, d *schema.Resou
 		Description: description,
 		Name:        name,
 		Pipeline:    pipeline,
-		Schedule:    frequency,
+		Schedule:    schedule,
 		State:       state,
 		Title:       title,
 	}
@@ -193,7 +193,7 @@ func resourceWorkspaceFlowpipeTriggerCreate(ctx context.Context, d *schema.Resou
 	d.Set("description", resp.Description)
 	d.Set("name", resp.Name)
 	d.Set("pipeline", pipeline)
-	d.Set("frequency", FormatJson(resp.Schedule))
+	d.Set("schedule", FormatJson(resp.Schedule))
 	d.Set("args", FormatJson(resp.Args))
 	d.Set("state", resp.State)
 	d.Set("state_reason", resp.StateReason)
@@ -275,7 +275,7 @@ func resourceWorkspaceFlowpipeTriggerRead(ctx context.Context, d *schema.Resourc
 	d.Set("description", resp.Description)
 	d.Set("name", resp.Name)
 	d.Set("pipeline", pipeline)
-	d.Set("frequency", FormatJson(resp.Schedule))
+	d.Set("schedule", FormatJson(resp.Schedule))
 	d.Set("args", FormatJson(resp.Args))
 	d.Set("state", resp.State)
 	d.Set("state_reason", resp.StateReason)
@@ -313,9 +313,9 @@ func resourceWorkspaceFlowpipeTriggerUpdate(ctx context.Context, d *schema.Resou
 	pipeline := d.Get("pipeline").(string)
 
 	// parse frequency & args - return if error
-	var frequency pipes.PipelineFrequency
+	var schedule pipes.PipelineFrequency
 	var args map[string]interface{}
-	err = json.Unmarshal([]byte(d.Get("frequency").(string)), &frequency)
+	err = json.Unmarshal([]byte(d.Get("schedule").(string)), &schedule)
 	if err != nil {
 		diags = append(diags, diag.Errorf("error parsing frequency for workspace Flowpipe trigger: %v", d.Get("frequency").(string))...)
 	}
@@ -353,7 +353,7 @@ func resourceWorkspaceFlowpipeTriggerUpdate(ctx context.Context, d *schema.Resou
 		Args:        &args,
 		Description: description,
 		Name:        name,
-		Schedule:    &frequency,
+		Schedule:    &schedule,
 		State:       state,
 		Title:       title,
 	}
@@ -388,7 +388,7 @@ func resourceWorkspaceFlowpipeTriggerUpdate(ctx context.Context, d *schema.Resou
 	d.Set("description", resp.Description)
 	d.Set("name", resp.Name)
 	d.Set("pipeline", pipeline)
-	d.Set("frequency", FormatJson(resp.Schedule))
+	d.Set("schedule", FormatJson(resp.Schedule))
 	d.Set("args", FormatJson(resp.Args))
 	d.Set("state", resp.State)
 	d.Set("state_reason", resp.StateReason)

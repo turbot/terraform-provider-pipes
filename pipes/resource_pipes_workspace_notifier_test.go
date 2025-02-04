@@ -3,11 +3,12 @@ package pipes
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"log"
 	"net/http"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccUserWorkspaceNotifier_Basic(t *testing.T) {
@@ -40,7 +41,7 @@ func TestAccUserWorkspaceNotifier_Basic(t *testing.T) {
 
 func testAccUserWorkspaceNotifierConfig(workspaceHandle, integrationHandle, notifierName string) string {
 	return fmt.Sprintf(`
-data "pipes_integration" "slack" {
+data "pipes_tenant_integration" "slack" {
 	handle = "%s"
 }
 
@@ -50,7 +51,7 @@ resource "pipes_workspace_notifier" "slack_general" {
 	notifies = jsonencode([{
 		"type": "slack",
 		"channel": "general",
-		"integration": data.pipes_integration.slack.integration_id,
+		"integration": data.pipes_tenant_integration.slack.integration_id,
     }])
 	state = "enabled"
 }
