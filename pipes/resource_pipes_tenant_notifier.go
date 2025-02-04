@@ -3,32 +3,33 @@ package pipes
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
-	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	"github.com/turbot/go-kit/types"
 	"github.com/turbot/pipes-sdk-go"
 )
 
-func resourceOrganizationNotifier() *schema.Resource {
+func resourceTenantNotifier() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: resourceOrganizationNotifierCreate,
-		ReadContext:   resourceOrganizationNotifierRead,
-		UpdateContext: resourceOrganizationNotifierUpdate,
-		DeleteContext: resourceOrganizationNotifierDelete,
+		CreateContext: resourceTenantNotifierCreate,
+		ReadContext:   resourceTenantNotifierRead,
+		UpdateContext: resourceTenantNotifierUpdate,
+		DeleteContext: resourceTenantNotifierDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Schema: map[string]*schema.Schema{
-			"organization": {
+			"notifier_id": {
 				Type:     schema.TypeString,
-				Required: true,
+				Computed: true,
+			},
+			"tenant_id": {
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 			"name": {
 				Type:     schema.TypeString,
@@ -39,20 +40,9 @@ func resourceOrganizationNotifier() *schema.Resource {
 				Required:     true,
 				ValidateFunc: validation.StringIsJSON,
 			},
-			"notifier_id": {
+			"precedence": {
 				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"tenant_id": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"workspace_id": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"identity_id": {
-				Type:     schema.TypeString,
+				Optional: true,
 				Computed: true,
 			},
 			"state": {
@@ -60,11 +50,6 @@ func resourceOrganizationNotifier() *schema.Resource {
 				Required: true,
 			},
 			"state_reason": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-			},
-			"precedence": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
@@ -97,7 +82,7 @@ func resourceOrganizationNotifier() *schema.Resource {
 	}
 }
 
-func resourceOrganizationNotifierCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceTenantNotifierCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	var r *http.Response
 	var err error
@@ -118,7 +103,6 @@ func resourceOrganizationNotifierCreate(ctx context.Context, d *schema.ResourceD
 		}
 	}
 
-	orgHandle := d.Get("organization").(string)
 	notifierName := d.Get("name").(string)
 
 	// create request
@@ -129,102 +113,82 @@ func resourceOrganizationNotifierCreate(ctx context.Context, d *schema.ResourceD
 		Notifies: notifies,
 	}
 
-	resp, r, err = client.APIClient.OrgNotifiers.Create(ctx, orgHandle).Request(req).Execute()
+	resp, r, err = client.APIClient.TenantNotifiers.Create(ctx).Request(req).Execute()
 	if err != nil {
-		return diag.Errorf("error creating organization notifier: %v", decodeResponse(r))
+		return diag.Errorf("error creating tenant notifier: %v", decodeResponse(r))
 	}
-	log.Printf("\n[DEBUG] Organization notifier created: %s", resp.Name)
+	log.Printf("\n[DEBUG] Tenant notifier created: %s", resp.Name)
 
 	// Set properties
-	d.Set("organization", orgHandle)
-	d.Set("name", resp.Name)
 	d.Set("notifier_id", resp.Id)
 	d.Set("tenant_id", resp.TenantId)
-	d.Set("workspace_id", resp.WorkspaceId)
-	d.Set("identity_id", resp.IdentityId)
+	d.Set("name", resp.Name)
 	d.Set("notifies", FormatJson(resp.Notifies))
 	d.Set("precedence", resp.Precedence)
 	d.Set("state", resp.State)
 	d.Set("state_reason", resp.StateReason)
 	d.Set("created_at", resp.CreatedAt)
+	d.Set("updated_at", resp.UpdatedAt)
 	if resp.CreatedBy != nil {
 		d.Set("created_by", resp.CreatedBy.Handle)
 	}
-	d.Set("updated_at", resp.UpdatedAt)
 	if resp.UpdatedBy != nil {
 		d.Set("updated_by", resp.UpdatedBy.Handle)
 	}
 	d.Set("version_id", resp.VersionId)
 
-	d.SetId(fmt.Sprintf("%s/%s", orgHandle, resp.Name))
+	d.SetId(resp.Name)
 
 	return diags
 }
 
-func resourceOrganizationNotifierRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceTenantNotifierRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	var r *http.Response
 	var err error
 	var resp pipes.Notifier
 
-	var orgHandle, notifierName string
-	parts := strings.Split(d.Id(), "/")
-	switch len(parts) {
-	case 2:
-		orgHandle = parts[0]
-		notifierName = parts[1]
-	default:
-		return diag.Errorf("error parsing organization handle and notifier name from id: %s", d.Id())
-	}
+	notifierName := d.Id()
 
 	client := meta.(*PipesClient)
 
-	resp, r, err = client.APIClient.OrgNotifiers.Get(ctx, orgHandle, notifierName).Execute()
+	resp, r, err = client.APIClient.TenantNotifiers.Get(ctx, notifierName).Execute()
 	if err != nil {
-		return diag.Errorf("error reading organization notifier: %v", decodeResponse(r))
+		return diag.Errorf("error reading tenant notifier: %v", decodeResponse(r))
 	}
 
 	// Set properties
-	d.Set("organization", orgHandle)
-	d.Set("name", resp.Name)
 	d.Set("notifier_id", resp.Id)
 	d.Set("tenant_id", resp.TenantId)
-	d.Set("workspace_id", resp.WorkspaceId)
-	d.Set("identity_id", resp.IdentityId)
+	d.Set("name", resp.Name)
 	d.Set("notifies", FormatJson(resp.Notifies))
 	d.Set("precedence", resp.Precedence)
 	d.Set("state", resp.State)
 	d.Set("state_reason", resp.StateReason)
 	d.Set("created_at", resp.CreatedAt)
+	d.Set("updated_at", resp.UpdatedAt)
 	if resp.CreatedBy != nil {
 		d.Set("created_by", resp.CreatedBy.Handle)
 	}
-	d.Set("updated_at", resp.UpdatedAt)
 	if resp.UpdatedBy != nil {
 		d.Set("updated_by", resp.UpdatedBy.Handle)
 	}
 	d.Set("version_id", resp.VersionId)
 
-	d.SetId(fmt.Sprintf("%s/%s", orgHandle, resp.Name))
+	d.SetId(resp.Name)
 
 	return diags
 }
 
-func resourceOrganizationNotifierUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceTenantNotifierUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	var r *http.Response
 	var err error
 	var resp pipes.Notifier
 
-	var orgHandle, notifierName string
-	parts := strings.Split(d.Id(), "/")
-	switch len(parts) {
-	case 2:
-		orgHandle = parts[0]
-		notifierName = parts[1]
-	default:
-		return diag.Errorf("error parsing organization handle and notifier name from id: %s", d.Id())
-	}
+	oldName, newName := d.GetChange("name")
+	oldNotifierName := oldName.(string)
+	newNotifierName := newName.(string)
 
 	s := d.Get("state").(string)
 	state, err := pipes.NewNotifierStateFromValue(s)
@@ -241,74 +205,55 @@ func resourceOrganizationNotifierUpdate(ctx context.Context, d *schema.ResourceD
 		}
 	}
 
-	newNotifierName := notifierName
-	_, newName := d.GetChange("name")
-	if newName != nil && newName.(string) != notifierName {
-		newNotifierName = newName.(string)
-	}
-
 	// create request
 	client := meta.(*PipesClient)
 	req := pipes.UpdateNotifierRequest{
-		Name:     types.String(newNotifierName),
+		Name:     &newNotifierName,
 		State:    state,
 		Notifies: &notifies,
 	}
 
-	resp, r, err = client.APIClient.OrgNotifiers.Update(ctx, orgHandle, notifierName).Request(req).Execute()
-
+	resp, r, err = client.APIClient.TenantNotifiers.Update(ctx, oldNotifierName).Request(req).Execute()
 	// check for errors
 	if err != nil {
-		return diag.Errorf("error updating organization notifier: %v", decodeResponse(r))
+		return diag.Errorf("error updating tenant notifier: %v", decodeResponse(r))
 	}
-	log.Printf("\n[DEBUG] Organization notifier updated: %s", resp.Name)
+	log.Printf("\n[DEBUG] Tenant notifier updated: %s", resp.Name)
 
 	// Set properties
-	d.Set("organization", orgHandle)
-	d.Set("name", resp.Name)
 	d.Set("notifier_id", resp.Id)
 	d.Set("tenant_id", resp.TenantId)
-	d.Set("workspace_id", resp.WorkspaceId)
-	d.Set("identity_id", resp.IdentityId)
+	d.Set("name", resp.Name)
 	d.Set("notifies", FormatJson(resp.Notifies))
 	d.Set("precedence", resp.Precedence)
 	d.Set("state", resp.State)
 	d.Set("state_reason", resp.StateReason)
 	d.Set("created_at", resp.CreatedAt)
+	d.Set("updated_at", resp.UpdatedAt)
 	if resp.CreatedBy != nil {
 		d.Set("created_by", resp.CreatedBy.Handle)
 	}
-	d.Set("updated_at", resp.UpdatedAt)
 	if resp.UpdatedBy != nil {
 		d.Set("updated_by", resp.UpdatedBy.Handle)
 	}
 	d.Set("version_id", resp.VersionId)
 
-	d.SetId(fmt.Sprintf("%s/%s", orgHandle, resp.Name))
+	d.SetId(resp.Name)
 
 	return diags
 }
 
-func resourceOrganizationNotifierDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceTenantNotifierDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	var r *http.Response
 	var err error
 
 	client := meta.(*PipesClient)
+	notifierName := d.Id()
 
-	var orgHandle, notifierName string
-	parts := strings.Split(d.Id(), "/")
-	switch len(parts) {
-	case 2:
-		orgHandle = parts[0]
-		notifierName = parts[1]
-	default:
-		return diag.Errorf("error parsing orgnization handle and notifier name from id: %s", d.Id())
-	}
-
-	_, r, err = client.APIClient.OrgNotifiers.Delete(ctx, orgHandle, notifierName).Execute()
+	_, r, err = client.APIClient.TenantNotifiers.Delete(ctx, notifierName).Execute()
 	if err != nil {
-		return diag.Errorf("resourceOrganizationNotifierDelete error: %v", decodeResponse(r))
+		return diag.Errorf("resourceTenantNotifierDelete error: %v", decodeResponse(r))
 	}
 
 	d.SetId("")

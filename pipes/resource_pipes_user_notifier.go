@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
+	"github.com/turbot/go-kit/types"
 	"github.com/turbot/pipes-sdk-go"
 )
 
@@ -237,10 +238,16 @@ func resourceUserNotifierUpdate(ctx context.Context, d *schema.ResourceData, met
 		}
 	}
 
+	newNotifierName := notifierName
+	_, newName := d.GetChange("name")
+	if newName != nil && newName.(string) != notifierName {
+		newNotifierName = newName.(string)
+	}
+
 	// create request
 	client := meta.(*PipesClient)
 	req := pipes.UpdateNotifierRequest{
-		Name:     &notifierName,
+		Name:     types.String(newNotifierName),
 		State:    state,
 		Notifies: &notifies,
 	}

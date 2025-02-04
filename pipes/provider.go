@@ -46,6 +46,7 @@ func Provider() *schema.Provider {
 			"pipes_tenant_connection_permission":              resourceTenantConnectionPermission(),
 			"pipes_tenant_connection_folder":                  resourceTenantConnectionFolder(),
 			"pipes_tenant_connection_folder_permission":       resourceTenantConnectionFolderPermission(),
+			"pipes_tenant_notifier":                           resourceTenantNotifier(),
 			"pipes_tenant_integration":                        resourceTenantIntegration(),
 			"pipes_tenant_member":                             resourceTenantMember(),
 			"pipes_user_integration":                          resourceUserIntegration(),
