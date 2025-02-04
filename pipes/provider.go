@@ -68,7 +68,9 @@ func Provider() *schema.Provider {
 			"pipes_workspace_snapshot":                        resourceWorkspaceSnapshot(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
-			"pipes_integration":                 dataSourceIntegration(),
+			"pipes_tenant_integration":          dataSourceTenantIntegration(),
+			"pipes_organization_integration":    dataSourceOrganizationIntegration(),
+			"pipes_user_integration":            dataSourceUserIntegration(),
 			"pipes_organization":                dataSourceOrganization(),
 			"pipes_process":                     dataSourceProcess(),
 			"pipes_tenant":                      dataSourceTenant(),

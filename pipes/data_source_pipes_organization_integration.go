@@ -12,35 +12,21 @@ import (
 	"github.com/turbot/pipes-sdk-go"
 )
 
-func dataSourceIntegration() *schema.Resource {
+func dataSourceOrganizationIntegration() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceIntegrationRead,
+		ReadContext: dataSourceOrganizationIntegrationRead,
 		Schema: map[string]*schema.Schema{
-			"organization": {
+			"integration_id": {
 				Type:     schema.TypeString,
-				Optional: true,
-				Computed: false,
-			},
-			"workspace": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: false,
-			},
-			"handle": {
-				Type:     schema.TypeString,
-				Required: true,
+				Computed: true,
 			},
 			"tenant_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"integration_id": {
+			"handle": {
 				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"identity_id": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Required: true,
 			},
 			"type": {
 				Type:     schema.TypeString,
@@ -86,11 +72,15 @@ func dataSourceIntegration() *schema.Resource {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
+			"organization": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
 		},
 	}
 }
 
-func dataSourceIntegrationRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceOrganizationIntegrationRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	var resp pipes.Integration
 	var r *http.Response
@@ -98,44 +88,14 @@ func dataSourceIntegrationRead(ctx context.Context, d *schema.ResourceData, meta
 
 	client := meta.(*PipesClient)
 
-	orgHandle := d.Get("organization").(string)
-	workspaceHandle := d.Get("workspace").(string)
+	// Organization is mandatory for this data source
+	orgHandle := ""
+	if val, ok := d.GetOk("organization"); ok {
+		orgHandle = val.(string)
+	}
 	integrationHandle := d.Get("handle").(string)
 
-	var userHandle, tfId string
-	isUser := orgHandle == ""
-
-	if isUser {
-		userHandle, r, err = getUserHandler(ctx, client)
-		if err != nil {
-			return diag.Errorf("dataSourceIntegrationRead.getUserHandler error  %v", decodeResponse(r))
-		}
-	}
-
-	switch {
-	case isUser && workspaceHandle == "":
-		resp, r, err = client.APIClient.UserIntegrations.Get(ctx, userHandle, integrationHandle).Execute()
-		if err == nil {
-			tfId = fmt.Sprintf("%s/%s", userHandle, resp.Handle)
-		}
-	case isUser && workspaceHandle != "":
-		resp, r, err = client.APIClient.UserWorkspaceIntegrations.Get(ctx, userHandle, workspaceHandle, integrationHandle).Execute()
-		if err == nil {
-			tfId = fmt.Sprintf("%s/%s/%s", userHandle, workspaceHandle, resp.Handle)
-		}
-	case !isUser && workspaceHandle == "":
-		resp, r, err = client.APIClient.OrgIntegrations.Get(ctx, orgHandle, integrationHandle).Execute()
-		if err == nil {
-			tfId = fmt.Sprintf("%s/%s", orgHandle, resp.Handle)
-		}
-	case !isUser && workspaceHandle != "":
-		resp, r, err = client.APIClient.OrgWorkspaceIntegrations.Get(ctx, orgHandle, workspaceHandle, integrationHandle).Execute()
-		if err == nil {
-			tfId = fmt.Sprintf("%s/%s/%s", orgHandle, workspaceHandle, resp.Handle)
-		}
-	}
-
-	// Check for errors
+	resp, r, err = client.APIClient.OrgIntegrations.Get(ctx, orgHandle, integrationHandle).Execute()
 	if err != nil {
 		return diag.Errorf("error obtaining integration: %v", decodeResponse(r))
 	}
@@ -144,14 +104,13 @@ func dataSourceIntegrationRead(ctx context.Context, d *schema.ResourceData, meta
 	// Convert config to string
 	configString, err := mapToJSONString(resp.GetConfig())
 	if err != nil {
-		return diag.Errorf("resourceTenantIntegrationRead. Error converting config to string: %v", err)
+		return diag.Errorf("dataSourceOrganizationIntegrationRead. Error converting config to string: %v", err)
 	}
 
 	// Set properties
 	d.Set("integration_id", resp.Id)
-	d.Set("handle", resp.Handle)
-	d.Set("identity_id", resp.IdentityId)
 	d.Set("tenant_id", resp.TenantId)
+	d.Set("handle", resp.Handle)
 	d.Set("type", resp.Type)
 	d.Set("state", resp.State)
 	d.Set("state_reason", resp.StateReason)
@@ -168,6 +127,6 @@ func dataSourceIntegrationRead(ctx context.Context, d *schema.ResourceData, meta
 	}
 	d.Set("version_id", resp.VersionId)
 
-	d.SetId(tfId)
+	d.SetId(fmt.Sprintf("%s/%s", orgHandle, integrationHandle))
 	return diags
 }

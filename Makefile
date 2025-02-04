@@ -5,7 +5,7 @@ PKG_NAME=pipes
 VERSION=0.0.1
 DIR=~/.terraform.d/plugins
 TEST?=$$(go list ./... |grep -v 'vendor')
-RUN=TestAccUserPreferences_Basic
+RUN=TestAccTenantIntegrationDataSource_Basic
 
 default: build
 
