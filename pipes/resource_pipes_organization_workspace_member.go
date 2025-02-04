@@ -67,6 +67,10 @@ func resourceOrganizationWorkspaceMember() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"last_activity_at": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"created_at": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -155,6 +159,7 @@ func resourceOrganizationWorkspaceMemberCreate(ctx context.Context, d *schema.Re
 	d.Set("status", orgWorkspaceMemberDetails.Status)
 	d.Set("role", orgWorkspaceMemberDetails.Role)
 	d.Set("scope", orgWorkspaceMemberDetails.Scope)
+	d.Set("last_activity_at", orgWorkspaceMemberDetails.LastActivityAt)
 	d.Set("created_at", orgWorkspaceMemberDetails.CreatedAt)
 	d.Set("updated_at", orgWorkspaceMemberDetails.UpdatedAt)
 	if orgWorkspaceMemberDetails.CreatedBy != nil {
@@ -218,6 +223,7 @@ func resourceOrganizationWorkspaceMemberRead(ctx context.Context, d *schema.Reso
 	d.Set("status", orgWorkspaceMemberDetails.Status)
 	d.Set("role", orgWorkspaceMemberDetails.Role)
 	d.Set("scope", orgWorkspaceMemberDetails.Scope)
+	d.Set("last_activity_at", orgWorkspaceMemberDetails.LastActivityAt)
 	d.Set("created_at", orgWorkspaceMemberDetails.CreatedAt)
 	d.Set("updated_at", orgWorkspaceMemberDetails.UpdatedAt)
 	if orgWorkspaceMemberDetails.CreatedBy != nil {
@@ -273,6 +279,7 @@ func resourceOrganizationWorkspaceMemberUpdate(ctx context.Context, d *schema.Re
 	d.Set("status", orgWorkspaceMemberDetails.Status)
 	d.Set("role", orgWorkspaceMemberDetails.Role)
 	d.Set("scope", orgWorkspaceMemberDetails.Scope)
+	d.Set("last_activity_at", orgWorkspaceMemberDetails.LastActivityAt)
 	d.Set("created_at", orgWorkspaceMemberDetails.CreatedAt)
 	d.Set("updated_at", orgWorkspaceMemberDetails.UpdatedAt)
 	if orgWorkspaceMemberDetails.CreatedBy != nil {

@@ -23,6 +23,9 @@ FEATURES:
 ENHANCEMENTS:
 
 * Updated some `string` based fields to be typed enums for better validation.
+* `resources/pipes_tenant_member`: Add attribute `last_activity_at`.
+* `resources/pipes_organization_member`: Add attribute `last_activity_at`.
+* `resources/pipes_organization_workspace_member`: Add attribute `last_activity_at`.
 
 ## 0.14.0 (August 2, 2024)
 
