@@ -8,8 +8,8 @@ import (
 )
 
 func TestAccTenantIntegrationDataSource_Basic(t *testing.T) {
-	dataSourceName := "data.pipes_integration.test"
-	handle := "pipes-email"
+	dataSourceName := "data.pipes_tenant_integration.test"
+	handle := "email.default"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -34,8 +34,8 @@ data "pipes_tenant_integration" "test" {
 }
 
 func TestAccUserIntegrationDataSource_Basic(t *testing.T) {
-	dataSourceName := "data.pipes_integration.test"
-	handle := "pipes-email"
+	dataSourceName := "data.pipes_user_integration.test"
+	handle := "email.default"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
