@@ -12,7 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	pipes "github.com/turbot/pipes-sdk-go"
+	"github.com/turbot/pipes-sdk-go"
 )
 
 func resourceWorkspacePipeline() *schema.Resource {
@@ -158,7 +158,7 @@ func resourceWorkspacePipelineCreate(ctx context.Context, d *schema.ResourceData
 	// Create request
 	req := pipes.CreatePipelineRequest{Title: title, Pipeline: pipeline, Frequency: frequency, Args: args, Tags: tags}
 	if desiredState != "" {
-		req.DesiredState = &desiredState
+		req.DesiredState = (*pipes.DesiredState)(&desiredState)
 	}
 
 	userHandle := ""
@@ -340,7 +340,7 @@ func resourceWorkspacePipelineUpdate(ctx context.Context, d *schema.ResourceData
 	// Create request
 	req := pipes.UpdatePipelineRequest{Title: &title, Frequency: &frequency, Args: args, Tags: tags}
 	if desiredState != "" {
-		req.DesiredState = &desiredState
+		req.DesiredState = (*pipes.DesiredState)(&desiredState)
 	}
 
 	userHandle := ""

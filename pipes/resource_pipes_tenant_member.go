@@ -54,6 +54,10 @@ func resourceTenantMember() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"last_activity_at": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"created_at": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -117,6 +121,7 @@ func resourceTenantMemberCreate(ctx context.Context, d *schema.ResourceData, met
 	d.Set("email", tenantMember.Email)
 	d.Set("role", tenantMember.Role)
 	d.Set("status", tenantMember.Status)
+	d.Set("last_activity_at", tenantMember.LastActivityAt)
 	d.Set("created_at", tenantMember.CreatedAt)
 	d.Set("updated_at", tenantMember.UpdatedAt)
 	d.Set("version_id", tenantMember.VersionId)
@@ -176,6 +181,7 @@ func resourceTenantMemberRead(ctx context.Context, d *schema.ResourceData, meta 
 	d.Set("email", tenantMember.Email)
 	d.Set("role", tenantMember.Role)
 	d.Set("status", tenantMember.Status)
+	d.Set("last_activity_at", tenantMember.LastActivityAt)
 	d.Set("created_at", tenantMember.CreatedAt)
 	d.Set("updated_at", tenantMember.UpdatedAt)
 	d.Set("version_id", tenantMember.VersionId)
@@ -228,6 +234,7 @@ func resourceTenantMemberUpdate(ctx context.Context, d *schema.ResourceData, met
 	d.Set("email", tenantMember.Email)
 	d.Set("role", tenantMember.Role)
 	d.Set("status", tenantMember.Status)
+	d.Set("last_activity_at", tenantMember.LastActivityAt)
 	d.Set("created_at", tenantMember.CreatedAt)
 	d.Set("updated_at", tenantMember.UpdatedAt)
 	d.Set("version_id", tenantMember.VersionId)

@@ -61,6 +61,7 @@ In addition to all arguments above, the following attributes are exported:
 - `created_at` - The time when the invitation has been sent.
 - `created_by` - The handle of the user who sent the invitation.
 - `display_name` - The display name of the user to add to the workspace.
+- `last_activity_at` - The time when activity was last performed by the user in the workspace.
 - `organization_workspace_member_id` - A unique identifier of the organization workspace membership.
 - `organization_id` - A unique identifier of the organization.
 - `scope` - The level of membership for the user. Can be either `org` or `workspace`.

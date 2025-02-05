@@ -12,7 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	pipes "github.com/turbot/pipes-sdk-go"
+	"github.com/turbot/pipes-sdk-go"
 )
 
 func resourceWorkspaceSnapshot() *schema.Resource {
@@ -146,7 +146,7 @@ func resourceWorkspaceSnapshotCreate(ctx context.Context, d *schema.ResourceData
 	log.Printf("\n[DEBUG] Snapshot Data: %v", data)
 
 	// Create request
-	req := pipes.CreateWorkspaceSnapshotRequest{Data: data, Tags: tags, Visibility: &visibility}
+	req := pipes.CreateWorkspaceSnapshotRequest{Data: data, Tags: tags, Visibility: (*pipes.SnapshotVisibility)(&visibility)}
 
 	isUser, orgHandle := isUserConnection(d)
 	if isUser {
@@ -300,7 +300,7 @@ func resourceWorkspaceSnapshotUpdate(ctx context.Context, d *schema.ResourceData
 	visibility := d.Get("visibility").(string)
 
 	// Create request
-	req := pipes.UpdateWorkspaceSnapshotRequest{Tags: tags, Visibility: &visibility}
+	req := pipes.UpdateWorkspaceSnapshotRequest{Tags: tags, Visibility: (*pipes.SnapshotVisibility)(&visibility)}
 
 	isUser, orgHandle := isUserConnection(d)
 	if isUser {

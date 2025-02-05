@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	pipes "github.com/turbot/pipes-sdk-go"
+	"github.com/turbot/pipes-sdk-go"
 )
 
 func resourceOrganizationIntegration() *schema.Resource {
@@ -63,7 +63,7 @@ func resourceOrganizationIntegration() *schema.Resource {
 				DiffSuppressFunc: IntegrationJSONStringsEqual,
 			},
 			"github_installation_id": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeInt,
 				Optional: true,
 				Computed: true,
 			},
@@ -129,7 +129,7 @@ func resourceOrganizationIntegrationCreate(ctx context.Context, d *schema.Resour
 
 	req := pipes.CreateIntegrationRequest{
 		Handle: integrationHandle,
-		Type:   integrationType,
+		Type:   pipes.IntegrationType(integrationType),
 	}
 
 	if config != nil {
@@ -261,8 +261,10 @@ func resourceOrganizationIntegrationUpdate(ctx context.Context, d *schema.Resour
 		orgHandle = val.(string)
 	}
 
-	old, new := d.GetChange("handle")
-	if new.(string) == "" {
+	o, n := d.GetChange("handle")
+	oldHandle := o.(string)
+	newHandle := n.(string)
+	if newHandle == "" {
 		return diag.Errorf("handle must be configured")
 	}
 	if value, ok := d.GetOk("state"); ok {
@@ -274,12 +276,9 @@ func resourceOrganizationIntegrationUpdate(ctx context.Context, d *schema.Resour
 		configString, config = FormatIntegrationJSONString(value.(string))
 	}
 
-	oldHandle := old.(string)
-	newHandle := new.(string)
-
 	req := pipes.UpdateIntegrationRequest{
 		Handle: &newHandle,
-		State:  &state,
+		State:  (*pipes.IntegrationState)(&state),
 	}
 
 	if config != nil {

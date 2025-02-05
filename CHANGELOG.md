@@ -1,3 +1,33 @@
+## 0.15.0 (February 4, 2025)
+
+BREAKING CHANGES:
+
+* Resource `pipes_organization_integration`: Attribute `github_installation_id` is now expected type `int` instead of `string`.
+* Resource `pipes_tenant_integration`: Attribute `github_installation_id` is now expected type `int` instead of `string`.
+* Resource `pipes_user_integration`: Attribute `github_installation_id` is now expected type `int` instead of `string`.
+
+FEATURES:
+
+* **New Resource:** `pipes_tenant_notifier`
+* **New Resource:** `pipes_organization_notifier`
+* **New Resource:** `pipes_user_notifier`
+* **New Resource:** `pipes_workspace_notifier`
+* **New Resource:** `pipes_workspace_flowpipe_mod`
+* **New Resource:** `pipes_workspace_flowpipe_mod_variable`
+* **New Resource:** `pipes_workspace_flowpipe_trigger`
+* **New Data Source:** `pipes_organization_integration`
+* **New Data Source:** `pipes_tenant_integration`
+* **New Data Source:** `pipes_user_integration`
+* **New Data Source:** `pipes_workspace`
+* **New Data Source:** `pipes_workspace_flowpipe_pipeline`
+
+ENHANCEMENTS:
+
+* Updated some `string` based fields to be typed enums for better validation.
+* `resources/pipes_tenant_member`: Add attribute `last_activity_at`.
+* `resources/pipes_organization_member`: Add attribute `last_activity_at`.
+* `resources/pipes_organization_workspace_member`: Add attribute `last_activity_at`.
+
 ## 0.14.0 (August 2, 2024)
 
 BREAKING CHANGES:
