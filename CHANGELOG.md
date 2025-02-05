@@ -1,4 +1,4 @@
-## 0.15.0 (February 4, 2025)
+## 0.15.0 (February 5, 2025)
 
 BREAKING CHANGES:
 
