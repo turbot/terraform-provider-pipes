@@ -166,7 +166,7 @@ func resourceOrganizationConnectionCreate(ctx context.Context, d *schema.Resourc
 
 	// save the formatted data: this is to ensure the acceptance tests behave in a consistent way regardless of the ordering of the json data
 	if value, ok := d.GetOk("config"); ok {
-		configString, config = formatConnectionJSONString(value.(string))
+		_, config = formatConnectionJSONString(value.(string))
 	}
 
 	req := pipes.CreateConnectionRequest{
@@ -193,6 +193,13 @@ func resourceOrganizationConnectionCreate(ctx context.Context, d *schema.Resourc
 		return diag.Errorf("resourceOrganizationConnectionCreate. Create connection api error  %v", decodeResponse(r))
 	}
 
+	if resp.GetConfig() != nil {
+		configString, err = mapToJSONString(resp.GetConfig())
+		if err != nil {
+			return diag.Errorf("resourceOrganizationConnectionCreate. Error converting config to string: %v", err)
+		}
+	}
+
 	d.Set("connection_id", resp.Id)
 	d.Set("tenant_id", resp.TenantId)
 	d.Set("organization_id", resp.IdentityId)
@@ -200,7 +207,7 @@ func resourceOrganizationConnectionCreate(ctx context.Context, d *schema.Resourc
 	d.Set("plugin", resp.Plugin)
 	d.Set("plugin_version", resp.PluginVersion)
 	d.Set("type", resp.Type)
-	if config != nil {
+	if configString != "" && configString != "null" {
 		d.Set("config", configString)
 	}
 	d.Set("config_source", resp.ConfigSource)
@@ -236,7 +243,6 @@ func resourceOrganizationConnectionRead(ctx context.Context, d *schema.ResourceD
 
 	// Warning or errors can be collected in a slice type
 	var connectionHandle, orgId, configString string
-	var config map[string]interface{}
 	var diags diag.Diagnostics
 
 	// Its an org level connection so the id would be of format "OrganizationHandle/ConnectionHandle"
@@ -253,11 +259,6 @@ func resourceOrganizationConnectionRead(ctx context.Context, d *schema.ResourceD
 		return diag.Errorf("resourceOrganizationConnectionRead. Connection handle not present.")
 	}
 
-	// save the formatted data: this is to ensure the acceptance tests behave in a consistent way regardless of the ordering of the json data
-	if value, ok := d.GetOk("config"); ok {
-		configString, config = formatConnectionJSONString(value.(string))
-	}
-
 	resp, r, err := client.APIClient.OrgConnections.Get(context.Background(), orgId, connectionHandle).Execute()
 	if err != nil {
 		if r.StatusCode == 404 {
@@ -272,7 +273,7 @@ func resourceOrganizationConnectionRead(ctx context.Context, d *schema.ResourceD
 	}
 
 	// Convert config to string
-	if config == nil {
+	if resp.GetConfig() != nil {
 		configString, err = mapToJSONString(resp.GetConfig())
 		if err != nil {
 			return diag.Errorf("resourceOrganizationConnectionRead. Error converting config to string: %v", err)
@@ -336,7 +337,7 @@ func resourceOrganizationConnectionUpdate(ctx context.Context, d *schema.Resourc
 
 	// save the formatted data: this is to ensure the acceptance tests behave in a consistent way regardless of the ordering of the json data
 	if value, ok := d.GetOk("config"); ok {
-		configString, config = formatConnectionJSONString(value.(string))
+		_, config = formatConnectionJSONString(value.(string))
 	}
 
 	req := pipes.UpdateConnectionRequest{Handle: types.String(newConnectionHandle.(string))}
@@ -364,6 +365,13 @@ func resourceOrganizationConnectionUpdate(ctx context.Context, d *schema.Resourc
 		return diag.Errorf("resourceOrganizationConnectionUpdate. Update connection error: %v", decodeResponse(r))
 	}
 
+	if resp.GetConfig() != nil {
+		configString, err = mapToJSONString(resp.GetConfig())
+		if err != nil {
+			return diag.Errorf("resourceOrganizationConnectionUpdate. Error converting config to string: %v", err)
+		}
+	}
+
 	d.Set("connection_id", resp.Id)
 	d.Set("tenant_id", resp.TenantId)
 	d.Set("organization_id", resp.IdentityId)
@@ -371,7 +379,7 @@ func resourceOrganizationConnectionUpdate(ctx context.Context, d *schema.Resourc
 	d.Set("plugin", resp.Plugin)
 	d.Set("plugin_version", resp.PluginVersion)
 	d.Set("type", resp.Type)
-	if config != nil {
+	if configString != "" && configString != "null" {
 		d.Set("config", configString)
 	}
 	d.Set("config_source", resp.ConfigSource)

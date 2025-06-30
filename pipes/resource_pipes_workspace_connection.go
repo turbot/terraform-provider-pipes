@@ -184,7 +184,7 @@ func resourceWorkspaceConnectionCreate(ctx context.Context, d *schema.ResourceDa
 
 	// save the formatted data: this is to ensure the acceptance tests behave in a consistent way regardless of the ordering of the json data
 	if value, ok := d.GetOk("config"); ok {
-		configString, config = formatConnectionJSONString(value.(string))
+		_, config = formatConnectionJSONString(value.(string))
 	}
 
 	req := pipes.CreateConnectionRequest{
@@ -221,6 +221,13 @@ func resourceWorkspaceConnectionCreate(ctx context.Context, d *schema.ResourceDa
 		return diag.Errorf("resourceWorkspaceConnectionCreate. Create connection api error  %v", decodeResponse(r))
 	}
 
+	if resp.GetConfig() != nil {
+		configString, err = mapToJSONString(resp.GetConfig())
+		if err != nil {
+			return diag.Errorf("resourceWorkspaceConnectionCreate. Error converting config to string: %v", err)
+		}
+	}
+
 	d.Set("connection_id", resp.Id)
 	d.Set("tenant_id", resp.TenantId)
 	d.Set("identity_id", resp.IdentityId)
@@ -229,7 +236,7 @@ func resourceWorkspaceConnectionCreate(ctx context.Context, d *schema.ResourceDa
 	d.Set("plugin", resp.Plugin)
 	d.Set("plugin_version", resp.PluginVersion)
 	d.Set("type", resp.Type)
-	if config != nil {
+	if configString != "" && configString != "null" {
 		d.Set("config", configString)
 	}
 	d.Set("config_source", resp.ConfigSource)
@@ -272,7 +279,6 @@ func resourceWorkspaceConnectionRead(ctx context.Context, d *schema.ResourceData
 
 	// Warning or errors can be collected in a slice type
 	var connectionHandle, orgHandle, workspaceHandle, configString string
-	var config map[string]interface{}
 	var diags diag.Diagnostics
 	var isUser = false
 
@@ -282,11 +288,6 @@ func resourceWorkspaceConnectionRead(ctx context.Context, d *schema.ResourceData
 	idParts := strings.Split(d.Id(), "/")
 	if len(idParts) < 2 && len(idParts) > 3 {
 		return diag.Errorf("unexpected format of ID (%q), expected <org-handle>/<workspace-handle>/<connection-handle>", d.Id())
-	}
-
-	// save the formatted data: this is to ensure the acceptance tests behave in a consistent way regardless of the ordering of the json data
-	if value, ok := d.GetOk("config"); ok {
-		configString, config = formatConnectionJSONString(value.(string))
 	}
 
 	if len(idParts) == 3 {
@@ -324,7 +325,7 @@ func resourceWorkspaceConnectionRead(ctx context.Context, d *schema.ResourceData
 	}
 
 	// Convert config to string
-	if config == nil {
+	if resp.GetConfig() != nil {
 		configString, err = mapToJSONString(resp.GetConfig())
 		if err != nil {
 			return diag.Errorf("resourceOrganizationConnectionRead. Error converting config to string: %v", err)
@@ -398,7 +399,7 @@ func resourceWorkspaceConnectionUpdate(ctx context.Context, d *schema.ResourceDa
 
 	// save the formatted data: this is to ensure the acceptance tests behave in a consistent way regardless of the ordering of the json data
 	if value, ok := d.GetOk("config"); ok {
-		configString, config = formatConnectionJSONString(value.(string))
+		_, config = formatConnectionJSONString(value.(string))
 	}
 
 	req := pipes.UpdateConnectionRequest{Handle: types.String(newConnectionHandle.(string))}
@@ -429,14 +430,21 @@ func resourceWorkspaceConnectionUpdate(ctx context.Context, d *schema.ResourceDa
 		var actorHandle string
 		actorHandle, r, err = getUserHandler(ctx, client)
 		if err != nil {
-			return diag.Errorf("resourceWorkspaceConnectionCreate. getUserHandler error %v", decodeResponse(r))
+			return diag.Errorf("resourceWorkspaceConnectionUpdate. getUserHandler error %v", decodeResponse(r))
 		}
 		resp, r, err = client.APIClient.UserWorkspaceConnections.Update(ctx, actorHandle, workspaceHandle, oldConnectionHandle.(string)).Request(req).Execute()
 	} else {
 		resp, r, err = client.APIClient.OrgWorkspaceConnections.Update(ctx, orgHandle, workspaceHandle, oldConnectionHandle.(string)).Request(req).Execute()
 	}
 	if err != nil {
-		return diag.Errorf("resourceWorkspaceConnectionCreate. Create connection api error  %v", decodeResponse(r))
+		return diag.Errorf("resourceWorkspaceConnectionUpdate. Create connection api error  %v", decodeResponse(r))
+	}
+
+	if resp.GetConfig() != nil {
+		configString, err = mapToJSONString(resp.GetConfig())
+		if err != nil {
+			return diag.Errorf("resourceWorkspaceConnectionUpdate. Error converting config to string: %v", err)
+		}
 	}
 
 	d.Set("connection_id", resp.Id)
@@ -447,7 +455,7 @@ func resourceWorkspaceConnectionUpdate(ctx context.Context, d *schema.ResourceDa
 	d.Set("plugin", resp.Plugin)
 	d.Set("plugin_version", resp.PluginVersion)
 	d.Set("type", resp.Type)
-	if config != nil {
+	if configString != "" && configString != "null" {
 		d.Set("config", configString)
 	}
 	d.Set("config_source", resp.ConfigSource)
