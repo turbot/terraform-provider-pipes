@@ -1,3 +1,11 @@
+## 0.15.1 (June 30, 2025)
+
+BUG FIXES:
+
+* Resource `pipes_tenant_connection`: Attribute `config` should store data from the response object.
+* Resource `pipes_organization_connection`: Attribute `config` should store data from the response object.
+* Resource `pipes_workspace_connection`: Attribute `config` should store data from the response object.
+
 ## 0.15.0 (February 5, 2025)
 
 BREAKING CHANGES:

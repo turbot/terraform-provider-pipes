@@ -153,7 +153,7 @@ func resourceTenantConnectionCreate(ctx context.Context, d *schema.ResourceData,
 
 	// save the formatted data: this is to ensure the acceptance tests behave in a consistent way regardless of the ordering of the json data
 	if value, ok := d.GetOk("config"); ok {
-		configString, config = formatConnectionJSONString(value.(string))
+		_, config = formatConnectionJSONString(value.(string))
 	}
 
 	req := pipes.CreateConnectionRequest{
@@ -180,13 +180,20 @@ func resourceTenantConnectionCreate(ctx context.Context, d *schema.ResourceData,
 		return diag.Errorf("resourceTenantConnectionCreate. Create connection api error  %v", decodeResponse(r))
 	}
 
+	if resp.GetConfig() != nil {
+		configString, err = mapToJSONString(resp.GetConfig())
+		if err != nil {
+			return diag.Errorf("resourceTenantConnectionCreate. Error converting config to string: %v", err)
+		}
+	}
+
 	d.Set("connection_id", resp.Id)
 	d.Set("tenant_id", resp.TenantId)
 	d.Set("handle", resp.Handle)
 	d.Set("plugin", resp.Plugin)
 	d.Set("plugin_version", resp.PluginVersion)
 	d.Set("type", resp.Type)
-	if config != nil {
+	if configString != "" && configString != "null" {
 		d.Set("config", configString)
 	}
 	d.Set("config_source", resp.ConfigSource)
@@ -221,7 +228,6 @@ func resourceTenantConnectionRead(ctx context.Context, d *schema.ResourceData, m
 
 	// Warning or errors can be collected in a slice type
 	var connectionHandle, tenantId, configString string
-	var config map[string]interface{}
 	var diags diag.Diagnostics
 
 	// Its a tenant level connection so the id would be of format "TenantId/ConnectionHandle"
@@ -238,11 +244,6 @@ func resourceTenantConnectionRead(ctx context.Context, d *schema.ResourceData, m
 		return diag.Errorf("resourceTenantConnectionRead. Connection handle not present.")
 	}
 
-	// save the formatted data: this is to ensure the acceptance tests behave in a consistent way regardless of the ordering of the json data
-	if value, ok := d.GetOk("config"); ok {
-		configString, config = formatConnectionJSONString(value.(string))
-	}
-
 	resp, r, err := client.APIClient.TenantConnections.Get(context.Background(), connectionHandle).Execute()
 	if err != nil {
 		if r.StatusCode == 404 {
@@ -257,7 +258,7 @@ func resourceTenantConnectionRead(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	// Convert config to string
-	if config == nil {
+	if resp.GetConfig() != nil {
 		configString, err = mapToJSONString(resp.GetConfig())
 		if err != nil {
 			return diag.Errorf("resourceTenantConnectionRead. Error converting config to string: %v", err)
@@ -317,7 +318,7 @@ func resourceTenantConnectionUpdate(ctx context.Context, d *schema.ResourceData,
 
 	// save the formatted data: this is to ensure the acceptance tests behave in a consistent way regardless of the ordering of the json data
 	if value, ok := d.GetOk("config"); ok {
-		configString, config = formatConnectionJSONString(value.(string))
+		_, config = formatConnectionJSONString(value.(string))
 	}
 
 	req := pipes.UpdateConnectionRequest{Handle: types.String(newConnectionHandle.(string))}
@@ -345,13 +346,20 @@ func resourceTenantConnectionUpdate(ctx context.Context, d *schema.ResourceData,
 		return diag.Errorf("resourceTenantConnectionUpdate. Update connection error: %v", decodeResponse(r))
 	}
 
+	if resp.GetConfig() != nil {
+		configString, err = mapToJSONString(resp.GetConfig())
+		if err != nil {
+			return diag.Errorf("resourceTenantConnectionUpdate. Error converting config to string: %v", err)
+		}
+	}
+
 	d.Set("connection_id", resp.Id)
 	d.Set("tenant_id", resp.TenantId)
 	d.Set("handle", resp.Handle)
 	d.Set("plugin", resp.Plugin)
 	d.Set("plugin_version", resp.PluginVersion)
 	d.Set("type", resp.Type)
-	if config != nil {
+	if configString != "" && configString != "null" {
 		d.Set("config", configString)
 	}
 	d.Set("config_source", resp.ConfigSource)
