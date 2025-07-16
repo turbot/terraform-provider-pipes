@@ -1,3 +1,10 @@
+## 0.15.2 (July 16, 2025)
+
+ENHANCEMENTS:
+
+* Updated `pipes-sdk-go` to `v0.14.0`.
+* Support for creation of `db1.medium` workspace instance types.
+
 ## 0.15.1 (June 30, 2025)
 
 BUG FIXES:
