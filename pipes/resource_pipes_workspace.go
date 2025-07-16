@@ -79,7 +79,7 @@ func resourceWorkspace() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Computed:     true,
-				ValidateFunc: validation.StringInSlice([]string{"db1.shared", "db1.small"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"db1.shared", "db1.small", "db1.medium"}, false),
 			},
 			"db_volume_size_bytes": {
 				Type:     schema.TypeInt,
@@ -291,6 +291,7 @@ func resourceWorkspaceUpdate(ctx context.Context, d *schema.ResourceData, meta i
 	var diags diag.Diagnostics
 	var desiredState string
 	var dbVolumeSizeBytes int64
+	var instanceType string
 
 	client := meta.(*PipesClient)
 
@@ -300,6 +301,9 @@ func resourceWorkspaceUpdate(ctx context.Context, d *schema.ResourceData, meta i
 	}
 	if value, ok := d.GetOk("db_volume_size_bytes"); ok {
 		dbVolumeSizeBytes = int64(value.(int))
+	}
+	if value, ok := d.GetOk("instance_type"); ok {
+		instanceType = value.(string)
 	}
 
 	// Create request
@@ -311,6 +315,9 @@ func resourceWorkspaceUpdate(ctx context.Context, d *schema.ResourceData, meta i
 	}
 	if dbVolumeSizeBytes != 0 {
 		req.DbVolumeSizeBytes = &dbVolumeSizeBytes
+	}
+	if instanceType != "" {
+		req.InstanceType = (*pipes.WorkspaceInstanceType)(&instanceType)
 	}
 
 	log.Printf("\n[DEBUG] Updating Workspace: %s", *req.Handle)
