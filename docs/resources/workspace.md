@@ -46,7 +46,7 @@ The following arguments are supported:
 
 - `handle` - (Required) A friendly identifier for your workspace, and must be unique across your workspaces.
 - `desired_state` - (Optional) The desired state of the workspace, which can be set only after it has already been created. Valid values are `enabled` and `disabled`.
-- `instance_type` - (Optional) The instance type to use for the workspace database. Valid instance type values are `db1.shared` and `db1.small`. Defaults to `db1.shared` if nothing is passed.
+- `instance_type` - (Optional) The instance type to use for the workspace database. Valid instance type values are `db1.shared`, `db1.small` and `db1.medium`. Defaults to `db1.shared` if nothing is passed.
 - `organization` - (Optional) An organization ID or handle to create the workspace in.
 
 ## Attributes Reference
