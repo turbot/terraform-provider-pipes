@@ -7,7 +7,7 @@ require github.com/turbot/go-kit v0.3.0
 require (
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.34.0
 	github.com/stretchr/testify v1.7.2
-	github.com/turbot/pipes-sdk-go v0.12.0
+	github.com/turbot/pipes-sdk-go v0.14.0
 )
 
 require (
