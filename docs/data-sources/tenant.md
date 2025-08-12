@@ -40,6 +40,7 @@ The following attributes are exported.
 - `created_by` - Handle of the user who created the tenant.
 - `display_name` - Display name of the tenant.
 - `state` - The current state of the tenant.
+- `token_min_issued_at` - Minimum issued at timestamp for tokens to be valid in the tenant.
 - `updated_at` - Last updated at timestamp of the tenant.
 - `updated_by` - Handle of the user who last updated the tenant.
 - `version_id` - The current version of the tenant record.

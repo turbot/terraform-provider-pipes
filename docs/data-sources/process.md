@@ -68,6 +68,7 @@ The following arguments are supported:
 
 In addition to all arguments above, the following attributes are exported:
 
+- `connection_id` - The unique identifier of the connection used by the process, if available.
 - `created_at` - The ISO 8601 date & time the process was created at.
 - `created_by` - The unique identifier of the actor that created this process.
 - `identity_id` - The unique identifier of the identity in which the process exists.

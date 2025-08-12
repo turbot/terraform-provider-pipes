@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/pipes-sdk-go"
 )
@@ -147,6 +148,41 @@ func resourceWorkspaceConnection() *schema.Resource {
 				Required: true,
 				Computed: false,
 			},
+			"status": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"last_error_at": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"last_error_process_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"last_successful_update_at": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"last_successful_update_process_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"last_update_attempt_at": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"last_update_attempt_process_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
 		},
 		SchemaVersion: 1,
 		StateUpgraders: []schema.StateUpgrader{
@@ -259,6 +295,27 @@ func resourceWorkspaceConnectionCreate(ctx context.Context, d *schema.ResourceDa
 		d.Set("updated_by", resp.UpdatedBy.Handle)
 	}
 	d.Set("version_id", resp.VersionId)
+	if resp.Status != nil {
+		d.Set("status", resp.Status)
+	}
+	if resp.LastErrorAt != nil {
+		d.Set("last_error_at", resp.LastErrorAt)
+	}
+	if resp.LastErrorProcessId != nil {
+		d.Set("last_error_process_id", resp.LastErrorProcessId)
+	}
+	if resp.LastSuccessfulUpdateAt != nil {
+		d.Set("last_successful_update_at", resp.LastSuccessfulUpdateAt)
+	}
+	if resp.LastSuccessfulUpdateProcessId != nil {
+		d.Set("last_successful_update_process_id", resp.LastSuccessfulUpdateProcessId)
+	}
+	if resp.LastUpdateAttemptAt != nil {
+		d.Set("last_update_attempt_at", resp.LastUpdateAttemptAt)
+	}
+	if resp.LastUpdateAttemptProcessId != nil {
+		d.Set("last_update_attempt_process_id", resp.LastUpdateAttemptProcessId)
+	}
 	d.Set("organization", orgHandle)
 	d.Set("workspace", workspaceHandle)
 	// ID Format
@@ -363,6 +420,27 @@ func resourceWorkspaceConnectionRead(ctx context.Context, d *schema.ResourceData
 		d.Set("updated_by", resp.UpdatedBy.Handle)
 	}
 	d.Set("version_id", resp.VersionId)
+	if resp.Status != nil {
+		d.Set("status", resp.Status)
+	}
+	if resp.LastErrorAt != nil {
+		d.Set("last_error_at", resp.LastErrorAt)
+	}
+	if resp.LastErrorProcessId != nil {
+		d.Set("last_error_process_id", resp.LastErrorProcessId)
+	}
+	if resp.LastSuccessfulUpdateAt != nil {
+		d.Set("last_successful_update_at", resp.LastSuccessfulUpdateAt)
+	}
+	if resp.LastSuccessfulUpdateProcessId != nil {
+		d.Set("last_successful_update_process_id", resp.LastSuccessfulUpdateProcessId)
+	}
+	if resp.LastUpdateAttemptAt != nil {
+		d.Set("last_update_attempt_at", resp.LastUpdateAttemptAt)
+	}
+	if resp.LastUpdateAttemptProcessId != nil {
+		d.Set("last_update_attempt_process_id", resp.LastUpdateAttemptProcessId)
+	}
 	d.Set("organization", orgHandle)
 	d.Set("workspace", workspaceHandle)
 	// ID Format
@@ -478,6 +556,27 @@ func resourceWorkspaceConnectionUpdate(ctx context.Context, d *schema.ResourceDa
 		d.Set("updated_by", resp.UpdatedBy.Handle)
 	}
 	d.Set("version_id", resp.VersionId)
+	if resp.Status != nil {
+		d.Set("status", resp.Status)
+	}
+	if resp.LastErrorAt != nil {
+		d.Set("last_error_at", resp.LastErrorAt)
+	}
+	if resp.LastErrorProcessId != nil {
+		d.Set("last_error_process_id", resp.LastErrorProcessId)
+	}
+	if resp.LastSuccessfulUpdateAt != nil {
+		d.Set("last_successful_update_at", resp.LastSuccessfulUpdateAt)
+	}
+	if resp.LastSuccessfulUpdateProcessId != nil {
+		d.Set("last_successful_update_process_id", resp.LastSuccessfulUpdateProcessId)
+	}
+	if resp.LastUpdateAttemptAt != nil {
+		d.Set("last_update_attempt_at", resp.LastUpdateAttemptAt)
+	}
+	if resp.LastUpdateAttemptProcessId != nil {
+		d.Set("last_update_attempt_process_id", resp.LastUpdateAttemptProcessId)
+	}
 	d.Set("organization", orgHandle)
 	d.Set("workspace", workspaceHandle)
 	// ID Format
