@@ -49,6 +49,7 @@ func Provider() *schema.Provider {
 			"pipes_tenant_notifier":                           resourceTenantNotifier(),
 			"pipes_tenant_integration":                        resourceTenantIntegration(),
 			"pipes_tenant_member":                             resourceTenantMember(),
+			"pipes_tenant_settings":                           resourceTenantSettings(),
 			"pipes_user_integration":                          resourceUserIntegration(),
 			"pipes_user_notifier":                             resourceUserNotifier(),
 			"pipes_user_preferences":                          resourceUserPreferences(),
