@@ -176,6 +176,13 @@ In addition to all arguments above, the following attributes are exported:
 - `type` - The type of the resource.
 - `updated_at` - The time when the connection was last updated.
 - `updated_by` - The handle of the user who last updated the connection.
+- `status` - The current status of the connection.
+- `last_error_at` - The time when the last error occurred for the connection.
+- `last_error_process_id` - The identifier of the process that encountered the last error.
+- `last_successful_update_at` - The time when the connection was last successfully updated.
+- `last_successful_update_process_id` - The identifier of the process that last successfully updated the connection.
+- `last_update_attempt_at` - The time when the most recent update attempt was made for the connection.
+- `last_update_attempt_process_id` - The identifier of the process that made the most recent update attempt.
 - `version_id` - The connection version.
 
 ## Import

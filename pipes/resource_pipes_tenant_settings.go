@@ -12,7 +12,7 @@ import (
 
 func resourceTenantSettings() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: resourceTenantSettingsRead,
+		CreateContext: resourceTenantSettingsUpdate,
 		ReadContext:   resourceTenantSettingsRead,
 		UpdateContext: resourceTenantSettingsUpdate,
 		DeleteContext: resourceTenantSettingsDelete,

@@ -126,6 +126,15 @@ precedence of credentials:
 */
 func CreateClient(config *Config, diags diag.Diagnostics) (*pipes.APIClient, diag.Diagnostics) {
 	configuration := pipes.NewConfiguration()
+
+	// Note: This code is commented out for deployment but can be used for local development to bypass TLS verification.
+	//tlsCfg := &tls.Config{InsecureSkipVerify: true}
+	//tr := http.DefaultTransport.(*http.Transport).Clone()
+	//tr.TLSClientConfig = tlsCfg
+	//configuration.HTTPClient = &http.Client{
+	//	Transport: tr,
+	//}
+
 	var pipesHost string
 	if config.Host != "" {
 		pipesHost = config.Host

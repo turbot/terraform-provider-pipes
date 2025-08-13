@@ -14,7 +14,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/stretchr/testify/require"
-	pipes "github.com/turbot/pipes-sdk-go"
+
+	"github.com/turbot/pipes-sdk-go"
 )
 
 const PipesTenantId = "t_00000000000000000000"
