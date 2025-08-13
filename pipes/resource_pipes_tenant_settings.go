@@ -176,7 +176,9 @@ func resourceTenantSettingsUpdate(ctx context.Context, d *schema.ResourceData, m
 			req.ConsoleSessionTimeout = &val
 		}
 	}
-	if v, ok := d.GetOk("max_token_expiration"); ok {
+
+	// max_token_expiration is a special case as we want to handle 0
+	if v := d.Get("max_token_expiration"); v != nil {
 		val := int32(v.(int))
 		if current.MaxTokenExpiration != val {
 			req.MaxTokenExpiration = &val
