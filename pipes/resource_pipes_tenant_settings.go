@@ -166,7 +166,7 @@ func resourceTenantSettingsUpdate(ctx context.Context, d *schema.ResourceData, m
 
 	if v, ok := d.GetOk("cli_session_timeout"); ok {
 		val := int32(v.(int))
-		if current.CliSessionTimeout != nil && *current.CliSessionTimeout != val {
+		if current.CliSessionTimeout == nil || *current.CliSessionTimeout != val {
 			req.CliSessionTimeout = &val
 		}
 	}
