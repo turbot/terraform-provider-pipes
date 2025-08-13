@@ -8,7 +8,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	pipes "github.com/turbot/pipes-sdk-go"
+
+	"github.com/turbot/pipes-sdk-go"
 )
 
 func dataSourceProcess() *schema.Resource {
@@ -49,6 +50,11 @@ func dataSourceProcess() *schema.Resource {
 			"state": {
 				Type:     schema.TypeString,
 				Computed: true,
+			},
+			"connection_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+				Optional: true,
 			},
 			"created_at": {
 				Type:     schema.TypeString,
@@ -134,6 +140,9 @@ func dataSourceProcessRead(ctx context.Context, d *schema.ResourceData, meta int
 	d.Set("version_id", resp.VersionId)
 	d.Set("organization", orgHandle)
 	d.Set("workspace", workspace)
+	if resp.ConnectionId != nil {
+		d.Set("connection_id", resp.ConnectionId)
+	}
 	d.SetId(resp.Id)
 
 	return diags

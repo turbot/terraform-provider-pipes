@@ -35,6 +35,11 @@ func dataSourceTenant() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"token_min_issued_at": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
 			"created_at": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -114,6 +119,11 @@ func dataSourceTenantRead(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 	if err := d.Set("version_id", resp.VersionId); err != nil {
 		return diag.FromErr(err)
+	}
+	if resp.TokenMinIssuedAt != nil {
+		if err := d.Set("token_min_issued_at", resp.TokenMinIssuedAt); err != nil {
+			return diag.FromErr(err)
+		}
 	}
 	d.SetId(resp.Id)
 

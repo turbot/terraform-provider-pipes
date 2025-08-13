@@ -12,8 +12,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
 	"github.com/turbot/go-kit/types"
-	pipes "github.com/turbot/pipes-sdk-go"
+	"github.com/turbot/pipes-sdk-go"
 )
 
 func resourceConnection() *schema.Resource {
@@ -89,6 +90,41 @@ func resourceConnection() *schema.Resource {
 				ValidateFunc:     validation.StringIsJSON,
 				DiffSuppressFunc: connectionJSONStringsEqual,
 			},
+			"status": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"last_error_at": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"last_error_process_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"last_successful_update_at": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"last_successful_update_process_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"last_update_attempt_at": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"last_update_attempt_process_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -150,6 +186,27 @@ func resourceConnectionCreate(ctx context.Context, d *schema.ResourceData, meta 
 		d.Set("updated_by", resp.UpdatedBy.Handle)
 	}
 	d.Set("version_id", resp.VersionId)
+	if resp.Status != nil {
+		d.Set("status", resp.Status)
+	}
+	if resp.LastErrorAt != nil {
+		d.Set("last_error_at", resp.LastErrorAt)
+	}
+	if resp.LastErrorProcessId != nil {
+		d.Set("last_error_process_id", resp.LastErrorProcessId)
+	}
+	if resp.LastSuccessfulUpdateAt != nil {
+		d.Set("last_successful_update_at", resp.LastSuccessfulUpdateAt)
+	}
+	if resp.LastSuccessfulUpdateProcessId != nil {
+		d.Set("last_successful_update_process_id", resp.LastSuccessfulUpdateProcessId)
+	}
+	if resp.LastUpdateAttemptAt != nil {
+		d.Set("last_update_attempt_at", resp.LastUpdateAttemptAt)
+	}
+	if resp.LastUpdateAttemptProcessId != nil {
+		d.Set("last_update_attempt_process_id", resp.LastUpdateAttemptProcessId)
+	}
 	if config != nil {
 		d.Set("config", configString)
 	}
@@ -220,6 +277,27 @@ func resourceConnectionRead(ctx context.Context, d *schema.ResourceData, meta in
 		d.Set("updated_by", resp.UpdatedBy.Handle)
 	}
 	d.Set("version_id", resp.VersionId)
+	if resp.Status != nil {
+		d.Set("status", resp.Status)
+	}
+	if resp.LastErrorAt != nil {
+		d.Set("last_error_at", resp.LastErrorAt)
+	}
+	if resp.LastErrorProcessId != nil {
+		d.Set("last_error_process_id", resp.LastErrorProcessId)
+	}
+	if resp.LastSuccessfulUpdateAt != nil {
+		d.Set("last_successful_update_at", resp.LastSuccessfulUpdateAt)
+	}
+	if resp.LastSuccessfulUpdateProcessId != nil {
+		d.Set("last_successful_update_process_id", resp.LastSuccessfulUpdateProcessId)
+	}
+	if resp.LastUpdateAttemptAt != nil {
+		d.Set("last_update_attempt_at", resp.LastUpdateAttemptAt)
+	}
+	if resp.LastUpdateAttemptProcessId != nil {
+		d.Set("last_update_attempt_process_id", resp.LastUpdateAttemptProcessId)
+	}
 	// format "OrganizationHandle/ConnectionHandle"
 	d.SetId(fmt.Sprintf("%s/%s", orgHandle, *resp.Handle))
 
@@ -282,6 +360,27 @@ func resourceConnectionUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		d.Set("updated_by", resp.UpdatedBy.Handle)
 	}
 	d.Set("version_id", resp.VersionId)
+	if resp.Status != nil {
+		d.Set("status", resp.Status)
+	}
+	if resp.LastErrorAt != nil {
+		d.Set("last_error_at", resp.LastErrorAt)
+	}
+	if resp.LastErrorProcessId != nil {
+		d.Set("last_error_process_id", resp.LastErrorProcessId)
+	}
+	if resp.LastSuccessfulUpdateAt != nil {
+		d.Set("last_successful_update_at", resp.LastSuccessfulUpdateAt)
+	}
+	if resp.LastSuccessfulUpdateProcessId != nil {
+		d.Set("last_successful_update_process_id", resp.LastSuccessfulUpdateProcessId)
+	}
+	if resp.LastUpdateAttemptAt != nil {
+		d.Set("last_update_attempt_at", resp.LastUpdateAttemptAt)
+	}
+	if resp.LastUpdateAttemptProcessId != nil {
+		d.Set("last_update_attempt_process_id", resp.LastUpdateAttemptProcessId)
+	}
 	// format "OrganizationHandle/ConnectionHandle"
 	d.SetId(fmt.Sprintf("%s/%s", orgHandle, *resp.Handle))
 

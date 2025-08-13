@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/pipes-sdk-go"
 )
@@ -137,6 +138,41 @@ func resourceOrganizationConnection() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"status": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"last_error_at": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"last_error_process_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"last_successful_update_at": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"last_successful_update_process_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"last_update_attempted_at": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"last_update_attempted_at_process_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -230,6 +266,28 @@ func resourceOrganizationConnectionCreate(ctx context.Context, d *schema.Resourc
 		d.Set("updated_by", resp.UpdatedBy.Handle)
 	}
 	d.Set("version_id", resp.VersionId)
+	// computed connection state fields
+	if resp.Status != nil {
+		d.Set("status", resp.Status)
+	}
+	if resp.LastErrorAt != nil {
+		d.Set("last_error_at", resp.LastErrorAt)
+	}
+	if resp.LastErrorProcessId != nil {
+		d.Set("last_error_process_id", resp.LastErrorProcessId)
+	}
+	if resp.LastSuccessfulUpdateAt != nil {
+		d.Set("last_successful_update_at", resp.LastSuccessfulUpdateAt)
+	}
+	if resp.LastSuccessfulUpdateProcessId != nil {
+		d.Set("last_successful_update_process_id", resp.LastSuccessfulUpdateProcessId)
+	}
+	if resp.LastUpdateAttemptAt != nil {
+		d.Set("last_update_attempted_at", resp.LastUpdateAttemptAt)
+	}
+	if resp.LastUpdateAttemptProcessId != nil {
+		d.Set("last_update_attempted_at_process_id", resp.LastUpdateAttemptProcessId)
+	}
 	d.Set("organization", orgHandle)
 	// The connection is being created at an organization level
 	// The id would be of format "OrganizationHandle/ConnectionHandle"
@@ -310,6 +368,28 @@ func resourceOrganizationConnectionRead(ctx context.Context, d *schema.ResourceD
 		d.Set("updated_by", resp.UpdatedBy.Handle)
 	}
 	d.Set("version_id", resp.VersionId)
+	// computed connection state fields
+	if resp.Status != nil {
+		d.Set("status", resp.Status)
+	}
+	if resp.LastErrorAt != nil {
+		d.Set("last_error_at", resp.LastErrorAt)
+	}
+	if resp.LastErrorProcessId != nil {
+		d.Set("last_error_process_id", resp.LastErrorProcessId)
+	}
+	if resp.LastSuccessfulUpdateAt != nil {
+		d.Set("last_successful_update_at", resp.LastSuccessfulUpdateAt)
+	}
+	if resp.LastSuccessfulUpdateProcessId != nil {
+		d.Set("last_successful_update_process_id", resp.LastSuccessfulUpdateProcessId)
+	}
+	if resp.LastUpdateAttemptAt != nil {
+		d.Set("last_update_attempted_at", resp.LastUpdateAttemptAt)
+	}
+	if resp.LastUpdateAttemptProcessId != nil {
+		d.Set("last_update_attempted_at_process_id", resp.LastUpdateAttemptProcessId)
+	}
 	d.Set("organization", orgId)
 	d.SetId(fmt.Sprintf("%s/%s", orgId, *resp.Handle))
 
