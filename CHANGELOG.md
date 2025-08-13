@@ -1,3 +1,18 @@
+## 0.15.3 (TBD)
+
+ENHANCEMENTS:
+
+* Updated `pipes-sdk-go` to `v0.15.0`.
+* **New Resource:** `pipes_tenant_settings`
+
+ENHANCEMENTS:
+
+* `resources/pipes_connection`: Added attributes `status`, `last_error_at`, `last_error_process_id`, `last_successful_update_at`, `last_successful_update_process_id`, `last_update_attempt_at`, `last_update_attempt_process_id`.
+* `resources/pipes_organization_connection`: Added attributes `status`, `last_error_at`, `last_error_process_id`, `last_successful_update_at`, `last_successful_update_process_id`, `last_update_attempt_at`, `last_update_attempt_process_id`.
+* `resources/pipes_tenant`: Added attribute `min_token_issued_at`.
+* `resources/pipes_tenant_connection`: Added attributes `status`, `last_error_at`, `last_error_process_id`, `last_successful_update_at`, `last_successful_update_process_id`, `last_update_attempt_at`, `last_update_attempt_process_id`.
+* `resources/pipes_workspace_connection`: Added attributes `status`, `last_error_at`, `last_error_process_id`, `last_successful_update_at`, `last_successful_update_process_id`, `last_update_attempt_at`, `last_update_attempt_process_id`.
+
 ## 0.15.2 (July 16, 2025)
 
 ENHANCEMENTS:

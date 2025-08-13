@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/turbot/pipes-sdk-go"
 )
@@ -39,25 +40,29 @@ func resourceTenantSettings() *schema.Resource {
 
 			// Login method states
 			"login_email_state": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.StringInSlice([]string{"enabled", "disabled"}, false),
 			},
 			"login_github_state": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.StringInSlice([]string{"enabled", "disabled"}, false),
 			},
 			"login_google_state": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.StringInSlice([]string{"enabled", "disabled"}, false),
 			},
 			// SAML settings
 			"login_saml_state": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.StringInSlice([]string{"enabled", "disabled"}, false),
 			},
 			"login_saml_certificate": {
 				Type:      schema.TypeString,
@@ -75,14 +80,16 @@ func resourceTenantSettings() *schema.Resource {
 
 			// Personal workspaces and postgres endpoint states
 			"personal_workspaces": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.StringInSlice([]string{"enabled", "disabled"}, false),
 			},
 			"postgres_endpoint": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.StringInSlice([]string{"enabled", "disabled"}, false),
 			},
 
 			// Arrays
