@@ -172,7 +172,7 @@ func resourceTenantSettingsUpdate(ctx context.Context, d *schema.ResourceData, m
 	}
 	if v, ok := d.GetOk("console_session_timeout"); ok {
 		val := int32(v.(int))
-		if current.ConsoleSessionTimeout != nil && *current.ConsoleSessionTimeout != val {
+		if current.ConsoleSessionTimeout == nil || *current.ConsoleSessionTimeout != val {
 			req.ConsoleSessionTimeout = &val
 		}
 	}
