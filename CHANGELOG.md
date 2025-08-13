@@ -1,4 +1,4 @@
-## 0.15.3 (TBD)
+## 0.15.3 (August 13, 2025)
 
 ENHANCEMENTS:
 
