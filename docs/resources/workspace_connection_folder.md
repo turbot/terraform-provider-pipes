@@ -55,10 +55,14 @@ resource "pipes_workspace_connection" "aws_eu1" {
   plugin = "aws"
   handle = "aws_eu1"
   parent_id = pipes_workspace_connection_folder.europe_folder.id
+  # Non-sensitive
   config = jsonencode({
+    regions = ["us-east-1"]
+  })
+  # Sensitive
+  config_sensitive = jsonencode({
     access_key = "redacted"
     secret_key = "redacted"
-    regions    = ["us-east-1"]
   })
 }
 ```

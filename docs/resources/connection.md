@@ -20,10 +20,14 @@ Manages a connection, which is defined at the user account or organization level
 resource "pipes_connection" "aws_aaa" {
   plugin = "aws"
   handle = "aws_aaa"
+  # Non-sensitive
   config = jsonencode({
+    regions = ["us-east-1"]
+  })
+  # Sensitive
+  config_sensitive = jsonencode({
     access_key = "redacted"
     secret_key = "redacted"
-    regions    = ["us-east-1"]
   })
 }
 ```
@@ -35,10 +39,14 @@ resource "pipes_connection" "aws_aab" {
   organization = "myorg"
   plugin       = "aws"
   handle       = "aws_aab"
+  # Non-sensitive
   config = jsonencode({
+    regions = ["us-east-1"]
+  })
+  # Sensitive
+  config_sensitive = jsonencode({
     access_key = "redacted"
     secret_key = "redacted"
-    regions    = ["us-east-1"]
   })
 }
 ```
@@ -117,8 +125,12 @@ resource "pipes_connection" "aws_role_connection" {
 resource "pipes_connection" "gcp_aaa" {
   handle      = "gcp_aaa"
   plugin      = "gcp"
+  # Non-sensitive
   config = jsonencode({
-    project     = "project-aaa"
+    project = "project-aaa"
+  })
+  # Sensitive
+  config_sensitive = jsonencode({
     credentials = file("/Users/myuser/Downloads/project-aaa.json")
   })
 }
@@ -130,11 +142,15 @@ resource "pipes_connection" "gcp_aaa" {
 resource "pipes_connection" "oci_aaa" {
   handle       = "oci"
   plugin       = "oci"
+  # Non-sensitive
   config = jsonencode({
     user_ocid    = "ocid1.user.oc1..aaaaaaaaw..."
     fingerprint  = "f1:fc:44:3a:..."
     tenancy_ocid = "ocid1.tenancy.oc1..aaaaaaaah..."
     regions      = ["ap-mumbai-1", "us-ashburn-1"]
+  })
+  # Sensitive
+  config_sensitive = jsonencode({
     private_key  = file("/Users/myuser/Downloads/mykey.cer")
   })
 }
@@ -155,10 +171,14 @@ For each connection resource, additional arguments are supported based on the pl
 resource "pipes_connection" "zendesk" {
   plugin    = "zendesk"
   handle    = "zendesk_example"
+  # Non-sensitive
   config = jsonencode({
     subdomain = "dmi"
     email     = "pam@dmi.com"
-    token     = "17ImlCYdfZ3WJIrGk96gCpJn1fi1pLwexample"
+  })
+  # Sensitive
+  config_sensitive = jsonencode({
+    token = "17ImlCYdfZ3WJIrGk96gCpJn1fi1pLwexample"
   })
 }
 ```
@@ -201,4 +221,27 @@ Organization connections can be imported using an ID made up of `organization_ha
 
 ```sh
 terraform import pipes_connection.example myorg/aws_aab
+```
+
+
+## Sensitive configuration
+
+Use config for non-sensitive settings and config_sensitive for secrets. Both are JSON strings; on create/update they are merged (config_sensitive wins on conflicts) and only config is shown in state from API reads.
+
+Example:
+
+```hcl
+resource "pipes_connection" "aws_secure" {
+  plugin = "aws"
+  handle = "aws_secure"
+  # Non-sensitive
+  config = jsonencode({
+    regions = ["us-east-1"]
+  })
+  # Sensitive
+  config_sensitive = jsonencode({
+    access_key = var.aws_access_key
+    secret_key = var.aws_secret_key
+  })
+}
 ```

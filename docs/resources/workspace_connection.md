@@ -25,10 +25,14 @@ resource "pipes_workspace_connection" "aws_aaa" {
   workspace = "playground"
   plugin = "aws"
   handle = "aws_aaa"
+  # Non-sensitive
   config = jsonencode({
+    regions = ["us-east-1"]
+  })
+  # Sensitive
+  config_sensitive = jsonencode({
     access_key = "redacted"
     secret_key = "redacted"
-    regions    = ["us-east-1"]
   })
 }
 ```
@@ -41,10 +45,14 @@ resource "pipes_workspace_connection" "aws_aaa" {
   workspace = "playground"
   plugin = "aws"
   handle = "aws_aaa"
+  # Non-sensitive
   config = jsonencode({
+    regions = ["us-east-1"]
+  })
+  # Sensitive
+  config_sensitive = jsonencode({
     access_key = "redacted"
     secret_key = "redacted"
-    regions    = ["us-east-1"]
   })
 }
 ```
@@ -57,11 +65,15 @@ resource "pipes_workspace_connection" "oci_aaa" {
   handle       = "oci"
   plugin       = "oci"
   parent_id    = "c_cqlp0647sic7l5q2n5d0"
+  # Non-sensitive
   config = jsonencode({
     user_ocid    = "ocid1.user.oc1..aaaaaaaaw..."
     fingerprint  = "f1:fc:44:3a:..."
     tenancy_ocid = "ocid1.tenancy.oc1..aaaaaaaah..."
     regions      = ["ap-mumbai-1", "us-ashburn-1"]
+  })
+  # Sensitive
+  config_sensitive = jsonencode({
     private_key  = file("/Users/myuser/Downloads/mykey.cer")
   })
 }
@@ -86,10 +98,14 @@ resource "pipes_workspace_connection" "zendesk" {
   workspace   = "playground"
   plugin    = "zendesk"
   handle    = "zendesk_example"
+  # Non-sensitive
   config = jsonencode({
     subdomain = "dmi"
     email     = "pam@dmi.com"
-    token     = "17ImlCYdfZ3WJIrGk96gCpJn1fi1pLwexample"
+  })
+  # Sensitive
+  config_sensitive = jsonencode({
+    token = "17ImlCYdfZ3WJIrGk96gCpJn1fi1pLwexample"
   })
 }
 ```
@@ -146,3 +162,8 @@ Organization workspce connections can be imported with an ID made up of `organiz
 ```sh
 terraform import pipes_workspace_connection.example acme/finance/aws_aaa
 ```
+
+
+## Sensitive configuration
+
+Use config for non-sensitive settings and config_sensitive for secrets. On create/update they are merged (config_sensitive wins on conflicts). Only config is populated from API reads, so sensitive keys are never echoed back.

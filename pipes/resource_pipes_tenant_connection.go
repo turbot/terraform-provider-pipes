@@ -61,6 +61,12 @@ func resourceTenantConnection() *schema.Resource {
 				ValidateFunc:     validation.StringIsJSON,
 				DiffSuppressFunc: connectionJSONStringsEqual,
 			},
+			"config_sensitive": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Sensitive:    true,
+				ValidateFunc: validation.StringIsJSON,
+			},
 			"config_source": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -187,9 +193,18 @@ func resourceTenantConnectionCreate(ctx context.Context, d *schema.ResourceData,
 		parentId = value.(string)
 	}
 
-	// save the formatted data: this is to ensure the acceptance tests behave in a consistent way regardless of the ordering of the json data
+	// Parse config and config_sensitive (if provided)
 	if value, ok := d.GetOk("config"); ok {
 		_, config = formatConnectionJSONString(value.(string))
+	}
+	var configSensitive map[string]interface{}
+	if value, ok := d.GetOk("config_sensitive"); ok {
+		_, configSensitive = formatConnectionJSONString(value.(string))
+	}
+	// Merge shallow: config as base, config_sensitive overrides
+	mergedConfig := config
+	if configSensitive != nil {
+		mergedConfig = mergeShallow(mergedConfig, configSensitive)
 	}
 
 	req := pipes.CreateConnectionRequest{
@@ -203,8 +218,8 @@ func resourceTenantConnectionCreate(ctx context.Context, d *schema.ResourceData,
 	}
 
 	// Pass the config if its set
-	if config != nil {
-		req.SetConfig(config)
+	if mergedConfig != nil {
+		req.SetConfig(mergedConfig)
 	}
 
 	client := meta.(*PipesClient)
@@ -394,14 +409,23 @@ func resourceTenantConnectionUpdate(ctx context.Context, d *schema.ResourceData,
 		return diag.Errorf("handle must be configured")
 	}
 
-	// save the formatted data: this is to ensure the acceptance tests behave in a consistent way regardless of the ordering of the json data
+	// Parse config and config_sensitive (if provided)
 	if value, ok := d.GetOk("config"); ok {
 		_, config = formatConnectionJSONString(value.(string))
 	}
+	var configSensitive map[string]interface{}
+	if value, ok := d.GetOk("config_sensitive"); ok {
+		_, configSensitive = formatConnectionJSONString(value.(string))
+	}
+	// Merge shallow: config as base, config_sensitive overrides
+	mergedConfig := config
+	if configSensitive != nil {
+		mergedConfig = mergeShallow(mergedConfig, configSensitive)
+	}
 
 	req := pipes.UpdateConnectionRequest{Handle: types.String(newConnectionHandle.(string))}
-	if config != nil {
-		req.SetConfig(config)
+	if mergedConfig != nil {
+		req.SetConfig(mergedConfig)
 	}
 	if ok := d.HasChange("parent_id"); ok {
 		if value, ok := d.GetOk("parent_id"); ok {
