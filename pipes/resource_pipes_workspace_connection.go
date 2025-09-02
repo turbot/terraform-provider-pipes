@@ -230,8 +230,8 @@ func resourceWorkspaceConnectionCreate(ctx context.Context, d *schema.ResourceDa
 		_, config = formatConnectionJSONString(value.(string))
 	}
 	var configSensitive map[string]interface{}
-	if value, ok := d.GetOk("config_sensitive"); ok {
-		_, configSensitive = formatConnectionJSONString(value.(string))
+	if value, ok := d.GetRawConfig().AsValueMap()["config_sensitive"]; ok && !value.IsNull() {
+		_, configSensitive = formatConnectionJSONString(value.AsString())
 	}
 	// Merge shallow: config as base, config_sensitive overrides
 	mergedConfig := config
@@ -496,8 +496,8 @@ func resourceWorkspaceConnectionUpdate(ctx context.Context, d *schema.ResourceDa
 		_, config = formatConnectionJSONString(value.(string))
 	}
 	var configSensitive map[string]interface{}
-	if value, ok := d.GetOk("config_sensitive"); ok {
-		_, configSensitive = formatConnectionJSONString(value.(string))
+	if value, ok := d.GetRawConfig().AsValueMap()["config_sensitive"]; ok && !value.IsNull() {
+		_, configSensitive = formatConnectionJSONString(value.AsString())
 	}
 	// Merge shallow: config as base, config_sensitive overrides
 	mergedConfig := config
