@@ -69,6 +69,7 @@ func resourceOrganizationConnection() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Sensitive:    true,
+				WriteOnly:    true,
 				ValidateFunc: validation.StringIsJSON,
 			},
 			"config_source": {

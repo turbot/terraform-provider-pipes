@@ -94,6 +94,7 @@ func resourceConnection() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Sensitive:    true,
+				WriteOnly:    true,
 				ValidateFunc: validation.StringIsJSON,
 			},
 			"status": {

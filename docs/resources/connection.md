@@ -223,10 +223,9 @@ Organization connections can be imported using an ID made up of `organization_ha
 terraform import pipes_connection.example myorg/aws_aab
 ```
 
+## Config vs Config_Sensitive
 
-## Sensitive configuration
-
-Use config for non-sensitive settings and config_sensitive for secrets. Both are JSON strings; on create/update they are merged (config_sensitive wins on conflicts) and only config is shown in state from API reads.
+Use config for non-sensitive settings and config_sensitive for secrets (access keys, tokens, etc); `config_sensitive` is `write only` and therefore not stored in `state`, therefore if this is the only change on the resource Terraform will be unable to detect this.
 
 Example:
 

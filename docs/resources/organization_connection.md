@@ -196,6 +196,6 @@ terraform import pipes_organization_connection.example finance/aws_aaa
 ```
 
 
-## Sensitive configuration
+## Config vs Config_Sensitive
 
-Use config for non-sensitive settings and config_sensitive for secrets. On create/update they are merged (config_sensitive wins on conflicts). Only config is populated from API reads, so sensitive keys are never echoed back.
+Use config for non-sensitive settings and config_sensitive for secrets (access keys, tokens, etc); `config_sensitive` is `write only` and therefore not stored in `state`, therefore if this is the only change on the resource Terraform will be unable to detect this. 
