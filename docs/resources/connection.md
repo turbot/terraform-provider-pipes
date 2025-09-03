@@ -25,10 +25,12 @@ resource "pipes_connection" "aws_aaa" {
     regions = ["us-east-1"]
   })
   # Sensitive
-  config_sensitive = jsonencode({
+  config_sensitive_wo = jsonencode({
     access_key = "redacted"
     secret_key = "redacted"
   })
+
+  config_sensitive_wo_version = 1
 }
 ```
 
@@ -44,10 +46,12 @@ resource "pipes_connection" "aws_aab" {
     regions = ["us-east-1"]
   })
   # Sensitive
-  config_sensitive = jsonencode({
+  config_sensitive_wo = jsonencode({
     access_key = "redacted"
     secret_key = "redacted"
   })
+
+  config_sensitive_wo_version = 1
 }
 ```
 
@@ -130,9 +134,11 @@ resource "pipes_connection" "gcp_aaa" {
     project = "project-aaa"
   })
   # Sensitive
-  config_sensitive = jsonencode({
+  config_sensitive_wo = jsonencode({
     credentials = file("/Users/myuser/Downloads/project-aaa.json")
   })
+
+  config_sensitive_wo_version = 1
 }
 ```
 
@@ -150,9 +156,11 @@ resource "pipes_connection" "oci_aaa" {
     regions      = ["ap-mumbai-1", "us-ashburn-1"]
   })
   # Sensitive
-  config_sensitive = jsonencode({
+  config_sensitive_wo = jsonencode({
     private_key  = file("/Users/myuser/Downloads/mykey.cer")
   })
+
+  config_sensitive_wo_version = 1
 }
 ```
 
@@ -163,6 +171,8 @@ The following arguments are supported:
 - `handle` - (Required) A friendly identifier for your connection, and must be unique across your connections.
 - `plugin` - (Required) The name of the plugin.
 - `config` - (Optional) Configuration for the connection.
+- `config_sensitive_wo` - (Optional) Write-only sensitive configuration for the connection. Values are not stored in state; use this for secrets such as access keys and tokens.
+- `config_sensitive_wo_version` - (Optional) Integer to indicate a new version of the write-only sensitive configuration. Increment this when only sensitive values change so Terraform can detect updates.
 - `organization` - (Optional) An organization ID or handle to create the connection in.
 
 For each connection resource, additional arguments are supported based on the plugin it uses. For instance, if creating a connection that uses the Zendesk plugin, the [Zendesk configuration arguments](https://hub.steampipe.io/plugins/turbot/zendesk#configuration) should be used in the connection:
@@ -177,9 +187,11 @@ resource "pipes_connection" "zendesk" {
     email     = "pam@dmi.com"
   })
   # Sensitive
-  config_sensitive = jsonencode({
+  config_sensitive_wo = jsonencode({
     token = "17ImlCYdfZ3WJIrGk96gCpJn1fi1pLwexample"
   })
+
+  config_sensitive_wo_version = 1
 }
 ```
 
@@ -221,26 +233,4 @@ Organization connections can be imported using an ID made up of `organization_ha
 
 ```sh
 terraform import pipes_connection.example myorg/aws_aab
-```
-
-## Config vs Config_Sensitive
-
-Use config for non-sensitive settings and config_sensitive for secrets (access keys, tokens, etc); `config_sensitive` is `write only` and therefore not stored in `state`, therefore if this is the only change on the resource Terraform will be unable to detect this.
-
-Example:
-
-```hcl
-resource "pipes_connection" "aws_secure" {
-  plugin = "aws"
-  handle = "aws_secure"
-  # Non-sensitive
-  config = jsonencode({
-    regions = ["us-east-1"]
-  })
-  # Sensitive
-  config_sensitive = jsonencode({
-    access_key = var.aws_access_key
-    secret_key = var.aws_secret_key
-  })
-}
 ```

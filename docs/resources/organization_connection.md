@@ -26,10 +26,12 @@ resource "pipes_organization_connection" "aws_aaa" {
     regions = ["us-east-1"]
   })
   # Sensitive
-  config_sensitive = jsonencode({
+  config_sensitive_wo = jsonencode({
     access_key = "redacted"
     secret_key = "redacted"
   })
+
+  config_sensitive_wo_version = 1
 }
 ```
 
@@ -118,9 +120,11 @@ resource "pipes_organization_connection" "oci_aaa" {
     regions      = ["ap-mumbai-1", "us-ashburn-1"]
   })
   # Sensitive
-  config_sensitive = jsonencode({
+  config_sensitive_wo = jsonencode({
     private_key  = file("/Users/myuser/Downloads/mykey.cer")
   })
+
+  config_sensitive_wo_version = 1
 }
 ```
 
@@ -132,6 +136,8 @@ The following arguments are supported:
 - `organization` - (Required) The handle of the organization where the connection will be created.
 - `plugin` - (Required) The name of the plugin.
 - `config` - (Optional) Configuration for the connection.
+- `config_sensitive_wo` - (Optional) Write-only sensitive configuration for the connection. Values are not stored in state; use this for secrets such as access keys and tokens.
+- `config_sensitive_wo_version` - (Optional) Integer to indicate a new version of the write-only sensitive configuration. Increment this when only sensitive values change so Terraform can detect updates.
 - `parent_id` - (Optional) Identifier of the connection folder in which the connection will be created. If nothing is passed the connection is created at the root level of the organization.
 
 For each connection resource, additional arguments are supported based on the plugin it uses. For instance, if creating a connection that uses the Zendesk plugin, the [Zendesk configuration arguments](https://hub.steampipe.io/plugins/turbot/zendesk#configuration) should be used in the connection:
@@ -147,9 +153,11 @@ resource "pipes_organization_connection" "zendesk" {
     email     = "pam@dmi.com"
   })
   # Sensitive
-  config_sensitive = jsonencode({
+  config_sensitive_wo = jsonencode({
     token = "17ImlCYdfZ3WJIrGk96gCpJn1fi1pLwexample"
   })
+
+  config_sensitive_wo_version = 1
 }
 ```
 
@@ -194,8 +202,3 @@ Organization connections can be imported using an ID made up of `organization_ha
 ```sh
 terraform import pipes_organization_connection.example finance/aws_aaa
 ```
-
-
-## Config vs Config_Sensitive
-
-Use config for non-sensitive settings and config_sensitive for secrets (access keys, tokens, etc); `config_sensitive` is `write only` and therefore not stored in `state`, therefore if this is the only change on the resource Terraform will be unable to detect this. 

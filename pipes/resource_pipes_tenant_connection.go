@@ -61,12 +61,18 @@ func resourceTenantConnection() *schema.Resource {
 				ValidateFunc:     validation.StringIsJSON,
 				DiffSuppressFunc: connectionJSONStringsEqual,
 			},
-			"config_sensitive": {
+			"config_sensitive_wo": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Sensitive:    true,
 				WriteOnly:    true,
 				ValidateFunc: validation.StringIsJSON,
+				RequiredWith: []string{"config_sensitive_wo_version"},
+			},
+			"config_sensitive_wo_version": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				RequiredWith: []string{"config_sensitive_wo"},
 			},
 			"config_source": {
 				Type:     schema.TypeString,
@@ -199,7 +205,7 @@ func resourceTenantConnectionCreate(ctx context.Context, d *schema.ResourceData,
 		_, config = formatConnectionJSONString(value.(string))
 	}
 	var configSensitive map[string]interface{}
-	if value, ok := d.GetRawConfig().AsValueMap()["config_sensitive"]; ok && !value.IsNull() {
+	if value, ok := d.GetRawConfig().AsValueMap()["config_sensitive_wo"]; ok && !value.IsNull() {
 		_, configSensitive = formatConnectionJSONString(value.AsString())
 	}
 	// Merge shallow: config as base, config_sensitive overrides
@@ -415,7 +421,7 @@ func resourceTenantConnectionUpdate(ctx context.Context, d *schema.ResourceData,
 		_, config = formatConnectionJSONString(value.(string))
 	}
 	var configSensitive map[string]interface{}
-	if value, ok := d.GetRawConfig().AsValueMap()["config_sensitive"]; ok && !value.IsNull() {
+	if value, ok := d.GetRawConfig().AsValueMap()["config_sensitive_wo"]; ok && !value.IsNull() {
 		_, configSensitive = formatConnectionJSONString(value.AsString())
 	}
 	// Merge shallow: config as base, config_sensitive overrides
