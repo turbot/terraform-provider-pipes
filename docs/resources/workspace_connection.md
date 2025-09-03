@@ -25,17 +25,15 @@ resource "pipes_workspace_connection" "aws_aaa" {
   workspace = "playground"
   plugin = "aws"
   handle = "aws_aaa"
-  # Non-sensitive
-  config = jsonencode({
+
+  # config_wo is write-only and not stored in state, ideal for secrets like access_key and secret_key
+  config_wo = jsonencode({
     regions = ["us-east-1"]
-  })
-  # Sensitive
-  config_sensitive_wo = jsonencode({
     access_key = "redacted"
     secret_key = "redacted"
   })
 
-  config_sensitive_wo_version = 1
+  config_wo_version = 1
 }
 ```
 
@@ -47,17 +45,14 @@ resource "pipes_workspace_connection" "aws_aaa" {
   workspace = "playground"
   plugin = "aws"
   handle = "aws_aaa"
-  # Non-sensitive
-  config = jsonencode({
+  
+  config_wo = jsonencode({
     regions = ["us-east-1"]
-  })
-  # Sensitive
-  config_sensitive_wo = jsonencode({
     access_key = "redacted"
     secret_key = "redacted"
   })
 
-  config_sensitive_wo_version = 1
+  config_wo_version = 1
 }
 ```
 
@@ -69,19 +64,16 @@ resource "pipes_workspace_connection" "oci_aaa" {
   handle       = "oci"
   plugin       = "oci"
   parent_id    = "c_cqlp0647sic7l5q2n5d0"
-  # Non-sensitive
-  config = jsonencode({
+
+  config_wo = jsonencode({
     user_ocid    = "ocid1.user.oc1..aaaaaaaaw..."
     fingerprint  = "f1:fc:44:3a:..."
     tenancy_ocid = "ocid1.tenancy.oc1..aaaaaaaah..."
     regions      = ["ap-mumbai-1", "us-ashburn-1"]
-  })
-  # Sensitive
-  config_sensitive_wo = jsonencode({
     private_key  = file("/Users/myuser/Downloads/mykey.cer")
   })
 
-  config_sensitive_wo_version = 1
+  config_wo_version = 1
 }
 ```
 
@@ -92,9 +84,9 @@ The following arguments are supported:
 - `handle` - (Required) A friendly identifier for your connection, and must be unique across your connections.
 - `plugin` - (Required) The name of the plugin.
 - `workspace` - (Required) The handle of the workspace where the connection will be managed.
-- `config` - (Optional) Configuration for the connection.
-- `config_sensitive_wo` - (Optional) Write-only sensitive configuration for the connection. Values are not stored in state; use this for secrets such as access keys and tokens.
-- `config_sensitive_wo_version` - (Optional) Integer to indicate a new version of the write-only sensitive configuration. Increment this when only sensitive values change so Terraform can detect updates.
+- `config` - (Optional) JSON Configuration for the connection, stored in state (cannot be used with `config_wo`). Note: As secrets are not returned from the API, this may show perpetual config drift is secrets are included in this argument.
+- `config_wo` - (Optional) Write-Only JSON Configuration for the connection, **NOT** stored in state  (cannot be used with `config`). Requires indication of changes using `config_wo_version`.
+- `config_wo_version` - (Optional) Integer to indicate a new version of the write-only configuration `config_wo`.
 - `organization` - (Optional) The handle of the organization which contains the workspace where the connection will be managed.
 - `parent_id` - (Optional) Identifier of the connection folder in which the connection will be created. If nothing is passed the connection is created at the root level of the workspace.
 
@@ -106,17 +98,14 @@ resource "pipes_workspace_connection" "zendesk" {
   workspace   = "playground"
   plugin    = "zendesk"
   handle    = "zendesk_example"
-  # Non-sensitive
-  config = jsonencode({
+
+  config_wo = jsonencode({
     subdomain = "dmi"
     email     = "pam@dmi.com"
-  })
-  # Sensitive
-  config_sensitive_wo = jsonencode({
     token = "17ImlCYdfZ3WJIrGk96gCpJn1fi1pLwexample"
   })
 
-  config_sensitive_wo_version = 1
+  config_wo_version = 1
 }
 ```
 
@@ -167,7 +156,7 @@ terraform import pipes_workspace_connection.example finance/aws_aaa
 
 ### Import Organization Workspace Connection
 
-Organization workspce connections can be imported with an ID made up of `organization_handle/workspace_handle/connection_handle`, e.g.,
+Organization workspace connections can be imported with an ID made up of `organization_handle/workspace_handle/connection_handle`, e.g.,
 
 ```sh
 terraform import pipes_workspace_connection.example acme/finance/aws_aaa

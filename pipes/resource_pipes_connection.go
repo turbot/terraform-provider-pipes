@@ -89,19 +89,21 @@ func resourceConnection() *schema.Resource {
 				Optional:         true,
 				ValidateFunc:     validation.StringIsJSON,
 				DiffSuppressFunc: connectionJSONStringsEqual,
+				ConflictsWith:    []string{"config_wo"},
 			},
-			"config_sensitive_wo": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Sensitive:    true,
-				WriteOnly:    true,
-				ValidateFunc: validation.StringIsJSON,
-				RequiredWith: []string{"config_sensitive_wo_version"},
+			"config_wo": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				Sensitive:     true,
+				WriteOnly:     true,
+				ValidateFunc:  validation.StringIsJSON,
+				ConflictsWith: []string{"config"},
+				RequiredWith:  []string{"config_wo_version"},
 			},
-			"config_sensitive_wo_version": {
+			"config_wo_version": {
 				Type:         schema.TypeInt,
 				Optional:     true,
-				RequiredWith: []string{"config_sensitive_wo"},
+				RequiredWith: []string{"config_wo"},
 			},
 			"status": {
 				Type:     schema.TypeString,
@@ -148,6 +150,7 @@ func resourceConnectionCreate(ctx context.Context, d *schema.ResourceData, meta 
 	var plugin, connHandle, configString, orgHandle string
 	var config map[string]interface{}
 	var err error
+	var writeConfig bool
 
 	// Organization is manadatory now since we no longer have user level connections
 	if val, ok := d.GetOk("organization"); ok {
@@ -161,18 +164,14 @@ func resourceConnectionCreate(ctx context.Context, d *schema.ResourceData, meta 
 		plugin = value.(string)
 	}
 
-	// Parse config and config_sensitive (if provided)
+	// Parse config OR config_wo (if provided)
 	if value, ok := d.GetOk("config"); ok {
-		configString, config = formatConnectionJSONString(value.(string))
+		writeConfig = true
+		_, config = formatConnectionJSONString(value.(string))
 	}
-	var configSensitive map[string]interface{}
-	if value, ok := d.GetRawConfig().AsValueMap()["config_sensitive_wo"]; ok && !value.IsNull() {
-		_, configSensitive = formatConnectionJSONString(value.AsString())
-	}
-	// Merge shallow: config as base, config_sensitive overrides
-	mergedConfig := config
-	if configSensitive != nil {
-		mergedConfig = mergeShallow(mergedConfig, configSensitive)
+
+	if value, ok := d.GetRawConfig().AsValueMap()["config_wo"]; ok && !value.IsNull() {
+		_, config = formatConnectionJSONString(value.AsString())
 	}
 
 	req := pipes.CreateConnectionRequest{
@@ -180,8 +179,8 @@ func resourceConnectionCreate(ctx context.Context, d *schema.ResourceData, meta 
 		Plugin: plugin,
 	}
 
-	if mergedConfig != nil {
-		req.SetConfig(mergedConfig)
+	if config != nil {
+		req.SetConfig(config)
 	}
 
 	client := meta.(*PipesClient)
@@ -232,7 +231,7 @@ func resourceConnectionCreate(ctx context.Context, d *schema.ResourceData, meta 
 	// Set config from API response if present
 	if resp.GetConfig() != nil {
 		configString, err = mapToJSONString(resp.GetConfig())
-		if err == nil && configString != "" && configString != "null" {
+		if err == nil && writeConfig && configString != "" && configString != "null" {
 			d.Set("config", configString)
 		}
 	}
@@ -285,12 +284,16 @@ func resourceConnectionRead(ctx context.Context, d *schema.ResourceData, meta in
 		return diag.Errorf("resourceOrganizationConnectionRead. Error converting config to string: %v", err)
 	}
 
+	_, writeConfig := d.GetOk("config")
+
 	// assign results back into ResourceData
 	d.Set("connection_id", resp.Id)
 	d.Set("identity_id", resp.IdentityId)
 	d.Set("organization", orgHandle)
 	d.Set("type", resp.Type)
-	d.Set("config", configString)
+	if writeConfig && configString != "" && configString != "null" {
+		d.Set("config", configString)
+	}
 	d.Set("plugin", resp.Plugin)
 	d.Set("plugin_version", resp.PluginVersion)
 	d.Set("handle", resp.Handle)
@@ -338,6 +341,7 @@ func resourceConnectionUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	var resp pipes.Connection
 	var err error
 	var config map[string]interface{}
+	var writeConfig bool
 
 	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
@@ -352,23 +356,18 @@ func resourceConnectionUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		return diag.Errorf("handle must be configured")
 	}
 
-	// Parse config and config_sensitive (if provided)
+	// Parse config OR config_wo (if provided)
 	if value, ok := d.GetOk("config"); ok {
-		configString, config = formatConnectionJSONString(value.(string))
+		writeConfig = true
+		_, config = formatConnectionJSONString(value.(string))
 	}
-	var configSensitive map[string]interface{}
-	if value, ok := d.GetRawConfig().AsValueMap()["config_sensitive_wo"]; ok && !value.IsNull() {
-		_, configSensitive = formatConnectionJSONString(value.AsString())
-	}
-	// Merge shallow: config as base, config_sensitive overrides
-	mergedConfig := config
-	if configSensitive != nil {
-		mergedConfig = mergeShallow(mergedConfig, configSensitive)
+	if value, ok := d.GetRawConfig().AsValueMap()["config_wo"]; ok && !value.IsNull() {
+		_, config = formatConnectionJSONString(value.AsString())
 	}
 
 	req := pipes.UpdateConnectionRequest{Handle: types.String(newConnectionHandle.(string))}
-	if mergedConfig != nil {
-		req.SetConfig(mergedConfig)
+	if config != nil {
+		req.SetConfig(config)
 	}
 
 	resp, r, err = client.APIClient.OrgConnections.Update(context.Background(), orgHandle, oldConnectionHandle.(string)).Request(req).Execute()
@@ -388,7 +387,7 @@ func resourceConnectionUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	// Set config from API response if present
 	if resp.GetConfig() != nil {
 		configString, err = mapToJSONString(resp.GetConfig())
-		if err == nil && configString != "" && configString != "null" {
+		if err == nil && writeConfig && configString != "" && configString != "null" {
 			d.Set("config", configString)
 		}
 	}

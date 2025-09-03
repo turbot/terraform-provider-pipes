@@ -20,17 +20,14 @@ Manages a connection, which is defined at the user account or organization level
 resource "pipes_connection" "aws_aaa" {
   plugin = "aws"
   handle = "aws_aaa"
-  # Non-sensitive
-  config = jsonencode({
+  # config_wo is write-only and not stored in state, ideal for secrets like access_key and secret_key
+  config_wo = jsonencode({
     regions = ["us-east-1"]
-  })
-  # Sensitive
-  config_sensitive_wo = jsonencode({
     access_key = "redacted"
     secret_key = "redacted"
   })
 
-  config_sensitive_wo_version = 1
+  config_wo_version = 1
 }
 ```
 
@@ -41,17 +38,14 @@ resource "pipes_connection" "aws_aab" {
   organization = "myorg"
   plugin       = "aws"
   handle       = "aws_aab"
-  # Non-sensitive
-  config = jsonencode({
+  
+  config_wo = jsonencode({
     regions = ["us-east-1"]
-  })
-  # Sensitive
-  config_sensitive_wo = jsonencode({
     access_key = "redacted"
     secret_key = "redacted"
   })
 
-  config_sensitive_wo_version = 1
+  config_wo_version = 1
 }
 ```
 
@@ -129,16 +123,13 @@ resource "pipes_connection" "aws_role_connection" {
 resource "pipes_connection" "gcp_aaa" {
   handle      = "gcp_aaa"
   plugin      = "gcp"
-  # Non-sensitive
-  config = jsonencode({
+
+  config_wo = jsonencode({
     project = "project-aaa"
-  })
-  # Sensitive
-  config_sensitive_wo = jsonencode({
     credentials = file("/Users/myuser/Downloads/project-aaa.json")
   })
 
-  config_sensitive_wo_version = 1
+  config_wo_version = 1
 }
 ```
 
@@ -148,19 +139,16 @@ resource "pipes_connection" "gcp_aaa" {
 resource "pipes_connection" "oci_aaa" {
   handle       = "oci"
   plugin       = "oci"
-  # Non-sensitive
-  config = jsonencode({
+
+  config_wo = jsonencode({
     user_ocid    = "ocid1.user.oc1..aaaaaaaaw..."
     fingerprint  = "f1:fc:44:3a:..."
     tenancy_ocid = "ocid1.tenancy.oc1..aaaaaaaah..."
     regions      = ["ap-mumbai-1", "us-ashburn-1"]
-  })
-  # Sensitive
-  config_sensitive_wo = jsonencode({
     private_key  = file("/Users/myuser/Downloads/mykey.cer")
   })
 
-  config_sensitive_wo_version = 1
+  config_wo_version = 1
 }
 ```
 
@@ -170,9 +158,9 @@ The following arguments are supported:
 
 - `handle` - (Required) A friendly identifier for your connection, and must be unique across your connections.
 - `plugin` - (Required) The name of the plugin.
-- `config` - (Optional) Configuration for the connection.
-- `config_sensitive_wo` - (Optional) Write-only sensitive configuration for the connection. Values are not stored in state; use this for secrets such as access keys and tokens.
-- `config_sensitive_wo_version` - (Optional) Integer to indicate a new version of the write-only sensitive configuration. Increment this when only sensitive values change so Terraform can detect updates.
+- `config` - (Optional) JSON Configuration for the connection, stored in state (cannot be used with `config_wo`). Note: As secrets are not returned from the API, this may show perpetual config drift is secrets are included in this argument.
+- `config_wo` - (Optional) Write-Only JSON Configuration for the connection, **NOT** stored in state  (cannot be used with `config`). Requires indication of changes using `config_wo_version`.
+- `config_wo_version` - (Optional) Integer to indicate a new version of the write-only configuration `config_wo`.
 - `organization` - (Optional) An organization ID or handle to create the connection in.
 
 For each connection resource, additional arguments are supported based on the plugin it uses. For instance, if creating a connection that uses the Zendesk plugin, the [Zendesk configuration arguments](https://hub.steampipe.io/plugins/turbot/zendesk#configuration) should be used in the connection:
@@ -181,17 +169,14 @@ For each connection resource, additional arguments are supported based on the pl
 resource "pipes_connection" "zendesk" {
   plugin    = "zendesk"
   handle    = "zendesk_example"
-  # Non-sensitive
-  config = jsonencode({
+
+  config_wo = jsonencode({
     subdomain = "dmi"
     email     = "pam@dmi.com"
-  })
-  # Sensitive
-  config_sensitive_wo = jsonencode({
     token = "17ImlCYdfZ3WJIrGk96gCpJn1fi1pLwexample"
   })
 
-  config_sensitive_wo_version = 1
+  config_wo_version = 1
 }
 ```
 

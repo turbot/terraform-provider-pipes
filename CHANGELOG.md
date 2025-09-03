@@ -3,10 +3,10 @@
 ENHANCEMENTS:
 * Updated `hashicorp/terraform-plugin-sdk` to `v2.37.0`
 * Updated `go-kit` to `v1.3.0`
-* `resources/pipes_connection`: Added attributes `config_sensitive_wo`, `config_sensitive_wo_version` to better support sensitive configuration.
-* `resources/pipes_organization_connection`: Added attributes `config_sensitive_wo`, `config_sensitive_wo_version` to better support sensitive configuration.
-* `resources/pipes_tenant_connection`: Added attributes `config_sensitive_wo`, `config_sensitive_wo_version` to better support sensitive configuration.
-* `resources/pipes_workspace_connection`: Added attributes `config_sensitive_wo`, `config_sensitive_wo_version` to better support sensitive configuration.
+* `resources/pipes_connection`: Added attributes `config_wo`, `config_wo_version` to support write-only configuration (i.e., not stored in state).
+* `resources/pipes_organization_connection`: Added attributes `config_wo`, `config_wo_version` to support write-only configuration (i.e., not stored in state).
+* `resources/pipes_tenant_connection`: Added attributes `config_wo`, `config_wo_version` to support write-only configuration (i.e., not stored in state).
+* `resources/pipes_workspace_connection`: Added attributes `config_wo`, `config_wo_version` to support write-only configuration (i.e., not stored in state).
 
 
 ## 0.15.3 (August 13, 2025)
