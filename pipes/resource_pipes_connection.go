@@ -89,6 +89,21 @@ func resourceConnection() *schema.Resource {
 				Optional:         true,
 				ValidateFunc:     validation.StringIsJSON,
 				DiffSuppressFunc: connectionJSONStringsEqual,
+				ConflictsWith:    []string{"config_wo"},
+			},
+			"config_wo": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				Sensitive:     true,
+				WriteOnly:     true,
+				ValidateFunc:  validation.StringIsJSON,
+				ConflictsWith: []string{"config"},
+				RequiredWith:  []string{"config_wo_version"},
+			},
+			"config_wo_version": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				RequiredWith: []string{"config_wo"},
 			},
 			"status": {
 				Type:     schema.TypeString,
@@ -135,6 +150,7 @@ func resourceConnectionCreate(ctx context.Context, d *schema.ResourceData, meta 
 	var plugin, connHandle, configString, orgHandle string
 	var config map[string]interface{}
 	var err error
+	var writeConfig bool
 
 	// Organization is manadatory now since we no longer have user level connections
 	if val, ok := d.GetOk("organization"); ok {
@@ -148,9 +164,14 @@ func resourceConnectionCreate(ctx context.Context, d *schema.ResourceData, meta 
 		plugin = value.(string)
 	}
 
-	// save the formatted data: this is to ensure the acceptance tests behave in a consistent way regardless of the ordering of the json data
+	// Parse config OR config_wo (if provided)
 	if value, ok := d.GetOk("config"); ok {
-		configString, config = formatConnectionJSONString(value.(string))
+		writeConfig = true
+		_, config = formatConnectionJSONString(value.(string))
+	}
+
+	if value, ok := d.GetRawConfig().AsValueMap()["config_wo"]; ok && !value.IsNull() {
+		_, config = formatConnectionJSONString(value.AsString())
 	}
 
 	req := pipes.CreateConnectionRequest{
@@ -207,8 +228,12 @@ func resourceConnectionCreate(ctx context.Context, d *schema.ResourceData, meta 
 	if resp.LastUpdateAttemptProcessId != nil {
 		d.Set("last_update_attempt_process_id", resp.LastUpdateAttemptProcessId)
 	}
-	if config != nil {
-		d.Set("config", configString)
+	// Set config from API response if present
+	if resp.GetConfig() != nil {
+		configString, err = mapToJSONString(resp.GetConfig())
+		if err == nil && writeConfig && configString != "" && configString != "null" {
+			d.Set("config", configString)
+		}
 	}
 	// format "OrganizationHandle/ConnectionHandle"
 	d.SetId(fmt.Sprintf("%s/%s", orgHandle, *resp.Handle))
@@ -259,12 +284,16 @@ func resourceConnectionRead(ctx context.Context, d *schema.ResourceData, meta in
 		return diag.Errorf("resourceOrganizationConnectionRead. Error converting config to string: %v", err)
 	}
 
+	_, writeConfig := d.GetOk("config")
+
 	// assign results back into ResourceData
 	d.Set("connection_id", resp.Id)
 	d.Set("identity_id", resp.IdentityId)
 	d.Set("organization", orgHandle)
 	d.Set("type", resp.Type)
-	d.Set("config", configString)
+	if writeConfig && configString != "" && configString != "null" {
+		d.Set("config", configString)
+	}
 	d.Set("plugin", resp.Plugin)
 	d.Set("plugin_version", resp.PluginVersion)
 	d.Set("handle", resp.Handle)
@@ -312,6 +341,7 @@ func resourceConnectionUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	var resp pipes.Connection
 	var err error
 	var config map[string]interface{}
+	var writeConfig bool
 
 	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
@@ -326,9 +356,13 @@ func resourceConnectionUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		return diag.Errorf("handle must be configured")
 	}
 
-	// save the formatted data: this is to ensure the acceptance tests behave in a consistent way regardless of the ordering of the json data
+	// Parse config OR config_wo (if provided)
 	if value, ok := d.GetOk("config"); ok {
-		configString, config = formatConnectionJSONString(value.(string))
+		writeConfig = true
+		_, config = formatConnectionJSONString(value.(string))
+	}
+	if value, ok := d.GetRawConfig().AsValueMap()["config_wo"]; ok && !value.IsNull() {
+		_, config = formatConnectionJSONString(value.AsString())
 	}
 
 	req := pipes.UpdateConnectionRequest{Handle: types.String(newConnectionHandle.(string))}
@@ -350,8 +384,12 @@ func resourceConnectionUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	d.Set("updated_at", resp.UpdatedAt)
 	d.Set("plugin", *resp.Plugin)
 	d.Set("plugin_version", resp.PluginVersion)
-	if config != nil {
-		d.Set("config", configString)
+	// Set config from API response if present
+	if resp.GetConfig() != nil {
+		configString, err = mapToJSONString(resp.GetConfig())
+		if err == nil && writeConfig && configString != "" && configString != "null" {
+			d.Set("config", configString)
+		}
 	}
 	if resp.CreatedBy != nil {
 		d.Set("created_by", resp.CreatedBy.Handle)

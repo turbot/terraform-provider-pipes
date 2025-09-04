@@ -60,6 +60,21 @@ func resourceTenantConnection() *schema.Resource {
 				Optional:         true,
 				ValidateFunc:     validation.StringIsJSON,
 				DiffSuppressFunc: connectionJSONStringsEqual,
+				ConflictsWith:    []string{"config_wo"},
+			},
+			"config_wo": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				Sensitive:     true,
+				WriteOnly:     true,
+				ValidateFunc:  validation.StringIsJSON,
+				ConflictsWith: []string{"config"},
+				RequiredWith:  []string{"config_wo_version"},
+			},
+			"config_wo_version": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				RequiredWith: []string{"config_wo"},
 			},
 			"config_source": {
 				Type:     schema.TypeString,
@@ -175,6 +190,7 @@ func resourceTenantConnectionCreate(ctx context.Context, d *schema.ResourceData,
 	var plugin, connHandle, configString, parentId string
 	var config map[string]interface{}
 	var err error
+	var writeConfig bool
 
 	// Get general information about the connection to be created
 	if value, ok := d.GetOk("handle"); ok {
@@ -187,9 +203,14 @@ func resourceTenantConnectionCreate(ctx context.Context, d *schema.ResourceData,
 		parentId = value.(string)
 	}
 
-	// save the formatted data: this is to ensure the acceptance tests behave in a consistent way regardless of the ordering of the json data
+	// Parse config OR config_wo (if provided)
 	if value, ok := d.GetOk("config"); ok {
+		writeConfig = true
 		_, config = formatConnectionJSONString(value.(string))
+	}
+
+	if value, ok := d.GetRawConfig().AsValueMap()["config_wo"]; ok && !value.IsNull() {
+		_, config = formatConnectionJSONString(value.AsString())
 	}
 
 	req := pipes.CreateConnectionRequest{
@@ -229,7 +250,7 @@ func resourceTenantConnectionCreate(ctx context.Context, d *schema.ResourceData,
 	d.Set("plugin", resp.Plugin)
 	d.Set("plugin_version", resp.PluginVersion)
 	d.Set("type", resp.Type)
-	if configString != "" && configString != "null" {
+	if writeConfig && configString != "" && configString != "null" {
 		d.Set("config", configString)
 	}
 	d.Set("config_source", resp.ConfigSource)
@@ -322,6 +343,8 @@ func resourceTenantConnectionRead(ctx context.Context, d *schema.ResourceData, m
 		}
 	}
 
+	_, writeConfig := d.GetOk("config")
+
 	// assign results back into ResourceData
 	d.Set("connection_id", resp.Id)
 	d.Set("tenant_id", resp.TenantId)
@@ -329,7 +352,7 @@ func resourceTenantConnectionRead(ctx context.Context, d *schema.ResourceData, m
 	d.Set("plugin", resp.Plugin)
 	d.Set("plugin_version", resp.PluginVersion)
 	d.Set("type", resp.Type)
-	if configString != "" && configString != "null" {
+	if writeConfig && configString != "" && configString != "null" {
 		d.Set("config", configString)
 	}
 	d.Set("config_source", resp.ConfigSource)
@@ -385,6 +408,7 @@ func resourceTenantConnectionUpdate(ctx context.Context, d *schema.ResourceData,
 
 	var configString string
 	var config map[string]interface{}
+	var writeConfig bool
 
 	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
@@ -394,9 +418,13 @@ func resourceTenantConnectionUpdate(ctx context.Context, d *schema.ResourceData,
 		return diag.Errorf("handle must be configured")
 	}
 
-	// save the formatted data: this is to ensure the acceptance tests behave in a consistent way regardless of the ordering of the json data
+	// Parse config OR config_wo (if provided)
 	if value, ok := d.GetOk("config"); ok {
+		writeConfig = true
 		_, config = formatConnectionJSONString(value.(string))
+	}
+	if value, ok := d.GetRawConfig().AsValueMap()["config_wo"]; ok && !value.IsNull() {
+		_, config = formatConnectionJSONString(value.AsString())
 	}
 
 	req := pipes.UpdateConnectionRequest{Handle: types.String(newConnectionHandle.(string))}
@@ -437,7 +465,7 @@ func resourceTenantConnectionUpdate(ctx context.Context, d *schema.ResourceData,
 	d.Set("plugin", resp.Plugin)
 	d.Set("plugin_version", resp.PluginVersion)
 	d.Set("type", resp.Type)
-	if configString != "" && configString != "null" {
+	if writeConfig && configString != "" && configString != "null" {
 		d.Set("config", configString)
 	}
 	d.Set("config_source", resp.ConfigSource)

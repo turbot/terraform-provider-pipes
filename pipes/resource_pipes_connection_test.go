@@ -50,6 +50,35 @@ func TestAccConnection_Basic(t *testing.T) {
 	})
 }
 
+func TestAccConnection_Sensitive_NoDrift(t *testing.T) {
+	resourceName := "pipes_connection.secure"
+	handle := "aws_" + randomString(7)
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckConnectionDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccConnectionSensitiveConfig(handle, "AKIAAAA", "secret-111"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckConnectionExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "handle", handle),
+					// State config should not include sensitive keys, only non-sensitive values
+					testCheckJSONString(resourceName, "config", `{"regions":["us-east-1"]}`),
+				),
+			},
+			{
+				// Update only sensitive values; expect no drift in non-sensitive config
+				Config: testAccConnectionSensitiveConfig(handle, "AKIABBBB", "secret-222"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "handle", handle),
+					testCheckJSONString(resourceName, "config", `{"regions":["us-east-1"]}`),
+				),
+			},
+		},
+	})
+}
+
 // configs
 func testAccConnectionConfig(connHandle string) string {
 	return fmt.Sprintf(`
@@ -75,6 +104,24 @@ resource "pipes_connection" "test" {
 		secret_key = "redacted"
 	})
 }`, newHandle)
+}
+
+func testAccConnectionSensitiveConfig(handle, accessKey, secretKey string) string {
+	return fmt.Sprintf(`
+resource "pipes_connection" "secure" {
+  handle = "%s"
+  plugin = "aws"
+  # Non-sensitive values only
+  config = jsonencode({
+    regions = ["us-east-1"]
+  })
+  # Secrets only
+  config_sensitive = jsonencode({
+    access_key = "%s"
+    secret_key = "%s"
+  })
+}
+`, handle, accessKey, secretKey)
 }
 
 // testAccCheckConnectionDestroy verifies the connection has been destroyed

@@ -21,11 +21,15 @@ resource "pipes_organization_connection" "aws_aaa" {
   organization = "acme"
   plugin = "aws"
   handle = "aws_aaa"
-  config = jsonencode({
+
+  # config_wo is write-only and not stored in state, ideal for secrets like access_key and secret_key
+  config_wo = jsonencode({
+    regions = ["us-east-1"]
     access_key = "redacted"
     secret_key = "redacted"
-    regions    = ["us-east-1"]
   })
+
+  config_wo_version = 1
 }
 ```
 
@@ -106,13 +110,16 @@ resource "pipes_organization_connection" "oci_aaa" {
   handle       = "oci"
   plugin       = "oci"
   parent_id    = "c_cqlp0647sic7l5q2n5d0"
-  config = jsonencode({
+
+  config_wo = jsonencode({
     user_ocid    = "ocid1.user.oc1..aaaaaaaaw..."
     fingerprint  = "f1:fc:44:3a:..."
     tenancy_ocid = "ocid1.tenancy.oc1..aaaaaaaah..."
     regions      = ["ap-mumbai-1", "us-ashburn-1"]
     private_key  = file("/Users/myuser/Downloads/mykey.cer")
   })
+
+  config_wo_version = 1
 }
 ```
 
@@ -123,7 +130,9 @@ The following arguments are supported:
 - `handle` - (Required) A friendly identifier for your connection, and must be unique across your connections.
 - `organization` - (Required) The handle of the organization where the connection will be created.
 - `plugin` - (Required) The name of the plugin.
-- `config` - (Optional) Configuration for the connection.
+- `config` - (Optional) JSON configuration for the connection. This value is stored in state and cannot be used alongside `config_wo`. Note: As secrets are not returned from the API, this may show perpetual config drift if secrets are included in this argument.
+- `config_wo` - (Optional) Write-only JSON configuration for the connection. This value is **NOT** stored in state and cannot be used alongside `config`). Any changes to this argument require a change to `config_wo_version` in order for Terraform to detect drift.
+- `config_wo_version` - (Optional) Integer to indicate a new version of the write-only configuration `config_wo`.
 - `parent_id` - (Optional) Identifier of the connection folder in which the connection will be created. If nothing is passed the connection is created at the root level of the organization.
 
 For each connection resource, additional arguments are supported based on the plugin it uses. For instance, if creating a connection that uses the Zendesk plugin, the [Zendesk configuration arguments](https://hub.steampipe.io/plugins/turbot/zendesk#configuration) should be used in the connection:
@@ -133,11 +142,14 @@ resource "pipes_organization_connection" "zendesk" {
   organization = "acme"
   plugin    = "zendesk"
   handle    = "zendesk_example"
-  config = jsonencode({
+
+  config_wo = jsonencode({
     subdomain = "dmi"
     email     = "pam@dmi.com"
-    token     = "17ImlCYdfZ3WJIrGk96gCpJn1fi1pLwexample"
+    token = "17ImlCYdfZ3WJIrGk96gCpJn1fi1pLwexample"
   })
+
+  config_wo_version = 1
 }
 ```
 

@@ -1,12 +1,22 @@
+## 0.16.0 (TBD)
+
+ENHANCEMENTS:
+* Updated `hashicorp/terraform-plugin-sdk` to `v2.37.0`
+* Updated `go-kit` to `v1.3.0`
+* `resources/pipes_connection`: Added attributes `config_wo`, `config_wo_version` to support write-only configuration (i.e., not stored in state).
+* `resources/pipes_organization_connection`: Added attributes `config_wo`, `config_wo_version` to support write-only configuration (i.e., not stored in state).
+* `resources/pipes_tenant_connection`: Added attributes `config_wo`, `config_wo_version` to support write-only configuration (i.e., not stored in state).
+* `resources/pipes_workspace_connection`: Added attributes `config_wo`, `config_wo_version` to support write-only configuration (i.e., not stored in state).
+* `resources/pipes_organization_integration`: Added attributes `config_wo`, `config_wo_version` to support write-only configuration (i.e., not stored in state).
+* `resources/pipes_tenant_integration`: Added attributes `config_wo`, `config_wo_version` to support write-only configuration (i.e., not stored in state).
+* `resources/pipes_user_integration`: Added attributes `config_wo`, `config_wo_version` to support write-only configuration (i.e., not stored in state).
+
 ## 0.15.3 (August 13, 2025)
 
 ENHANCEMENTS:
 
 * Updated `pipes-sdk-go` to `v0.15.0`.
 * **New Resource:** `pipes_tenant_settings`
-
-ENHANCEMENTS:
-
 * `resources/pipes_connection`: Added attributes `status`, `last_error_at`, `last_error_process_id`, `last_successful_update_at`, `last_successful_update_process_id`, `last_update_attempt_at`, `last_update_attempt_process_id`.
 * `resources/pipes_organization_connection`: Added attributes `status`, `last_error_at`, `last_error_process_id`, `last_successful_update_at`, `last_successful_update_process_id`, `last_update_attempt_at`, `last_update_attempt_process_id`.
 * `resources/pipes_tenant`: Added attribute `token_min_issued_at`.

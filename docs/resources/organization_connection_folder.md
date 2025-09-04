@@ -57,10 +57,14 @@ resource "pipes_organization_connection" "aws_aaa" {
   plugin = "aws"
   handle = "aws_aaa"
   parent_id = pipes_organization_connection_folder.devops_folder.id
+  # Non-sensitive
   config = jsonencode({
+    regions = ["us-east-1"]
+  })
+  # Sensitive
+  config_sensitive = jsonencode({
     access_key = "redacted"
     secret_key = "redacted"
-    regions    = ["us-east-1"]
   })
 }
 ```

@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
 	"github.com/turbot/pipes-sdk-go"
 )
 
@@ -61,6 +62,21 @@ func resourceOrganizationIntegration() *schema.Resource {
 				Sensitive:        true,
 				ValidateFunc:     validation.StringIsJSON,
 				DiffSuppressFunc: IntegrationJSONStringsEqual,
+				ConflictsWith:    []string{"config_wo"},
+			},
+			"config_wo": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				Sensitive:     true,
+				WriteOnly:     true,
+				ValidateFunc:  validation.StringIsJSON,
+				ConflictsWith: []string{"config"},
+				RequiredWith:  []string{"config_wo_version"},
+			},
+			"config_wo_version": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				RequiredWith: []string{"config_wo"},
 			},
 			"github_installation_id": {
 				Type:     schema.TypeInt,
@@ -108,6 +124,7 @@ func resourceOrganizationIntegrationCreate(ctx context.Context, d *schema.Resour
 	var integrationType, integrationHandle, orgHandle string
 	var configString string
 	var config map[string]interface{}
+	var err error
 
 	// Get details about the organization where the integration would be created
 	if val, ok := d.GetOk("organization"); ok {
@@ -122,9 +139,14 @@ func resourceOrganizationIntegrationCreate(ctx context.Context, d *schema.Resour
 		integrationType = value.(string)
 	}
 
-	// save the formatted data: this is to ensure the acceptance tests behave in a consistent way regardless of the ordering of the json data
+	// Parse config OR config_wo (if provided)
+	var writeConfig bool
 	if value, ok := d.GetOk("config"); ok {
+		writeConfig = true
 		configString, config = FormatIntegrationJSONString(value.(string))
+	}
+	if value, ok := d.GetRawConfig().AsValueMap()["config_wo"]; ok && !value.IsNull() {
+		_, config = FormatIntegrationJSONString(value.AsString())
 	}
 
 	req := pipes.CreateIntegrationRequest{
@@ -151,7 +173,13 @@ func resourceOrganizationIntegrationCreate(ctx context.Context, d *schema.Resour
 	d.Set("type", resp.Type)
 	d.Set("state", resp.State)
 	d.Set("state_reason", resp.StateReason)
-	if config != nil {
+	if resp.GetConfig() != nil {
+		configString, err = mapToJSONString(resp.GetConfig())
+		if err != nil {
+			return diag.Errorf("resourceOrganizationIntegrationCreate. Error converting config to string: %v", err)
+		}
+	}
+	if writeConfig && configString != "" && configString != "null" {
 		d.Set("config", configString)
 	}
 	d.Set("github_installation_id", resp.GithubInstallationId)
@@ -178,8 +206,8 @@ func resourceOrganizationIntegrationRead(ctx context.Context, d *schema.Resource
 
 	// Warning or errors can be collected in a slice type
 	var integrationHandle, orgHandle, configString string
-	var config map[string]interface{}
 	var diags diag.Diagnostics
+	var err error
 	id := d.Id()
 
 	ids := strings.Split(id, "/")
@@ -190,11 +218,6 @@ func resourceOrganizationIntegrationRead(ctx context.Context, d *schema.Resource
 
 	if integrationHandle == "" {
 		return diag.Errorf("resourceOrganizationIntegrationRead. Integration details is not present.")
-	}
-
-	// save the formatted data: this is to ensure the acceptance tests behave in a consistent way regardless of the ordering of the json data
-	if value, ok := d.GetOk("config"); ok {
-		configString, config = formatConnectionJSONString(value.(string))
 	}
 
 	resp, r, err := client.APIClient.OrgIntegrations.Get(context.Background(), orgHandle, integrationHandle).Execute()
@@ -211,12 +234,13 @@ func resourceOrganizationIntegrationRead(ctx context.Context, d *schema.Resource
 	}
 
 	// Convert config to string
-	if config != nil {
+	if resp.GetConfig() != nil {
 		configString, err = mapToJSONString(resp.GetConfig())
 		if err != nil {
-			return diag.Errorf("resourceTenantIntegrationRead. Error converting config to string: %v", err)
+			return diag.Errorf("resourceOrganizationIntegrationRead. Error converting config to string: %v", err)
 		}
 	}
+	_, writeConfig := d.GetOk("config")
 
 	d.Set("integration_id", resp.Id)
 	d.Set("tenant_id", resp.TenantId)
@@ -225,7 +249,9 @@ func resourceOrganizationIntegrationRead(ctx context.Context, d *schema.Resource
 	d.Set("type", resp.Type)
 	d.Set("state", resp.State)
 	d.Set("state_reason", resp.StateReason)
-	d.Set("config", configString)
+	if writeConfig && configString != "" && configString != "null" {
+		d.Set("config", configString)
+	}
 	d.Set("github_installation_id", resp.GithubInstallationId)
 	d.Set("pipeline_id", resp.PipelineId)
 	d.Set("created_at", resp.CreatedAt)
@@ -271,9 +297,14 @@ func resourceOrganizationIntegrationUpdate(ctx context.Context, d *schema.Resour
 		state = value.(string)
 	}
 
-	// save the formatted data: this is to ensure the acceptance tests behave in a consistent way regardless of the ordering of the json data
+	// Parse config OR config_wo (if provided)
+	var writeConfig bool
 	if value, ok := d.GetOk("config"); ok {
+		writeConfig = true
 		configString, config = FormatIntegrationJSONString(value.(string))
+	}
+	if value, ok := d.GetRawConfig().AsValueMap()["config_wo"]; ok && !value.IsNull() {
+		_, config = FormatIntegrationJSONString(value.AsString())
 	}
 
 	req := pipes.UpdateIntegrationRequest{
@@ -290,6 +321,13 @@ func resourceOrganizationIntegrationUpdate(ctx context.Context, d *schema.Resour
 		return diag.Errorf("resourceOrganizationIntegrationUpdate. Update integration error: %v", decodeResponse(r))
 	}
 
+	if resp.GetConfig() != nil {
+		configString, err = mapToJSONString(resp.GetConfig())
+		if err != nil {
+			return diag.Errorf("resourceOrganizationIntegrationUpdate. Error converting config to string: %v", err)
+		}
+	}
+
 	d.Set("integration_id", resp.Id)
 	d.Set("tenant_id", resp.TenantId)
 	d.Set("organization_id", resp.IdentityId)
@@ -297,7 +335,7 @@ func resourceOrganizationIntegrationUpdate(ctx context.Context, d *schema.Resour
 	d.Set("type", resp.Type)
 	d.Set("state", resp.State)
 	d.Set("state_reason", resp.StateReason)
-	if config != nil {
+	if writeConfig && configString != "" && configString != "null" {
 		d.Set("config", configString)
 	}
 	d.Set("github_installation_id", resp.GithubInstallationId)
