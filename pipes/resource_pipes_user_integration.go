@@ -61,6 +61,21 @@ func resourceUserIntegration() *schema.Resource {
 				Optional:         true,
 				ValidateFunc:     validation.StringIsJSON,
 				DiffSuppressFunc: IntegrationJSONStringsEqual,
+				ConflictsWith:    []string{"config_wo"},
+			},
+			"config_wo": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				Sensitive:     true,
+				WriteOnly:     true,
+				ValidateFunc:  validation.StringIsJSON,
+				ConflictsWith: []string{"config"},
+				RequiredWith:  []string{"config_wo_version"},
+			},
+			"config_wo_version": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				RequiredWith: []string{"config_wo"},
 			},
 			"github_installation_id": {
 				Type:     schema.TypeInt,
@@ -104,6 +119,7 @@ func resourceUserIntegrationCreate(ctx context.Context, d *schema.ResourceData, 
 	var integrationType, integrationHandle string
 	var configString string
 	var config map[string]interface{}
+	var err error
 
 	if value, ok := d.GetOk("handle"); ok {
 		integrationHandle = value.(string)
@@ -112,9 +128,14 @@ func resourceUserIntegrationCreate(ctx context.Context, d *schema.ResourceData, 
 		integrationType = value.(string)
 	}
 
-	// save the formatted data: this is to ensure the acceptance tests behave in a consistent way regardless of the ordering of the json data
+	// Parse config OR config_wo (if provided)
+	var writeConfig bool
 	if value, ok := d.GetOk("config"); ok {
+		writeConfig = true
 		configString, config = FormatIntegrationJSONString(value.(string))
+	}
+	if value, ok := d.GetRawConfig().AsValueMap()["config_wo"]; ok && !value.IsNull() {
+		_, config = FormatIntegrationJSONString(value.AsString())
 	}
 
 	req := pipes.CreateIntegrationRequest{
@@ -142,6 +163,13 @@ func resourceUserIntegrationCreate(ctx context.Context, d *schema.ResourceData, 
 		return diag.Errorf("resourceUserIntegrationCreate. Create integration api error  %v", decodeResponse(r))
 	}
 
+	if resp.GetConfig() != nil {
+		configString, err = mapToJSONString(resp.GetConfig())
+		if err != nil {
+			return diag.Errorf("resourceUserIntegrationCreate. Error converting config to string: %v", err)
+		}
+	}
+
 	d.Set("integration_id", resp.Id)
 	d.Set("tenant_id", resp.TenantId)
 	d.Set("identity_id", resp.IdentityId)
@@ -149,7 +177,7 @@ func resourceUserIntegrationCreate(ctx context.Context, d *schema.ResourceData, 
 	d.Set("type", resp.Type)
 	d.Set("state", resp.State)
 	d.Set("state_reason", resp.StateReason)
-	if config != nil {
+	if writeConfig && configString != "" && configString != "null" {
 		d.Set("config", configString)
 	}
 	d.Set("github_installation_id", resp.GithubInstallationId)
@@ -205,8 +233,9 @@ func resourceUserIntegrationRead(ctx context.Context, d *schema.ResourceData, me
 	// Convert config to string
 	configString, err := mapToJSONString(resp.GetConfig())
 	if err != nil {
-		return diag.Errorf("resourceTenantIntegrationRead. Error converting config to string: %v", err)
+		return diag.Errorf("resourceUserIntegrationRead. Error converting config to string: %v", err)
 	}
+	_, writeConfig := d.GetOk("config")
 
 	d.Set("integration_id", resp.Id)
 	d.Set("tenant_id", resp.TenantId)
@@ -215,7 +244,9 @@ func resourceUserIntegrationRead(ctx context.Context, d *schema.ResourceData, me
 	d.Set("type", resp.Type)
 	d.Set("state", resp.State)
 	d.Set("state_reason", resp.StateReason)
-	d.Set("config", configString)
+	if writeConfig && configString != "" && configString != "null" {
+		d.Set("config", configString)
+	}
 	d.Set("github_installation_id", resp.GithubInstallationId)
 	d.Set("pipeline_id", resp.PipelineId)
 	d.Set("created_at", resp.CreatedAt)
@@ -254,9 +285,14 @@ func resourceUserIntegrationUpdate(ctx context.Context, d *schema.ResourceData, 
 		state = value.(string)
 	}
 
-	// save the formatted data: this is to ensure the acceptance tests behave in a consistent way regardless of the ordering of the json data
+	// Parse config OR config_wo (if provided)
+	var writeConfig bool
 	if value, ok := d.GetOk("config"); ok {
+		writeConfig = true
 		configString, config = FormatIntegrationJSONString(value.(string))
+	}
+	if value, ok := d.GetRawConfig().AsValueMap()["config_wo"]; ok && !value.IsNull() {
+		_, config = FormatIntegrationJSONString(value.AsString())
 	}
 
 	req := pipes.UpdateIntegrationRequest{
@@ -279,6 +315,13 @@ func resourceUserIntegrationUpdate(ctx context.Context, d *schema.ResourceData, 
 		return diag.Errorf("resourceUserIntegrationUpdate. Update integration error: %v", decodeResponse(r))
 	}
 
+	if resp.GetConfig() != nil {
+		configString, err = mapToJSONString(resp.GetConfig())
+		if err != nil {
+			return diag.Errorf("resourceUserIntegrationUpdate. Error converting config to string: %v", err)
+		}
+	}
+
 	d.Set("integration_id", resp.Id)
 	d.Set("tenant_id", resp.TenantId)
 	d.Set("identity_id", resp.IdentityId)
@@ -286,7 +329,7 @@ func resourceUserIntegrationUpdate(ctx context.Context, d *schema.ResourceData, 
 	d.Set("type", resp.Type)
 	d.Set("state", resp.State)
 	d.Set("state_reason", resp.StateReason)
-	if config != nil {
+	if writeConfig && configString != "" && configString != "null" {
 		d.Set("config", configString)
 	}
 	d.Set("github_installation_id", resp.GithubInstallationId)

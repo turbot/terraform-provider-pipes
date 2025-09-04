@@ -7,7 +7,9 @@ ENHANCEMENTS:
 * `resources/pipes_organization_connection`: Added attributes `config_wo`, `config_wo_version` to support write-only configuration (i.e., not stored in state).
 * `resources/pipes_tenant_connection`: Added attributes `config_wo`, `config_wo_version` to support write-only configuration (i.e., not stored in state).
 * `resources/pipes_workspace_connection`: Added attributes `config_wo`, `config_wo_version` to support write-only configuration (i.e., not stored in state).
-
+* `resources/pipes_organization_integration`: Added attributes `config_wo`, `config_wo_version` to support write-only configuration (i.e., not stored in state).
+* `resources/pipes_tenant_integration`: Added attributes `config_wo`, `config_wo_version` to support write-only configuration (i.e., not stored in state).
+* `resources/pipes_user_integration`: Added attributes `config_wo`, `config_wo_version` to support write-only configuration (i.e., not stored in state).
 
 ## 0.15.3 (August 13, 2025)
 

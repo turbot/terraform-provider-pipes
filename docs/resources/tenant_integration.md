@@ -12,23 +12,24 @@ Manages an integration defined on a tenant.
 
 ## Example Usage
 
-**Create an AWS integration**
+**Create an AWS integration using write-only config (recommended for secrets)**
 
 ```hcl
 resource "pipes_tenant_integration" "aws" {
   handle = "aws"
   type   = "aws"
-  config = jsonencode(
-    {
-       discovery_mode = "access_key"
-       discovery_access_key = "redacted"
-       discovery_secret_key = "redacted"
-       role_name = "pipes_readonly"
-       handle_prefix = "aws_"
-       regions = ["*"]
-       permissions = []
-    }
-  )
+
+  # write-only config, not stored in state
+  config_wo = jsonencode({
+    discovery_mode        = "access_key"
+    discovery_access_key  = "redacted"
+    discovery_secret_key  = "redacted"
+    role_name             = "pipes_readonly"
+    handle_prefix         = "aws_"
+    regions               = ["*"]
+    permissions           = []
+  })
+  config_wo_version = 1
 }
 ```
 
@@ -43,7 +44,7 @@ resource "pipes_tenant_integration" "gcp" {
       quota_project_setting = "credentials_project_id"
       ignore_error_codes = []
       handle_prefix = "gcp_"
-      premissions = []
+      permissions = []
       credentials = "${path_to_credentials_file}"
     } 
   )
@@ -56,16 +57,15 @@ resource "pipes_tenant_integration" "gcp" {
 resource "pipes_tenant_integration" "azure" {
   handle = "azure"
   type = "azure"
-  config = jsonencode(
-    {
-      environment = "AZUREPUBLICCLOUD"
-      tenant_id = "redacted"
-      client_id = "redacted"
-      client_secret = "redacted"
-      handle_prefix = "azure_"
-      permissions = []
-    }
-  )
+  config_wo = jsonencode({
+    environment = "AZUREPUBLICCLOUD"
+    tenant_id = "redacted"
+    client_id = "redacted"
+    client_secret = "redacted"
+    handle_prefix = "azure_"
+    permissions = []
+  })
+  config_wo_version = 1
 }
 ```
 
@@ -75,23 +75,25 @@ The following arguments are supported:
 
 - `handle` - (Required) A friendly identifier for your integration.
 - `type` - (Required) The type of the integration. Possible values are `aws`, `azure`, `gcp`, `github`.
-- `config` - (Optional) Configuration for the integration.
+- `config` - (Optional) JSON configuration stored in state. Cannot be used with `config_wo`. Secrets not returned by the API may cause perpetual diff if included.
+- `config_wo` - (Optional) Write-only JSON configuration, not stored in state. Cannot be used with `config`. Requires `config_wo_version` to indicate changes.
+- `config_wo_version` - (Optional) Integer to signal a new version of `config_wo` and force update when write-only config changes.
 
 ## Attributes Reference
 
 In addition to all arguments above, the following attributes are exported:
 
-- `created_at` - The time when the connection was created.
-- `created_by` - The handle of the user who created the connection.
+- `created_at` - The time when the integration was created.
+- `created_by` - The handle of the user who created the integration.
 - `github_installation_id` - The installation id of the GitHub app. Populated only if the type is `github` and the app is installed successfully.
 - `integration_id` - Unique identifier of the integration.
 - `pipeline_id` - Unique identifier of the pipeline created to synchronize the integration in regular intervals.
 - `state` - The current state of the integration.
 - `state_reason` - The reason for the current state of the integration.
-- `tenant_id` - Unique identifier of the tenant where the connection exists.
-- `updated_at` - The time when the connection was last updated.
-- `updated_by` - The handle of the user who last updated the connection.
-- `version_id` - The connection version.
+- `tenant_id` - Unique identifier of the tenant where the integration exists.
+- `updated_at` - The time when the integration was last updated.
+- `updated_by` - The handle of the user who last updated the integration.
+- `version_id` - The integration version.
 
 ## Import
 
