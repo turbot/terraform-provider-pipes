@@ -1,4 +1,4 @@
-## 0.16.0 (TBD)
+## 0.16.0 (September 4, 2025)
 
 ENHANCEMENTS:
 * Updated `hashicorp/terraform-plugin-sdk` to `v2.37.0`
