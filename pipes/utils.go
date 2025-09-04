@@ -212,18 +212,3 @@ func FormatIntegrationJSONString(body string) (string, map[string]interface{}) {
 	}
 	return body, data
 }
-
-// mergeShallow merges src into dst (both map[string]interface{}). For key conflicts, src overwrites dst.
-// If dst is nil, a new map is allocated. Nested maps are not merged deeply; src replaces dst at that key.
-func mergeShallow(dst, src map[string]interface{}) map[string]interface{} {
-	if dst == nil {
-		dst = map[string]interface{}{}
-	}
-	if src == nil {
-		return dst
-	}
-	for k, v := range src {
-		dst[k] = v
-	}
-	return dst
-}
