@@ -76,9 +76,9 @@ The following arguments are supported:
 
 - `handle` - (Required) A friendly identifier for your integration.
 - `type` - (Required) The type of the integration. Possible values are `aws`, `azure`, `gcp`, `github`.
-- `config` - (Optional) JSON configuration stored in state. Cannot be used with `config_wo`. Secrets not returned by the API may cause perpetual diff if included.
-- `config_wo` - (Optional) Write-only JSON configuration, not stored in state. Cannot be used with `config`. Requires `config_wo_version` to indicate changes.
-- `config_wo_version` - (Optional) Integer to signal a new version of `config_wo` and force update when write-only config changes.
+- `config` - (Optional) JSON configuration for the integration. This value is stored in state and cannot be used alongside `config_wo`. Note: As secrets are not returned from the API, this may show perpetual config drift if secrets are included in this argument.
+- `config_wo` - (Optional) Write-only JSON configuration for the integration. This value is **NOT** stored in state and cannot be used alongside `config`). Any changes to this argument require a change to `config_wo_version` in order for Terraform to detect drift.
+- `config_wo_version` - (Optional) Integer to indicate a new version of the write-only configuration `config_wo`.
 
 ## Attributes Reference
 

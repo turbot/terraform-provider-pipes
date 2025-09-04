@@ -130,8 +130,8 @@ The following arguments are supported:
 - `handle` - (Required) A friendly identifier for your connection, and must be unique across your connections.
 - `organization` - (Required) The handle of the organization where the connection will be created.
 - `plugin` - (Required) The name of the plugin.
-- `config` - (Optional) JSON Configuration for the connection, stored in state (cannot be used with `config_wo`). Note: As secrets are not returned from the API, this may show perpetual config drift is secrets are included in this argument.
-- `config_wo` - (Optional) Write-Only JSON Configuration for the connection, **NOT** stored in state  (cannot be used with `config`). Requires indication of changes using `config_wo_version`.
+- `config` - (Optional) JSON configuration for the connection. This value is stored in state and cannot be used alongside `config_wo`. Note: As secrets are not returned from the API, this may show perpetual config drift if secrets are included in this argument.
+- `config_wo` - (Optional) Write-only JSON configuration for the connection. This value is **NOT** stored in state and cannot be used alongside `config`). Any changes to this argument require a change to `config_wo_version` in order for Terraform to detect drift.
 - `config_wo_version` - (Optional) Integer to indicate a new version of the write-only configuration `config_wo`.
 - `parent_id` - (Optional) Identifier of the connection folder in which the connection will be created. If nothing is passed the connection is created at the root level of the organization.
 
