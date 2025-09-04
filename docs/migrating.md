@@ -23,7 +23,7 @@ We are attaching example steps that need to be followed when migrating existing 
 2. Migrate `pipes_connection` to `pipes_organization_connection` for all connections defined on the organization.
     1. Rename all resources of type `pipes_connection` to `pipes_organization_connection` in your terraform config. Note that the attributes within the resource remain the same.
     2. Rename all references of the resource type `pipes_connection` to `pipes_organization_connection` in your terraform config.
-    3. Remove all instances of existing `pipes_connection` config using `terraform state list | grep "pipes_connection." | xargs -L 1  terraform state rm`.
+    3. Remove all instances of existing `pipes_connection` config using `terraform state list | grep "pipes_connection." | sed "s/.*/'&'/" | xargs -L 1  terraform state rm`.
     4. Add `connection_import.tf` file to import existing `pipes_organization_connection` config into terraform state. Add an `import` block for each instance of the `pipes_organization_connection` resource of the following format:
         ```
         import {
@@ -35,7 +35,7 @@ We are attaching example steps that need to be followed when migrating existing 
 3. Migrate `pipes_workspace_connection` to `pipes_workspace_schema` for all schema association records.
     1. Rename all instances of type `pipes_workspace_connection` to `pipes_workspace_schema` in your terraform config.
     2. Rename the attribute `workspace_handle` to `workspace` in the new `pipes_workspace_schema` resource.
-    3. Remove all instances of existing `pipes_workspace_connection` config using `terraform state list | grep "pipes_workspace_connection." | xargs -L 1  terraform state rm`
+    3. Remove all instances of existing `pipes_workspace_connection` config using `terraform state list | grep "pipes_workspace_connection." | sed "s/.*/'&'/" | xargs -L 1  terraform state rm`
     4. Add `schema_import.tf` file to import existing `pipes_workspace_schema` config into terraform state. Add an `import` block for each instance of the `pipes_workspace_schema` resource of the following format:
         ```
         import {
