@@ -1,4 +1,4 @@
-## 0.16.1 (October 17, 2025)
+## 0.17.0 (October 17, 2025)
 
 FEATURES:
 
