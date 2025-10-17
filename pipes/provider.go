@@ -2,8 +2,10 @@ package pipes
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
 	"log"
+	"net/http"
 	"net/url"
 	"os"
 
@@ -127,12 +129,12 @@ func CreateClient(config *Config, diags diag.Diagnostics) (*pipes.APIClient, dia
 	configuration := pipes.NewConfiguration()
 
 	// Note: This code is commented out for deployment but can be used for local development to bypass TLS verification.
-	//tlsCfg := &tls.Config{InsecureSkipVerify: true}
-	//tr := http.DefaultTransport.(*http.Transport).Clone()
-	//tr.TLSClientConfig = tlsCfg
-	//configuration.HTTPClient = &http.Client{
-	//	Transport: tr,
-	//}
+	tlsCfg := &tls.Config{InsecureSkipVerify: true}
+	tr := http.DefaultTransport.(*http.Transport).Clone()
+	tr.TLSClientConfig = tlsCfg
+	configuration.HTTPClient = &http.Client{
+		Transport: tr,
+	}
 
 	var pipesHost string
 	if config.Host != "" {
