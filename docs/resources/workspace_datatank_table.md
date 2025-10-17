@@ -144,10 +144,11 @@ The following arguments are supported:
 - `description` - (Optional) A description for the table.
 - `desired_state` - (Optional) The desired state of the datatank table, which can be set only after it has already been created. Valid values are `enabled`, `disabled` and `paused`.
 - `organization` - (Optional) The optional handle of the organization to be used when the datatank table to be managed belongs to an organization.
-- `part_per` - (Optional) The partitioning strategy for the table i.e. creates a separate partition for each connection in `source_schema`. Only valid value is `connection`.
+- `part_per` - (Optional) The partitioning strategy for the table i.e. creates a separate partition for each connection in `source_schema`. Only valid value is `connection`. Note: This value is set at create time and cannot be changed via update.
 - `source_query` - (Optional) The query to be used when refreshing data for the table. Required when `type = query`.
 - `source_schema` - (Optional) The handle of the schema to be used when refreshing data for the table. Required when `type = table` and/or `part_per = connection`.
-- `source_table` - (Optional) The handle of the table to be used when refreshing data for the table. Required when `type = table`.
+- `source_table` - (Optional) The handle of the table to be used when refreshing data for the table. Required when `type = table`. Note: This value is set at create time and cannot be changed via update.
+- `skip_initial_refresh` - (Optional) If true, the initial refresh after create or update will be skipped. This is a write-only flag and is not returned in state.
 
 ## Attributes Reference
 

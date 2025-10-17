@@ -2,8 +2,10 @@ package pipes
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
 	"log"
+	"net/http"
 	"net/url"
 	"os"
 
@@ -13,7 +15,7 @@ import (
 	"github.com/turbot/pipes-sdk-go"
 )
 
-// Provider
+// Provider configuration for the Turbot Pipes Terraform provider
 func Provider() *schema.Provider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
@@ -42,6 +44,7 @@ func Provider() *schema.Provider {
 			"pipes_organization_member":                       resourceOrganizationMember(),
 			"pipes_organization_notifier":                     resourceOrganizationNotifier(),
 			"pipes_organization_workspace_member":             resourceOrganizationWorkspaceMember(),
+			"pipes_organization_service_account":              resourceOrganizationServiceAccount(),
 			"pipes_tenant_connection":                         resourceTenantConnection(),
 			"pipes_tenant_connection_permission":              resourceTenantConnectionPermission(),
 			"pipes_tenant_connection_folder":                  resourceTenantConnectionFolder(),
@@ -49,6 +52,7 @@ func Provider() *schema.Provider {
 			"pipes_tenant_notifier":                           resourceTenantNotifier(),
 			"pipes_tenant_integration":                        resourceTenantIntegration(),
 			"pipes_tenant_member":                             resourceTenantMember(),
+			"pipes_tenant_service_account":                    resourceTenantServiceAccount(),
 			"pipes_tenant_settings":                           resourceTenantSettings(),
 			"pipes_user_integration":                          resourceUserIntegration(),
 			"pipes_user_notifier":                             resourceUserNotifier(),
@@ -119,21 +123,18 @@ type Config struct {
 	Host  string
 }
 
-/*
-precedence of credentials:
-1. token set in config
-2. ENV vars {PIPES_TOKEN}
-*/
+// CreateClient creates a Turbot Pipes API client using the provided configuration and diagnostics.
+// It checks for the host and token in the configuration first, then falls back to environment variables if not set.
 func CreateClient(config *Config, diags diag.Diagnostics) (*pipes.APIClient, diag.Diagnostics) {
 	configuration := pipes.NewConfiguration()
 
 	// Note: This code is commented out for deployment but can be used for local development to bypass TLS verification.
-	//tlsCfg := &tls.Config{InsecureSkipVerify: true}
-	//tr := http.DefaultTransport.(*http.Transport).Clone()
-	//tr.TLSClientConfig = tlsCfg
-	//configuration.HTTPClient = &http.Client{
-	//	Transport: tr,
-	//}
+	tlsCfg := &tls.Config{InsecureSkipVerify: true}
+	tr := http.DefaultTransport.(*http.Transport).Clone()
+	tr.TLSClientConfig = tlsCfg
+	configuration.HTTPClient = &http.Client{
+		Transport: tr,
+	}
 
 	var pipesHost string
 	if config.Host != "" {

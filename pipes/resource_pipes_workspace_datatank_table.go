@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
 	"github.com/turbot/pipes-sdk-go"
 )
 
@@ -86,6 +87,12 @@ func resourceWorkspaceDatatankTable() *schema.Resource {
 			"source_query": {
 				Type:     schema.TypeString,
 				Optional: true,
+			},
+			"skip_initial_refresh": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				WriteOnly:   true,
+				Description: "If true, skip the initial refresh after create or update. This value is write-only and not exported in state.",
 			},
 			"state": {
 				Type:     schema.TypeString,
@@ -193,6 +200,9 @@ func resourceWorkspaceDatatankTableCreate(ctx context.Context, d *schema.Resourc
 	}
 	if desiredState != "" {
 		req.DesiredState = (*pipes.DesiredState)(&desiredState)
+	}
+	if v, ok := d.GetOk("skip_initial_refresh"); ok {
+		req.SetSkipInitialRefresh(v.(bool))
 	}
 
 	// If nothing is passed in the `part_per` field, set it to nil, so that it does not consider it as an empty string
@@ -360,7 +370,7 @@ func resourceWorkspaceDatatankTableUpdate(ctx context.Context, d *schema.Resourc
 	client := meta.(*PipesClient)
 
 	var diags diag.Diagnostics
-	var workspaceHandle, datatankHandle, name, description, partPer, sourceSchema, sourceTable, sourceQuery, desiredState string
+	var workspaceHandle, datatankHandle, name, description, sourceSchema, sourceQuery, desiredState string
 	var frequency pipes.PipelineFrequency
 
 	if value, ok := d.GetOk("workspace_handle"); ok {
@@ -375,14 +385,8 @@ func resourceWorkspaceDatatankTableUpdate(ctx context.Context, d *schema.Resourc
 	if value, ok := d.GetOk("description"); ok {
 		description = value.(string)
 	}
-	if value, ok := d.GetOk("part_per"); ok {
-		partPer = value.(string)
-	}
 	if value, ok := d.GetOk("source_schema"); ok {
 		sourceSchema = value.(string)
-	}
-	if value, ok := d.GetOk("source_table"); ok {
-		sourceTable = value.(string)
 	}
 	if value, ok := d.GetOk("source_query"); ok {
 		sourceQuery = value.(string)
@@ -398,19 +402,15 @@ func resourceWorkspaceDatatankTableUpdate(ctx context.Context, d *schema.Resourc
 	req := pipes.UpdateDatatankTableRequest{
 		Name:         &name,
 		Description:  &description,
-		PartPer:      &partPer,
 		SourceSchema: &sourceSchema,
-		SourceTable:  &sourceTable,
 		SourceQuery:  &sourceQuery,
 		Frequency:    &frequency,
 	}
 	if desiredState != "" {
 		req.DesiredState = (*pipes.DesiredState)(&desiredState)
 	}
-
-	// If nothing is passed in the `part_per` field, set it to nil, so that it does not consider it as an empty string
-	if partPer == "" {
-		req.PartPer = nil
+	if v, ok := d.GetOk("skip_initial_refresh"); ok {
+		req.SetSkipInitialRefresh(v.(bool))
 	}
 
 	var r *http.Response
