@@ -2,14 +2,14 @@
 
 FEATURES:
 
-* **New Resource:** `pipes_tenant_service_account` — Manage tenant-level service accounts (title, description). (#NEW)
-* **New Resource:** `pipes_organization_service_account` — Manage organization-level service accounts (title, description). (#NEW)
+* **New Resource:** `pipes_tenant_service_account` — Manage tenant-level service accounts (title, description).
+* **New Resource:** `pipes_organization_service_account` — Manage organization-level service accounts (title, description).
 
 ENHANCEMENTS:
 
 * `pipes_workspace_datatank_table`:
   - Update no longer accepts changes to `part_per` and `source_table` (these are immutable after creation and are ignored on update).
-  - Added write-only argument `skip_initial_refresh` on create/update to skip the initial refresh. This flag is not exported in state or read. Docs updated. (#DT)
+  - Added write-only argument `skip_initial_refresh` on create/update to skip the initial refresh. This flag is not exported in state or read.
 
 ## 0.16.0 (September 4, 2025)
 
