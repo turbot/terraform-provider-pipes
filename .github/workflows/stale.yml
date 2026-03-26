@@ -9,6 +9,11 @@ on:
         required: false
         default: "false"
 
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
 jobs:
   stale:
     runs-on: ubuntu-latest
@@ -28,7 +33,7 @@ jobs:
 
       - name: Stale issues and PRs
         id: stale-issues-or-prs
-        uses: actions/stale@v3
+        uses: actions/stale@98ed4cb500039dbcccf4bd9bedada4d0187f2757 # v3
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           debug-only: ${{ github.event.inputs.debugOnly }}
