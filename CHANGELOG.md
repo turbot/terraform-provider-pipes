@@ -3,7 +3,7 @@
 BREAKING CHANGES:
 
 * The provider now requires macOS 12 Monterey or later on macOS. Go 1.25 dropped support for macOS 11 Big Sur.
-* No `windows_arm` (32-bit Windows on ARM) build is published from this release on, because Go 1.25 removed that platform. `windows_arm64` is unaffected.
+* No `windows_arm` (32-bit Windows on ARM) build is published from this release on, because Go 1.26 removed that platform. `windows_arm64` is unaffected.
 
 SECURITY:
 
