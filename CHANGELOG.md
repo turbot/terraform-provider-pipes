@@ -1,3 +1,14 @@
+## 0.17.1 (October 21, 2026)
+
+BREAKING CHANGES:
+
+* The provider now requires macOS 12 Monterey or later on macOS. Go 1.25 dropped support for macOS 11 Big Sur.
+* No `windows_arm` (32-bit Windows on ARM) build is published from this release on, because Go 1.26 removed that platform. `windows_arm64` is unaffected.
+
+SECURITY:
+
+* Rebuilt with Go 1.26.10, which refuses TLS certificate chains through the eight compromised eMudhra intermediate CAs ([golang/go#82345](https://go.dev/issue/82345)). Earlier builds used an older Go, so wherever the operating system's CA store still trusts the eMudhra root, anyone on the network path holding one of the leaked keys could impersonate the Pipes API and capture the provider's token.
+
 ## 0.17.0 (October 17, 2025)
 
 FEATURES:
