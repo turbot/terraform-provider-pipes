@@ -59,6 +59,7 @@ func resourceUserIntegration() *schema.Resource {
 			"config": {
 				Type:             schema.TypeString,
 				Optional:         true,
+				Sensitive:        true,
 				ValidateFunc:     validation.StringIsJSON,
 				DiffSuppressFunc: IntegrationJSONStringsEqual,
 				ConflictsWith:    []string{"config_wo"},

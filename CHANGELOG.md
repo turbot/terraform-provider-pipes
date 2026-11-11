@@ -1,3 +1,19 @@
+## 0.17.1 (November 11, 2026)
+
+BREAKING CHANGES:
+
+* A root module `output` that refers to `config` on one of the resources or data sources below must now set `sensitive = true`. This also applies to a value taken from `config`, such as `jsondecode(data.pipes_organization_integration.aws.config).role_name`. Without it, Terraform 0.15 and later and OpenTofu stop with `Output refers to sensitive values`. Outputs in child modules are not affected. You can add `sensitive = true` before you upgrade.
+* A `for_each` that uses a value taken from `config` now stops with `Invalid for_each argument`. Wrap the value in `nonsensitive()`, for example `for_each = nonsensitive(toset(jsondecode(data.pipes_organization_integration.aws.config).regions))`. Make this change when you upgrade, not before: Terraform 1.5 refuses `nonsensitive()` on a value that is not sensitive.
+
+SECURITY:
+
+* `data/pipes_organization_integration`, `data/pipes_tenant_integration`, `data/pipes_user_integration`: `config` is now marked sensitive, the same as on the `pipes_organization_integration` and `pipes_tenant_integration` resources. Before, `terraform plan` showed it in clear text when an output or another resource referred to it. An integration's config can hold credentials for the system it connects to. Reported by [kta1kri](https://github.com/kta1kri). ([GHSA-f5px-m78q-8xxj](https://github.com/turbot/terraform-provider-pipes/security/advisories/GHSA-f5px-m78q-8xxj))
+* `resource/pipes_connection`, `resource/pipes_organization_connection`, `resource/pipes_tenant_connection`, `resource/pipes_workspace_connection`, `resource/pipes_user_integration`: `config` is now marked sensitive. Before, a secret set in `config`, such as an AWS `secret_key`, appeared in clear text in plan output. Pipes does not return secrets, so the plan showed the secret as a change on every run. Use `config_wo` for secrets. ([GHSA-f5px-m78q-8xxj](https://github.com/turbot/terraform-provider-pipes/security/advisories/GHSA-f5px-m78q-8xxj))
+* `provider`: `token` is now marked sensitive. Terraform does not show provider arguments in plan output, so nothing visible changes.
+* A unit test now fails the build if an attribute named `config`, or an attribute whose name contains `secret`, `password`, `private_key` or `token`, is not marked sensitive. It also fails if a data source attribute is not sensitive where a resource attribute with the same name is.
+
+Upgrading adds no plan changes and makes no API writes. Terraform still writes `config` to state in clear text, so protect the state file. The JSON plan (`terraform show -json`) also still holds the values; it now marks them in `after_sensitive`.
+
 ## 0.17.0 (October 17, 2025)
 
 FEATURES:

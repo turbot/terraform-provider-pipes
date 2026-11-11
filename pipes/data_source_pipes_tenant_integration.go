@@ -40,8 +40,9 @@ func dataSourceTenantIntegration() *schema.Resource {
 				Computed: true,
 			},
 			"config": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:      schema.TypeString,
+				Computed:  true,
+				Sensitive: true,
 			},
 			"github_installation_id": {
 				Type:     schema.TypeInt,
