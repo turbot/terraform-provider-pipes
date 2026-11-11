@@ -58,6 +58,7 @@ func resourceTenantConnection() *schema.Resource {
 			"config": {
 				Type:             schema.TypeString,
 				Optional:         true,
+				Sensitive:        true,
 				ValidateFunc:     validation.StringIsJSON,
 				DiffSuppressFunc: connectionJSONStringsEqual,
 				ConflictsWith:    []string{"config_wo"},

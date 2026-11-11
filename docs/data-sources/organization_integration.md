@@ -41,7 +41,7 @@ The following arguments are supported:
 
 In addition to all arguments above, the following attributes are exported:
 
-- `config` - The configuration for the integration
+- `config` - The JSON configuration for the integration. This value is sensitive: `terraform plan` and `terraform apply` show it as `(sensitive value)`. A root module `output` that refers to it must set `sensitive = true`.
 - `created_at` - The ISO 8601 date & time the integration was created at.  
 - `created_by` - The unique identifier of the actor that created this integration.
 - `github_installation_id` - The installation id of the github app populated when the integration type is `github`. 
