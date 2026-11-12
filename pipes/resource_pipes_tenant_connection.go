@@ -325,7 +325,7 @@ func resourceTenantConnectionRead(ctx context.Context, d *schema.ResourceData, m
 
 	resp, r, err := client.APIClient.TenantConnections.Get(context.Background(), connectionHandle).Execute()
 	if err != nil {
-		if r.StatusCode == 404 {
+		if isNotFound(r) {
 			diags = append(diags, diag.Diagnostic{
 				Severity: diag.Warning,
 				Summary:  fmt.Sprintf("Connection (%s) not found", connectionHandle),
@@ -528,7 +528,7 @@ func resourceTenantConnectionDelete(ctx context.Context, d *schema.ResourceData,
 	}
 
 	_, r, err := client.APIClient.TenantConnections.Delete(ctx, connectionHandle).Execute()
-	if err != nil {
+	if err != nil && !isNotFound(r) {
 		return diag.Errorf("resourceTenantConnectionDelete. Delete connection error:	%v", decodeResponse(r))
 	}
 

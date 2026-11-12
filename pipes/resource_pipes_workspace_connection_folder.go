@@ -237,7 +237,7 @@ func resourceWorkspaceConnectionFolderRead(ctx context.Context, d *schema.Resour
 		resp, r, err = client.APIClient.OrgWorkspaceConnectionFolders.Get(context.Background(), orgHandle, workspaceHandle, connectionFolderId).Execute()
 	}
 	if err != nil {
-		if r.StatusCode == 404 {
+		if isNotFound(r) {
 			diags = append(diags, diag.Diagnostic{
 				Severity: diag.Warning,
 				Summary:  fmt.Sprintf("Connection Folder (%s) not found", connectionFolderId),
@@ -406,7 +406,7 @@ func resourceWorkspaceConnectionFolderDelete(ctx context.Context, d *schema.Reso
 	} else {
 		_, r, err = client.APIClient.OrgWorkspaceConnectionFolders.Delete(ctx, orgHandle, workspaceHandle, connectionFolderId).Execute()
 	}
-	if err != nil {
+	if err != nil && !isNotFound(r) {
 		return diag.Errorf("resourceWorkspaceConnectionFolderDelete. Delete connection error:	%v", decodeResponse(r))
 	}
 

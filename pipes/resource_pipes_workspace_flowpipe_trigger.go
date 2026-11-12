@@ -262,6 +262,11 @@ func resourceWorkspaceFlowpipeTriggerRead(ctx context.Context, d *schema.Resourc
 
 	// Error check
 	if err != nil {
+		if isNotFound(r) {
+			log.Printf("[WARN] Workspace Flowpipe trigger (%s) not found, removing from state", d.Id())
+			d.SetId("")
+			return diags
+		}
 		return diag.Errorf("error reading workspace Flowpipe trigger: %v", decodeResponse(r))
 	}
 	log.Printf("\n[DEBUG] Trigger: %s received for Workspace: %s", *resp.Id, workspaceHandle)
@@ -451,7 +456,7 @@ func resourceWorkspaceFlowpipeTriggerDelete(ctx context.Context, d *schema.Resou
 	}
 
 	// Error check
-	if err != nil {
+	if err != nil && !isNotFound(r) {
 		return diag.Errorf("error deleting workspace Flowpipe trigger: %v", decodeResponse(r))
 	}
 

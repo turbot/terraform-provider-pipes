@@ -216,7 +216,7 @@ func resourceOrganizationMemberRead(ctx context.Context, d *schema.ResourceData,
 
 	resp, r, err := client.APIClient.OrgMembers.Get(context.Background(), org, userHandle).Execute()
 	if err != nil {
-		if r.StatusCode == 404 {
+		if isNotFound(r) {
 			log.Printf("\n[WARN] Member (%s) not found", userHandle)
 			d.SetId("")
 			return nil
@@ -325,7 +325,7 @@ func resourceOrganizationMemberDelete(ctx context.Context, d *schema.ResourceDat
 	log.Printf("\n[DEBUG] Removing membership: %s", id)
 
 	_, r, err := client.APIClient.OrgMembers.Delete(context.Background(), org, idParts[1]).Execute()
-	if err != nil {
+	if err != nil && !isNotFound(r) {
 		return diag.Errorf("error removing membership %s: %s", id, decodeResponse(r))
 	}
 	d.SetId("")

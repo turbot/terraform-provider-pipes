@@ -244,7 +244,7 @@ func resourceWorkspaceSchemaRead(ctx context.Context, d *schema.ResourceData, me
 		// Check of the schema handle is a connection folder
 		connectionFolder, r, err := client.APIClient.UserWorkspaceConnectionFolders.Get(ctx, actorHandle, workspaceHandle, schemaHandle).Execute()
 		// If there's an error and the status code is not not found, return the error
-		if err != nil && r.StatusCode != 404 {
+		if err != nil && !isNotFound(r) {
 			diags = append(diags, diag.Diagnostic{
 				Severity: diag.Warning,
 				Summary:  fmt.Sprintf("Schema (%s) not found", schemaHandle),
@@ -262,7 +262,7 @@ func resourceWorkspaceSchemaRead(ctx context.Context, d *schema.ResourceData, me
 			respSchema, r, err = client.APIClient.UserWorkspaceSchemas.Get(ctx, actorHandle, workspaceHandle, schemaHandle).Execute()
 		}
 		if err != nil {
-			if r.StatusCode == 404 {
+			if isNotFound(r) {
 				diags = append(diags, diag.Diagnostic{
 					Severity: diag.Warning,
 					Summary:  fmt.Sprintf("Schema (%s) not found", schemaHandle),
@@ -277,7 +277,7 @@ func resourceWorkspaceSchemaRead(ctx context.Context, d *schema.ResourceData, me
 		// Check of the schema handle is a connection folder
 		connectionFolder, r, err := client.APIClient.OrgWorkspaceConnectionFolders.Get(ctx, orgHandle, workspaceHandle, schemaHandle).Execute()
 		// If there's an error and the status code is not not found, return the error
-		if err != nil && r.StatusCode != 404 {
+		if err != nil && !isNotFound(r) {
 			diags = append(diags, diag.Diagnostic{
 				Severity: diag.Warning,
 				Summary:  fmt.Sprintf("Schema (%s) not found", schemaHandle),
@@ -295,7 +295,7 @@ func resourceWorkspaceSchemaRead(ctx context.Context, d *schema.ResourceData, me
 			respSchema, r, err = client.APIClient.OrgWorkspaceSchemas.Get(ctx, orgHandle, workspaceHandle, schemaHandle).Execute()
 		}
 		if err != nil {
-			if r.StatusCode == 404 {
+			if isNotFound(r) {
 				diags = append(diags, diag.Diagnostic{
 					Severity: diag.Warning,
 					Summary:  fmt.Sprintf("Schema (%s) not found", schemaHandle),
@@ -409,7 +409,7 @@ func resourceWorkspaceSchemaDelete(ctx context.Context, d *schema.ResourceData, 
 		_, r, err = client.APIClient.OrgWorkspaceSchemas.Detach(ctx, orgHandle, workspaceHandle, schemaHandle).Execute()
 	}
 
-	if err != nil {
+	if err != nil && !isNotFound(r) {
 		return diag.Errorf("error detaching schema from workspace: %v", decodeResponse(r))
 	}
 	d.SetId("")

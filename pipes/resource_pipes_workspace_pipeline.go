@@ -258,6 +258,11 @@ func resourceWorkspacePipelineRead(ctx context.Context, d *schema.ResourceData, 
 
 	// Error check
 	if err != nil {
+		if isNotFound(r) {
+			log.Printf("[WARN] Workspace pipeline (%s) not found, removing from state", d.Id())
+			d.SetId("")
+			return diags
+		}
 		return diag.Errorf("error getting workspace pipeline: %v", decodeResponse(r))
 	}
 	log.Printf("\n[DEBUG] pipeline: %s received for Workspace: %s", resp.Id, workspaceHandle)
@@ -437,7 +442,7 @@ func resourceWorkspacePipelineDelete(ctx context.Context, d *schema.ResourceData
 		_, r, err = client.APIClient.OrgWorkspacePipelines.Delete(ctx, orgHandle, workspaceHandle, pipelineId).Execute()
 	}
 
-	if err != nil {
+	if err != nil && !isNotFound(r) {
 		return diag.Errorf("error deleting pipeline: %v", decodeResponse(r))
 	}
 	d.SetId("")

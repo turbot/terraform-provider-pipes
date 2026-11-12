@@ -220,7 +220,7 @@ func resourceUserIntegrationRead(ctx context.Context, d *schema.ResourceData, me
 
 	resp, r, err := client.APIClient.UserIntegrations.Get(context.Background(), userHandle, integrationHandle).Execute()
 	if err != nil {
-		if r.StatusCode == 404 {
+		if isNotFound(r) {
 			diags = append(diags, diag.Diagnostic{
 				Severity: diag.Warning,
 				Summary:  fmt.Sprintf("Integration (%s) not found", integrationHandle),
@@ -368,7 +368,7 @@ func resourceUserIntegrationDelete(ctx context.Context, d *schema.ResourceData, 
 	}
 
 	_, r, err = client.APIClient.UserIntegrations.Delete(ctx, actorHandle, integrationHandle).Execute()
-	if err != nil {
+	if err != nil && !isNotFound(r) {
 		return diag.Errorf("resourceUserIntegrationDelete. Delete integration error:	%v", decodeResponse(r))
 	}
 

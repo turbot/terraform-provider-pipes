@@ -215,6 +215,11 @@ func resourceWorkspaceNotifierRead(ctx context.Context, d *schema.ResourceData, 
 		resp, r, err = client.APIClient.OrgWorkspaceNotifiers.Get(ctx, orgHandle, workspaceHandle, notifierName).Execute()
 	}
 	if err != nil {
+		if isNotFound(r) {
+			log.Printf("[WARN] Workspace notifier (%s) not found, removing from state", d.Id())
+			d.SetId("")
+			return diags
+		}
 		return diag.Errorf("error reading workspace notifier: %v", decodeResponse(r))
 	}
 	log.Printf("\n[DEBUG] Notifier: %s received for Workspace: %s", resp.Name, workspaceHandle)
@@ -371,7 +376,7 @@ func resourceWorkspaceNotifierDelete(ctx context.Context, d *schema.ResourceData
 	} else {
 		_, r, err = client.APIClient.OrgWorkspaceNotifiers.Delete(ctx, orgHandle, workspaceHandle, notifierName).Execute()
 	}
-	if err != nil {
+	if err != nil && !isNotFound(r) {
 		return diag.Errorf("resourceWorkspaceNotifierDelete error: %v", decodeResponse(r))
 	}
 

@@ -63,7 +63,7 @@ func resourceUserPreferencesRead(ctx context.Context, d *schema.ResourceData, me
 
 	user, r, err := client.APIClient.Actors.Get(context.Background()).Execute()
 	if err != nil {
-		if r.StatusCode == 404 {
+		if isNotFound(r) {
 			log.Printf("\n[WARN] Actor information not found")
 			d.SetId("")
 			return nil
@@ -73,7 +73,7 @@ func resourceUserPreferencesRead(ctx context.Context, d *schema.ResourceData, me
 
 	resp, r, err := client.APIClient.Users.GetPreferences(context.Background(), user.Handle).Execute()
 	if err != nil {
-		if r.StatusCode == 404 {
+		if isNotFound(r) {
 			log.Printf("\n[WARN] User Preferences not found")
 			d.SetId("")
 			return nil
@@ -111,7 +111,7 @@ func resourceUserPreferencesUpdate(ctx context.Context, d *schema.ResourceData, 
 	} else {
 		user, r, err := client.APIClient.Actors.Get(context.Background()).Execute()
 		if err != nil {
-			if r.StatusCode == 404 {
+			if isNotFound(r) {
 				log.Printf("\n[WARN] Actor information not found")
 				d.SetId("")
 				return nil

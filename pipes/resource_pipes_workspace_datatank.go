@@ -221,7 +221,7 @@ func resourceWorkspaceDatatankRead(ctx context.Context, d *schema.ResourceData, 
 		resp, r, err = client.APIClient.OrgWorkspaceDatatanks.Get(context.Background(), orgHandle, workspaceHandle, datatankHandle).Execute()
 	}
 	if err != nil {
-		if r.StatusCode == 404 {
+		if isNotFound(r) {
 			diags = append(diags, diag.Diagnostic{
 				Severity: diag.Warning,
 				Summary:  fmt.Sprintf("Datatank (%s) not found", datatankHandle),
@@ -368,7 +368,7 @@ func resourceWorkspaceDatatankDelete(ctx context.Context, d *schema.ResourceData
 		_, r, err = client.APIClient.OrgWorkspaceDatatanks.Delete(ctx, orgHandle, workspaceHandle, datatankHandle).Execute()
 	}
 
-	if err != nil {
+	if err != nil && !isNotFound(r) {
 		return diag.Errorf("resourceWorkspaceDatatankDelete. Delete datatank error:	%v", decodeResponse(r))
 	}
 

@@ -243,6 +243,11 @@ func resourceWorkspaceSnapshotRead(ctx context.Context, d *schema.ResourceData, 
 
 	// Error check
 	if err != nil {
+		if isNotFound(r) {
+			log.Printf("[WARN] Workspace snapshot (%s) not found, removing from state", d.Id())
+			d.SetId("")
+			return diags
+		}
 		return diag.Errorf("error getting workspace snapshot: %v", decodeResponse(r))
 	}
 	log.Printf("\n[DEBUG] Snapshot: %s received for Workspace: %s", resp.Id, workspaceHandle)
@@ -394,7 +399,7 @@ func resourceWorkspaceSnapshotDelete(ctx context.Context, d *schema.ResourceData
 		_, r, err = client.APIClient.OrgWorkspaceSnapshots.Delete(ctx, orgHandle, workspaceHandle, snapshotId).Execute()
 	}
 
-	if err != nil {
+	if err != nil && !isNotFound(r) {
 		return diag.Errorf("error deleting snapshot: %v", decodeResponse(r))
 	}
 	d.SetId("")

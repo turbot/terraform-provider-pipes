@@ -8,10 +8,44 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 // test suites
+
+func TestOrgConnectionPermission_NotFound(t *testing.T) {
+	res := resourceOrganizationConnectionPermission()
+	const id = "myorg/connectionhandle/perm_d017jeqkknnc71aajpc0"
+	ctx := context.Background()
+
+	d := schema.TestResourceDataRaw(t, res.Schema, nil)
+	d.SetId(id)
+	if diags := res.ReadContext(ctx, d, testClient(t, http.StatusNotFound)); diags.HasError() {
+		t.Fatalf("read after 404: %v", diags)
+	}
+	if d.Id() != "" {
+		t.Fatalf("read after 404 kept %q in state", d.Id())
+	}
+
+	d = schema.TestResourceDataRaw(t, res.Schema, nil)
+	d.SetId(id)
+	if diags := res.DeleteContext(ctx, d, testClient(t, http.StatusNotFound)); diags.HasError() {
+		t.Fatalf("delete after 404: %v", diags)
+	}
+
+	d = schema.TestResourceDataRaw(t, res.Schema, nil)
+	d.SetId(id)
+	if diags := res.ReadContext(ctx, d, testClient(t, http.StatusInternalServerError)); !diags.HasError() {
+		t.Fatal("read after 500 returned no error")
+	}
+	if d.Id() != id {
+		t.Fatalf("read after 500 changed the id to %q", d.Id())
+	}
+	if diags := res.DeleteContext(ctx, d, testClient(t, http.StatusInternalServerError)); !diags.HasError() {
+		t.Fatal("delete after 500 returned no error")
+	}
+}
 
 func TestAccOrgConnectionPermission_Basic(t *testing.T) {
 	orgResource := "pipes_organization.test_org"

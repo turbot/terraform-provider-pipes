@@ -3,6 +3,7 @@ package pipes
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 
@@ -185,6 +186,11 @@ func resourceTenantConnectionFolderPermissionRead(ctx context.Context, d *schema
 	resp, r, err = client.APIClient.TenantConnectionFolders.GetPermission(ctx, connectionFolderId, permissionId).Execute()
 	// Error check
 	if err != nil {
+		if isNotFound(r) {
+			log.Printf("[WARN] Tenant connection folder permission (%s) not found, removing from state", d.Id())
+			d.SetId("")
+			return diags
+		}
 		return diag.Errorf("error getting tenant connection folder permission: %v", decodeResponse(r))
 	}
 
@@ -321,7 +327,7 @@ func resourceTenantConnectionFolderPermissionDelete(ctx context.Context, d *sche
 	var r *http.Response
 
 	_, r, err = client.APIClient.TenantConnectionFolders.DeletePermission(ctx, connectionFolderId, permissionId).Execute()
-	if err != nil {
+	if err != nil && !isNotFound(r) {
 		return diag.Errorf("error deleting permission from tenant connection: %v", decodeResponse(r))
 	}
 	d.SetId("")

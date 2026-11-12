@@ -3,7 +3,6 @@ package pipes
 import (
 	"context"
 	"fmt"
-	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -117,7 +116,7 @@ func resourceOrganizationServiceAccountRead(ctx context.Context, d *schema.Resou
 
 	resp, r, err := client.APIClient.OrgServiceAccounts.Get(ctx, orgHandle, saId).Execute()
 	if err != nil {
-		if r != nil && r.StatusCode == http.StatusNotFound {
+		if isNotFound(r) {
 			d.SetId("")
 			return diags
 		}
@@ -166,7 +165,7 @@ func resourceOrganizationServiceAccountDelete(ctx context.Context, d *schema.Res
 	saId := d.Id()
 
 	r, err := client.APIClient.OrgServiceAccounts.Delete(ctx, orgHandle, saId).Execute()
-	if err != nil {
+	if err != nil && !isNotFound(r) {
 		return diag.Errorf("resourceOrganizationServiceAccountDelete. Delete org service account error: %v", decodeResponse(r))
 	}
 	d.SetId("")

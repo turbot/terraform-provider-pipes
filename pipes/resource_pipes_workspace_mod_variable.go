@@ -237,6 +237,11 @@ func resourceWorkspaceModVariableRead(ctx context.Context, d *schema.ResourceDat
 
 	// Error check
 	if err != nil {
+		if isNotFound(r) {
+			log.Printf("[WARN] Workspace mod variable (%s) not found, removing from state", d.Id())
+			d.SetId("")
+			return diags
+		}
 		return diag.Errorf("error getting workspace mod variable : %v", decodeResponse(r))
 	}
 	log.Printf("\n[DEBUG] Varible: %s received for Mod: %s in Workspace: %s", variableName, modAlias, workspaceHandle)
@@ -388,7 +393,7 @@ func resourceWorkspaceModVariableDeleteSetting(ctx context.Context, d *schema.Re
 		_, r, err = client.APIClient.OrgWorkspaceModVariables.DeleteSetting(ctx, orgHandle, workspaceHandle, modAlias, variableName).Execute()
 	}
 
-	if err != nil {
+	if err != nil && !isNotFound(r) {
 		return diag.Errorf("error deleting mod variable setting: %v", decodeResponse(r))
 	}
 	d.SetId("")

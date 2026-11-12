@@ -154,6 +154,11 @@ func resourceTenantNotifierRead(ctx context.Context, d *schema.ResourceData, met
 
 	resp, r, err = client.APIClient.TenantNotifiers.Get(ctx, notifierName).Execute()
 	if err != nil {
+		if isNotFound(r) {
+			log.Printf("[WARN] Tenant notifier (%s) not found, removing from state", d.Id())
+			d.SetId("")
+			return diags
+		}
 		return diag.Errorf("error reading tenant notifier: %v", decodeResponse(r))
 	}
 
@@ -252,7 +257,7 @@ func resourceTenantNotifierDelete(ctx context.Context, d *schema.ResourceData, m
 	notifierName := d.Id()
 
 	_, r, err = client.APIClient.TenantNotifiers.Delete(ctx, notifierName).Execute()
-	if err != nil {
+	if err != nil && !isNotFound(r) {
 		return diag.Errorf("resourceTenantNotifierDelete error: %v", decodeResponse(r))
 	}
 

@@ -246,7 +246,7 @@ func resourceWorkspaceRead(ctx context.Context, d *schema.ResourceData, meta int
 	}
 
 	if err != nil {
-		if r.StatusCode == 404 {
+		if isNotFound(r) {
 			diags = append(diags, diag.Diagnostic{
 				Severity: diag.Warning,
 				Summary:  fmt.Sprintf("Workspace (%s) not found", workspaceHandle),
@@ -404,7 +404,7 @@ func resourceWorkspaceDelete(ctx context.Context, d *schema.ResourceData, meta i
 		_, r, err = client.APIClient.OrgWorkspaces.Delete(ctx, orgHandle, workspaceHandle).Execute()
 	}
 
-	if err != nil {
+	if err != nil && !isNotFound(r) {
 		return diag.Errorf("error deleting workspace: %v", decodeResponse(r))
 	}
 	d.SetId("")

@@ -73,6 +73,12 @@ func getWorkspaceDetails(ctx context.Context, client *PipesClient, d *schema.Res
 	return &resp, r, nil
 }
 
+// isNotFound reports whether the API answered 404. Read drops the resource from
+// state so the next plan recreates it; Delete treats it as already gone.
+func isNotFound(r *http.Response) bool {
+	return r != nil && r.StatusCode == http.StatusNotFound
+}
+
 // Decode response body
 func decodeResponse(r *http.Response) string {
 	var errBody interface{}
