@@ -222,7 +222,7 @@ func resourceOrganizationIntegrationRead(ctx context.Context, d *schema.Resource
 
 	resp, r, err := client.APIClient.OrgIntegrations.Get(context.Background(), orgHandle, integrationHandle).Execute()
 	if err != nil {
-		if r.StatusCode == 404 {
+		if isNotFound(r) {
 			diags = append(diags, diag.Diagnostic{
 				Severity: diag.Warning,
 				Summary:  fmt.Sprintf("Integration (%s) not found", integrationHandle),
@@ -373,7 +373,7 @@ func resourceOrganizationIntegrationDelete(ctx context.Context, d *schema.Resour
 	}
 
 	_, r, err := client.APIClient.OrgIntegrations.Delete(ctx, orgHandle, integrationHandle).Execute()
-	if err != nil {
+	if err != nil && !isNotFound(r) {
 		return diag.Errorf("resourceOrganizationIntegrationDelete. Delete integration error:	%v", decodeResponse(r))
 	}
 

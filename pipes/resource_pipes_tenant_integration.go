@@ -219,7 +219,7 @@ func resourceTenantIntegrationRead(ctx context.Context, d *schema.ResourceData, 
 
 	resp, r, err = client.APIClient.TenantIntegrations.Get(ctx, integrationId).Execute()
 	if err != nil {
-		if r.StatusCode == 404 {
+		if isNotFound(r) {
 			diags = append(diags, diag.Diagnostic{
 				Severity: diag.Warning,
 				Summary:  fmt.Sprintf("Integration (%s) not found", integrationId),
@@ -358,7 +358,7 @@ func resourceTenantIntegrationDelete(ctx context.Context, d *schema.ResourceData
 	}
 
 	_, r, err := client.APIClient.TenantIntegrations.Delete(ctx, integrationHandle).Execute()
-	if err != nil {
+	if err != nil && !isNotFound(r) {
 		return diag.Errorf("resourceTenantIntegrationDelete. Delete integration error:	%v", decodeResponse(r))
 	}
 

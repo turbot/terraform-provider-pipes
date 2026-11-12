@@ -178,7 +178,7 @@ func resourceTenantConnectionFolderRead(ctx context.Context, d *schema.ResourceD
 
 	resp, r, err := client.APIClient.TenantConnectionFolders.Get(context.Background(), connectionFolderId).Execute()
 	if err != nil {
-		if r.StatusCode == 404 {
+		if isNotFound(r) {
 			diags = append(diags, diag.Diagnostic{
 				Severity: diag.Warning,
 				Summary:  fmt.Sprintf("Connection Folder (%s) not found", connectionFolderId),
@@ -279,7 +279,7 @@ func resourceTenantConnectionFolderDelete(ctx context.Context, d *schema.Resourc
 	connectionFolderId := strings.Split(d.Id(), "/")[1]
 
 	_, r, err := client.APIClient.TenantConnectionFolders.Delete(ctx, connectionFolderId).Execute()
-	if err != nil {
+	if err != nil && !isNotFound(r) {
 		return diag.Errorf("resourceTenantConnectionFolderDelete. Delete connection error:	%v", decodeResponse(r))
 	}
 

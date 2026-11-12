@@ -179,6 +179,11 @@ func resourceUserNotifierRead(ctx context.Context, d *schema.ResourceData, meta 
 
 	resp, r, err = client.APIClient.UserNotifiers.Get(ctx, userHandle, notifierName).Execute()
 	if err != nil {
+		if isNotFound(r) {
+			log.Printf("[WARN] User notifier (%s) not found, removing from state", d.Id())
+			d.SetId("")
+			return diags
+		}
 		return diag.Errorf("error reading user notifier: %v", decodeResponse(r))
 	}
 
@@ -303,7 +308,7 @@ func resourceUserNotifierDelete(ctx context.Context, d *schema.ResourceData, met
 	}
 
 	_, r, err = client.APIClient.UserNotifiers.Delete(ctx, userHandle, notifierName).Execute()
-	if err != nil {
+	if err != nil && !isNotFound(r) {
 		return diag.Errorf("resourceUserNotifierDelete error: %v", decodeResponse(r))
 	}
 

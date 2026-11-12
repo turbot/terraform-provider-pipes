@@ -139,7 +139,7 @@ func resourceOrganizationWorkspaceMemberCreate(ctx context.Context, d *schema.Re
 	var orgWorkspaceMemberDetails pipes.OrgWorkspaceUser
 	resp, r, err := client.APIClient.OrgWorkspaceMembers.Get(ctx, org, workspace, req.Handle).Execute()
 	if err != nil {
-		if r.StatusCode == 404 {
+		if isNotFound(r) {
 			return diag.Errorf("requested member %s not found", req.Handle)
 		}
 		return diag.Errorf("error reading member %s.\nerr: %s", req.Handle, decodeResponse(r))
@@ -199,7 +199,7 @@ func resourceOrganizationWorkspaceMemberRead(ctx context.Context, d *schema.Reso
 
 	orgWorkspaceMemberDetails, r, err := client.APIClient.OrgWorkspaceMembers.Get(context.Background(), org, workspace, user).Execute()
 	if err != nil {
-		if r.StatusCode == 404 {
+		if isNotFound(r) {
 			log.Printf("\n[WARN] Member (%s) not found in workspace (%s) of organization (%s)", user, workspace, org)
 			d.SetId("")
 			return nil
@@ -316,7 +316,7 @@ func resourceOrganizationWorkspaceMemberDelete(ctx context.Context, d *schema.Re
 	log.Printf("\n[DEBUG] Removing membership: %s", id)
 
 	_, r, err := client.APIClient.OrgWorkspaceMembers.Delete(context.Background(), org, workspace, user).Execute()
-	if err != nil {
+	if err != nil && !isNotFound(r) {
 		return diag.Errorf("error removing membership %s: %s", id, decodeResponse(r))
 	}
 	d.SetId("")

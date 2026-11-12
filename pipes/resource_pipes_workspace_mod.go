@@ -231,6 +231,11 @@ func resourceWorkspaceModRead(ctx context.Context, d *schema.ResourceData, meta 
 
 	// Error check
 	if err != nil {
+		if isNotFound(r) {
+			log.Printf("[WARN] Workspace mod (%s) not found, removing from state", d.Id())
+			d.SetId("")
+			return diags
+		}
 		return diag.Errorf("error getting workspace mod: %v", decodeResponse(r))
 	}
 	log.Printf("\n[DEBUG] Mod: %s received for Workspace: %s", *resp.Path, workspaceHandle)
@@ -379,7 +384,7 @@ func resourceWorkspaceModUninstall(ctx context.Context, d *schema.ResourceData, 
 		_, r, err = client.APIClient.OrgWorkspaceMods.Uninstall(ctx, orgHandle, workspaceHandle, modAlias).Execute()
 	}
 
-	if err != nil {
+	if err != nil && !isNotFound(r) {
 		return diag.Errorf("error uninstalling mod: %v", decodeResponse(r))
 	}
 	d.SetId("")

@@ -220,6 +220,11 @@ func resourceWorkspaceFlowpipeModRead(ctx context.Context, d *schema.ResourceDat
 
 	// Check for errors
 	if err != nil {
+		if isNotFound(r) {
+			log.Printf("[WARN] Workspace Flowpipe mod (%s) not found, removing from state", d.Id())
+			d.SetId("")
+			return diags
+		}
 		return diag.Errorf("error getting workspace mod: %v", decodeResponse(r))
 	}
 	log.Printf("\n[DEBUG] Flowpipe Mod: %s received for Workspace: %s", *resp.Path, workspaceHandle)
@@ -365,7 +370,7 @@ func resourceWorkspaceFlowpipeModUninstall(ctx context.Context, d *schema.Resour
 	}
 
 	// Check for errors
-	if err != nil {
+	if err != nil && !isNotFound(r) {
 		return diag.Errorf("error uninstalling workspace Flowpipe mod: %v", decodeResponse(r))
 	}
 	d.SetId("")

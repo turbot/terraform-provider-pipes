@@ -181,6 +181,11 @@ func resourceOrganizationNotifierRead(ctx context.Context, d *schema.ResourceDat
 
 	resp, r, err = client.APIClient.OrgNotifiers.Get(ctx, orgHandle, notifierName).Execute()
 	if err != nil {
+		if isNotFound(r) {
+			log.Printf("[WARN] Organization notifier (%s) not found, removing from state", d.Id())
+			d.SetId("")
+			return diags
+		}
 		return diag.Errorf("error reading organization notifier: %v", decodeResponse(r))
 	}
 
@@ -307,7 +312,7 @@ func resourceOrganizationNotifierDelete(ctx context.Context, d *schema.ResourceD
 	}
 
 	_, r, err = client.APIClient.OrgNotifiers.Delete(ctx, orgHandle, notifierName).Execute()
-	if err != nil {
+	if err != nil && !isNotFound(r) {
 		return diag.Errorf("resourceOrganizationNotifierDelete error: %v", decodeResponse(r))
 	}
 

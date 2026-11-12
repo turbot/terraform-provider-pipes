@@ -341,7 +341,7 @@ func resourceOrganizationConnectionRead(ctx context.Context, d *schema.ResourceD
 
 	resp, r, err := client.APIClient.OrgConnections.Get(context.Background(), orgId, connectionHandle).Execute()
 	if err != nil {
-		if r.StatusCode == 404 {
+		if isNotFound(r) {
 			diags = append(diags, diag.Diagnostic{
 				Severity: diag.Warning,
 				Summary:  fmt.Sprintf("Connection (%s) not found", connectionHandle),
@@ -533,7 +533,7 @@ func resourceOrganizationConnectionDelete(ctx context.Context, d *schema.Resourc
 	}
 
 	_, r, err := client.APIClient.OrgConnections.Delete(ctx, orgHandle, connectionHandle).Execute()
-	if err != nil {
+	if err != nil && !isNotFound(r) {
 		return diag.Errorf("resourceOrganizationConnectionDelete. Delete connection error:	%v", decodeResponse(r))
 	}
 

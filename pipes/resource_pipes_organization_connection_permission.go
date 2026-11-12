@@ -3,6 +3,7 @@ package pipes
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 
@@ -193,6 +194,11 @@ func resourceOrganizationConnectionPermissionRead(ctx context.Context, d *schema
 	resp, r, err = client.APIClient.OrgConnections.GetPermission(ctx, orgHandle, connectionHandle, permissionId).Execute()
 	// Error check
 	if err != nil {
+		if isNotFound(r) {
+			log.Printf("[WARN] Organization connection permission (%s) not found, removing from state", d.Id())
+			d.SetId("")
+			return diags
+		}
 		return diag.Errorf("error getting tenant connection permission: %v", decodeResponse(r))
 	}
 
@@ -333,7 +339,7 @@ func resourceOrganizationConnectionPermissionDelete(ctx context.Context, d *sche
 	var r *http.Response
 
 	_, r, err = client.APIClient.OrgConnections.DeletePermission(ctx, orgHandle, connectionHandle, permissionId).Execute()
-	if err != nil {
+	if err != nil && !isNotFound(r) {
 		return diag.Errorf("error deleting permission from organization connection: %v", decodeResponse(r))
 	}
 	d.SetId("")

@@ -1,3 +1,9 @@
+## 0.17.2 (November 12, 2026)
+
+BUG FIXES:
+
+* Resources no longer fail `terraform plan` or `terraform apply` when the resource was already deleted in Turbot Pipes. Read removes it from state so the next plan recreates it, and Delete treats a `404` as already deleted. Before, `pipes_organization_connection_permission` and 16 other resources returned an error until the resource was removed from state by hand. (#51)
+
 ## 0.17.1 (November 11, 2026)
 
 BREAKING CHANGES:

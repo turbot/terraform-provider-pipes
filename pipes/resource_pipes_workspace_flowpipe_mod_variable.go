@@ -224,6 +224,11 @@ func resourceWorkspaceFlowpipeModVariableRead(ctx context.Context, d *schema.Res
 
 	// Check for errors
 	if err != nil {
+		if isNotFound(r) {
+			log.Printf("[WARN] Workspace Flowpipe mod variable (%s) not found, removing from state", d.Id())
+			d.SetId("")
+			return diags
+		}
 		return diag.Errorf("error fetching setting for workspace Flowpipe mod variable: %v", decodeResponse(r))
 	}
 	log.Printf("\n[DEBUG] Variable: %s received for Flowpipe mod: %s in Workspace: %s", variableName, modAlias, workspaceHandle)
@@ -360,7 +365,7 @@ func resourceWorkspaceFlowpipeModVariableDelete(ctx context.Context, d *schema.R
 	}
 
 	// Check for errors
-	if err != nil {
+	if err != nil && !isNotFound(r) {
 		return diag.Errorf("error deleting setting for workspace Flowpipe mod variable : %v", decodeResponse(r))
 	}
 	log.Printf("\n[DEBUG] Setting deleted for Variable: %s of Flowpipe mod: %s in Workspace: %s", variableName, modAlias, workspaceHandle)

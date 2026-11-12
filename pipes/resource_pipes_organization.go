@@ -126,7 +126,7 @@ func resourceOrganizationRead(ctx context.Context, d *schema.ResourceData, meta 
 
 	resp, r, err := client.APIClient.Orgs.Get(context.Background(), handle).Execute()
 	if err != nil {
-		if r.StatusCode == 404 {
+		if isNotFound(r) {
 			log.Printf("\n[WARN] Organization (%s) not found", handle)
 			d.SetId("")
 			return nil
@@ -207,7 +207,7 @@ func resourceOrganizationDelete(ctx context.Context, d *schema.ResourceData, met
 	handle := d.Id()
 
 	_, r, err := client.APIClient.Orgs.Delete(ctx, handle).Execute()
-	if err != nil {
+	if err != nil && !isNotFound(r) {
 		return diag.Errorf("Deleting organization error: %v", decodeResponse(r))
 	}
 	d.SetId("")

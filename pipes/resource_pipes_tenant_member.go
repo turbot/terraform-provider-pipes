@@ -156,7 +156,7 @@ func resourceTenantMemberRead(ctx context.Context, d *schema.ResourceData, meta 
 
 	tenantMember, r, err := client.APIClient.TenantMembers.Get(context.Background(), tenantHandle, userHandle).Execute()
 	if err != nil {
-		if r.StatusCode == 404 {
+		if isNotFound(r) {
 			log.Printf("\n[WARN] Member (%s) not found", userHandle)
 			d.SetId("")
 			return nil
@@ -266,7 +266,7 @@ func resourceTenantMemberDelete(ctx context.Context, d *schema.ResourceData, met
 	log.Printf("\n[DEBUG] Removing membership: %s", id)
 
 	_, r, err := client.APIClient.TenantMembers.Delete(context.Background(), tenantHandle, userHandle).Execute()
-	if err != nil {
+	if err != nil && !isNotFound(r) {
 		return diag.Errorf("error removing membership %s: %s", id, decodeResponse(r))
 	}
 	d.SetId("")

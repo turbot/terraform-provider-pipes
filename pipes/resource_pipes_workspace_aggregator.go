@@ -205,6 +205,11 @@ func resourceWorkspaceAggregatorRead(ctx context.Context, d *schema.ResourceData
 
 	// Error check
 	if err != nil {
+		if isNotFound(r) {
+			log.Printf("[WARN] Workspace aggregator (%s) not found, removing from state", d.Id())
+			d.SetId("")
+			return diags
+		}
 		return diag.Errorf("error getting workspace aggregator: %v", decodeResponse(r))
 	}
 	log.Printf("\n[DEBUG] Aggregator: %s received for Workspace: %s", resp.Id, workspaceHandle)
@@ -353,7 +358,7 @@ func resourceWorkspaceAggregatorDelete(ctx context.Context, d *schema.ResourceDa
 		_, r, err = client.APIClient.OrgWorkspaceAggregators.Delete(ctx, orgHandle, workspaceHandle, aggregatorHandle).Execute()
 	}
 
-	if err != nil {
+	if err != nil && !isNotFound(r) {
 		return diag.Errorf("error deleting aggregator: %v", decodeResponse(r))
 	}
 	d.SetId("")

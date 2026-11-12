@@ -192,7 +192,7 @@ func resourceOrganizationConnectionFolderRead(ctx context.Context, d *schema.Res
 
 	resp, r, err := client.APIClient.OrgConnectionFolders.Get(context.Background(), orgHandle, connectionFolderId).Execute()
 	if err != nil {
-		if r.StatusCode == 404 {
+		if isNotFound(r) {
 			diags = append(diags, diag.Diagnostic{
 				Severity: diag.Warning,
 				Summary:  fmt.Sprintf("Connection Folder (%s) not found", connectionFolderId),
@@ -305,7 +305,7 @@ func resourceOrganizationConnectionFolderDelete(ctx context.Context, d *schema.R
 	}
 
 	_, r, err := client.APIClient.OrgConnectionFolders.Delete(ctx, orgHandle, connectionFolderId).Execute()
-	if err != nil {
+	if err != nil && !isNotFound(r) {
 		return diag.Errorf("resourceOrganizationConnectionFolderDelete. Delete connection error:	%v", decodeResponse(r))
 	}
 

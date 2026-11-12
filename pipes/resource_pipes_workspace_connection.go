@@ -400,6 +400,11 @@ func resourceWorkspaceConnectionRead(ctx context.Context, d *schema.ResourceData
 		resp, r, err = client.APIClient.OrgWorkspaceConnections.Get(ctx, orgHandle, workspaceHandle, connectionHandle).Execute()
 	}
 	if err != nil {
+		if isNotFound(r) {
+			log.Printf("[WARN] Workspace connection (%s) not found, removing from state", d.Id())
+			d.SetId("")
+			return diags
+		}
 		return diag.Errorf("resourceWorkspaceConnectionCreate. Create connection api error  %v", decodeResponse(r))
 	}
 
@@ -660,7 +665,7 @@ func resourceWorkspaceConnectionDelete(ctx context.Context, d *schema.ResourceDa
 		_, r, err = client.APIClient.OrgWorkspaceConnections.Delete(ctx, orgHandle, workspaceHandle, connectionHandle).Execute()
 	}
 
-	if err != nil {
+	if err != nil && !isNotFound(r) {
 		return diag.Errorf("error deleting workspace connection: %v", decodeResponse(r))
 	}
 	d.SetId("")

@@ -2,7 +2,6 @@ package pipes
 
 import (
 	"context"
-	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -90,7 +89,7 @@ func resourceTenantServiceAccountRead(ctx context.Context, d *schema.ResourceDat
 
 	resp, r, err := client.APIClient.TenantServiceAccounts.Get(ctx, id).Execute()
 	if err != nil {
-		if r != nil && r.StatusCode == http.StatusNotFound {
+		if isNotFound(r) {
 			d.SetId("")
 			return diags
 		}
@@ -138,7 +137,7 @@ func resourceTenantServiceAccountDelete(ctx context.Context, d *schema.ResourceD
 
 	id := d.Id()
 	r, err := client.APIClient.TenantServiceAccounts.Delete(ctx, id).Execute()
-	if err != nil {
+	if err != nil && !isNotFound(r) {
 		return diag.Errorf("resourceTenantServiceAccountDelete. Delete tenant service account error: %v", decodeResponse(r))
 	}
 	d.SetId("")
